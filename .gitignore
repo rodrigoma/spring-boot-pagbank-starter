@@ -1,0 +1,10 @@
+target/
+.DS_Store
+*.class
+*.jar
+!**/src/main/**/*.jar
+.idea/
+*.iml
+.settings/
+.project
+.classpath
