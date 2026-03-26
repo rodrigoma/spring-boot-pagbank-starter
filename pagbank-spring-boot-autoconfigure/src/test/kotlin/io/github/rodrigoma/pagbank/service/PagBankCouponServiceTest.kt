@@ -46,20 +46,48 @@ class PagBankCouponServiceTest {
         service = PagBankCouponService(restClient)
     }
 
+    private fun couponMap(id: String = "CPN_123") = mapOf(
+        "id" to id,
+        "code" to "SAVE10",
+        "discount_type" to "PERCENT",
+        "discount_value" to 10
+    )
+
     @Test
-    fun `create should POST and return CouponResponse with expected code`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(
-            mapOf(
-                "id" to "COUP_123",
-                "code" to "SAVE10",
-                "discount_type" to "PERCENT",
-                "discount_value" to 10
+    fun `create should POST and return CouponResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(couponMap())
+        val response = service.create(
+            CreateCouponRequest(
+                code = "SAVE10",
+                discountType = DiscountType.PERCENT,
+                discountValue = 10
             )
         )
-        val response = service.create(
-            CreateCouponRequest("SAVE10", DiscountType.PERCENT, 10)
-        )
-        assertThat(response.id).isEqualTo("COUP_123")
+        assertThat(response.id).isEqualTo("CPN_123")
         assertThat(response.code).isEqualTo("SAVE10")
+        assertThat(response.discountType).isEqualTo(DiscountType.PERCENT)
+        assertThat(response.discountValue).isEqualTo(10)
+    }
+
+    @Test
+    fun `get should return CouponResponse by id`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(couponMap("CPN_456"))
+        val response = service.get("CPN_456")
+        assertThat(response.id).isEqualTo("CPN_456")
+    }
+
+    @Test
+    fun `delete should DELETE without a response body`() {
+        mockFactory.nextBody = ByteArray(0)
+        mockFactory.nextStatus = HttpStatus.NO_CONTENT
+        // No exception = success
+        service.delete("CPN_123")
+    }
+
+    @Test
+    fun `applyToSubscription should POST without a response body`() {
+        mockFactory.nextBody = ByteArray(0)
+        mockFactory.nextStatus = HttpStatus.NO_CONTENT
+        service.applyToSubscription("SUB_001", "CPN_123")
     }
 }
