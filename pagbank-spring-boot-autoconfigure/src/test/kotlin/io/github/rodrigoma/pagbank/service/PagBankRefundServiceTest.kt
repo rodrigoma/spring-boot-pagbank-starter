@@ -46,19 +46,35 @@ class PagBankRefundServiceTest {
         service = PagBankRefundService(restClient)
     }
 
+    private fun refundMap(id: String = "REF_123") = mapOf(
+        "id" to id,
+        "payment_id" to "PAY_001",
+        "amount" to 2990,
+        "status" to "COMPLETED",
+        "created_at" to "2026-01-20T12:00:00Z"
+    )
+
     @Test
-    fun `create should POST to payments refunds and return RefundResponse`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(
-            mapOf(
-                "id" to "REF_123",
-                "payment_id" to "PAY_123",
-                "amount" to 999,
-                "status" to "COMPLETED",
-                "created_at" to "2026-01-15T10:00:00Z"
-            )
-        )
-        val response = service.create("PAY_123", RefundRequest())
+    fun `create should POST full refund and return RefundResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(refundMap())
+        val response = service.create("PAY_001")
         assertThat(response.id).isEqualTo("REF_123")
-        assertThat(response.paymentId).isEqualTo("PAY_123")
+        assertThat(response.paymentId).isEqualTo("PAY_001")
+        assertThat(response.amount).isEqualTo(2990)
+        assertThat(response.status).isEqualTo("COMPLETED")
+    }
+
+    @Test
+    fun `create should POST partial refund with amount`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(refundMap())
+        val response = service.create("PAY_001", RefundRequest(amount = 1000))
+        assertThat(response.id).isEqualTo("REF_123")
+    }
+
+    @Test
+    fun `get should return RefundResponse by id`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(refundMap("REF_456"))
+        val response = service.get("REF_456")
+        assertThat(response.id).isEqualTo("REF_456")
     }
 }
