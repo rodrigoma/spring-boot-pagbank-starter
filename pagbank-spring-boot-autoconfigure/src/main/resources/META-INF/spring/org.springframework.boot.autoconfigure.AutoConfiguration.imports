@@ -1,2 +1,2 @@
-com.example.pagbank.autoconfigure.PagBankAutoConfiguration
-com.example.pagbank.autoconfigure.PagBankHealthIndicatorAutoConfiguration
+io.github.rodrigoma.pagbank.autoconfigure.PagBankAutoConfiguration
+io.github.rodrigoma.pagbank.autoconfigure.PagBankHealthIndicatorAutoConfiguration
