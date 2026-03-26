@@ -46,16 +46,42 @@ class PagBankPreferenceServiceTest {
         service = PagBankPreferenceService(restClient)
     }
 
+    private fun preferenceMap(retryDays: Int = 3, email: String? = "ops@example.com") = mapOf(
+        "retry_days" to retryDays,
+        "notification_email" to email
+    )
+
     @Test
     fun `get should return PreferenceResponse`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(
-            mapOf(
-                "retry_days" to 3,
-                "notification_email" to "admin@example.com"
-            )
-        )
+        mockFactory.nextBody = mapper.writeValueAsBytes(preferenceMap())
         val response = service.get()
         assertThat(response.retryDays).isEqualTo(3)
-        assertThat(response.notificationEmail).isEqualTo("admin@example.com")
+        assertThat(response.notificationEmail).isEqualTo("ops@example.com")
+    }
+
+    @Test
+    fun `get should return PreferenceResponse with null notificationEmail`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(preferenceMap(retryDays = 5, email = null))
+        val response = service.get()
+        assertThat(response.retryDays).isEqualTo(5)
+        assertThat(response.notificationEmail).isNull()
+    }
+
+    @Test
+    fun `update should PUT and return updated PreferenceResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(preferenceMap(retryDays = 7))
+        val response = service.update(UpdatePreferenceRequest(retryDays = 7))
+        assertThat(response.retryDays).isEqualTo(7)
+    }
+
+    @Test
+    fun `update should PUT with notificationEmail and return updated PreferenceResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(
+            preferenceMap(retryDays = 3, email = "new@example.com")
+        )
+        val response = service.update(
+            UpdatePreferenceRequest(notificationEmail = "new@example.com")
+        )
+        assertThat(response.notificationEmail).isEqualTo("new@example.com")
     }
 }
