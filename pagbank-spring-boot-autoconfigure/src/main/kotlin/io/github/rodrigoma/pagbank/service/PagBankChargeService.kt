@@ -1,6 +1,7 @@
 package io.github.rodrigoma.pagbank.service
 
 import io.github.rodrigoma.pagbank.model.charge.*
+import io.github.rodrigoma.pagbank.model.common.ListParams
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 
@@ -12,9 +13,9 @@ class PagBankChargeService(private val restClient: RestClient) {
             .retrieve()
             .body<ChargeResponse>()!!
 
-    fun list(): ChargeListResponse =
+    fun list(params: ListParams = ListParams()): ChargeListResponse =
         restClient.get()
-            .uri("/charges")
+            .uri("/charges?limit={limit}&offset={offset}", params.limit, params.offset)
             .retrieve()
             .body<ChargeListResponse>()!!
 

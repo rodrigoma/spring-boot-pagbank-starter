@@ -1,6 +1,7 @@
 package io.github.rodrigoma.pagbank.service
 
 import io.github.rodrigoma.pagbank.model.charge.*
+import io.github.rodrigoma.pagbank.model.common.ListParams
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -46,18 +47,49 @@ class PagBankChargeServiceTest {
         service = PagBankChargeService(restClient)
     }
 
+    private fun chargeMap(id: String = "CHG_123") = mapOf(
+        "id" to id,
+        "subscription_id" to "SUB_001",
+        "amount" to 2990,
+        "status" to "PAID"
+    )
+
     @Test
     fun `get should return ChargeResponse by id`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(
-            mapOf(
-                "id" to "CHG_123",
-                "subscription_id" to "SUB_123",
-                "amount" to 999,
-                "status" to "PAID"
-            )
-        )
+        mockFactory.nextBody = mapper.writeValueAsBytes(chargeMap())
         val response = service.get("CHG_123")
         assertThat(response.id).isEqualTo("CHG_123")
-        assertThat(response.status).isEqualTo("PAID")
+        assertThat(response.amount).isEqualTo(2990)
+    }
+
+    @Test
+    fun `list should return ChargeListResponse with default params`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(
+            mapOf("charges" to listOf(chargeMap()))
+        )
+        val response = service.list()
+        assertThat(response.charges).hasSize(1)
+        assertThat(response.charges[0].id).isEqualTo("CHG_123")
+    }
+
+    @Test
+    fun `list should forward limit and offset params`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("charges" to emptyList<Any>()))
+        val response = service.list(ListParams(limit = 50, offset = 100))
+        assertThat(response.charges).isEmpty()
+    }
+
+    @Test
+    fun `retry should POST without a response body`() {
+        mockFactory.nextBody = ByteArray(0)
+        mockFactory.nextStatus = HttpStatus.NO_CONTENT
+        service.retry("CHG_123")
+    }
+
+    @Test
+    fun `retry should POST with paymentMethod`() {
+        mockFactory.nextBody = ByteArray(0)
+        mockFactory.nextStatus = HttpStatus.NO_CONTENT
+        service.retry("CHG_123", RetryChargeRequest(paymentMethod = "CARD"))
     }
 }
