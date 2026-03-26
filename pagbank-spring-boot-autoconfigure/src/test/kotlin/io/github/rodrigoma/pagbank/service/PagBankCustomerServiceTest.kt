@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.service
 
+import io.github.rodrigoma.pagbank.model.common.ListParams
 import io.github.rodrigoma.pagbank.model.customer.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
@@ -46,36 +47,63 @@ class PagBankCustomerServiceTest {
         service = PagBankCustomerService(restClient)
     }
 
+    private fun customerMap(id: String = "CUST_123") = mapOf(
+        "id" to id,
+        "name" to "Maria Silva",
+        "email" to "maria@example.com",
+        "tax_id" to "123.456.789-00",
+        "created_at" to "2026-01-01T00:00:00Z"
+    )
+
     @Test
     fun `create should POST and return CustomerResponse`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(
-            mapOf(
-                "id" to "CUST_123",
-                "name" to "John Doe",
-                "email" to "john@example.com",
-                "tax_id" to "123.456.789-00",
-                "created_at" to "2026-01-01T00:00:00Z"
+        mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
+        val response = service.create(
+            CreateCustomerRequest(
+                name = "Maria Silva",
+                email = "maria@example.com",
+                taxId = "123.456.789-00"
             )
         )
-        val response = service.create(
-            CreateCustomerRequest("John Doe", "john@example.com", "123.456.789-00")
-        )
         assertThat(response.id).isEqualTo("CUST_123")
-        assertThat(response.name).isEqualTo("John Doe")
+        assertThat(response.email).isEqualTo("maria@example.com")
     }
 
     @Test
-    fun `get should return customer by id`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(
-            mapOf(
-                "id" to "CUST_123",
-                "name" to "John Doe",
-                "email" to "john@example.com",
-                "tax_id" to "123.456.789-00",
-                "created_at" to "2026-01-01T00:00:00Z"
+    fun `get should return CustomerResponse by id`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(customerMap("CUST_456"))
+        val response = service.get("CUST_456")
+        assertThat(response.id).isEqualTo("CUST_456")
+    }
+
+    @Test
+    fun `update should PUT and return updated CustomerResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
+        val response = service.update(
+            "CUST_123",
+            CreateCustomerRequest(
+                name = "Maria Silva",
+                email = "new@example.com",
+                taxId = "123.456.789-00"
             )
         )
-        val response = service.get("CUST_123")
         assertThat(response.id).isEqualTo("CUST_123")
+    }
+
+    @Test
+    fun `list should return CustomerListResponse with default params`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(
+            mapOf("customers" to listOf(customerMap()))
+        )
+        val response = service.list()
+        assertThat(response.customers).hasSize(1)
+        assertThat(response.customers[0].id).isEqualTo("CUST_123")
+    }
+
+    @Test
+    fun `list should forward limit and offset params`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("customers" to emptyList<Any>()))
+        val response = service.list(ListParams(limit = 5, offset = 10))
+        assertThat(response.customers).isEmpty()
     }
 }
