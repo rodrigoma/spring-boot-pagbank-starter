@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.service
 
+import io.github.rodrigoma.pagbank.model.common.ListParams
 import io.github.rodrigoma.pagbank.model.invoice.*
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
@@ -12,9 +13,9 @@ class PagBankInvoiceService(private val restClient: RestClient) {
             .retrieve()
             .body<InvoiceResponse>()!!
 
-    fun listBySubscription(subscriptionId: String): InvoiceListResponse =
+    fun listBySubscription(subscriptionId: String, params: ListParams = ListParams()): InvoiceListResponse =
         restClient.get()
-            .uri("/subscriptions/{id}/invoices", subscriptionId)
+            .uri("/subscriptions/{id}/invoices?limit={limit}&offset={offset}", subscriptionId, params.limit, params.offset)
             .retrieve()
             .body<InvoiceListResponse>()!!
 }
