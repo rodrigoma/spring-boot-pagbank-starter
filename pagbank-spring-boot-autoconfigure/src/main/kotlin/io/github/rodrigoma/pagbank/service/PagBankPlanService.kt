@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.service
 
+import io.github.rodrigoma.pagbank.model.common.ListParams
 import io.github.rodrigoma.pagbank.model.plan.*
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
@@ -19,9 +20,9 @@ class PagBankPlanService(private val restClient: RestClient) {
             .retrieve()
             .body<PlanResponse>()!!
 
-    fun list(): PlanListResponse =
+    fun list(params: ListParams = ListParams()): PlanListResponse =
         restClient.get()
-            .uri("/plans")
+            .uri("/plans?limit={limit}&offset={offset}", params.limit, params.offset)
             .retrieve()
             .body<PlanListResponse>()!!
 

@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.service
 
+import io.github.rodrigoma.pagbank.model.common.ListParams
 import io.github.rodrigoma.pagbank.model.plan.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
@@ -73,5 +74,28 @@ class PagBankPlanServiceTest {
         )
         val response = service.get("PLAN_123")
         assertThat(response.id).isEqualTo("PLAN_123")
+    }
+
+    @Test
+    fun `list should return PlanListResponse with default params`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(
+            mapOf("plans" to listOf(
+                mapOf("id" to "PLAN_001", "name" to "Basic",
+                      "amount" to mapOf("value" to 999, "currency" to "BRL"),
+                      "interval" to mapOf("length" to 1, "unit" to "month"),
+                      "status" to "ACTIVE", "created_at" to "2026-01-01T00:00:00Z",
+                      "reference_id" to null, "trial" to null, "updated_at" to null)
+            ))
+        )
+        val response = service.list()
+        assertThat(response.plans).hasSize(1)
+        assertThat(response.plans[0].id).isEqualTo("PLAN_001")
+    }
+
+    @Test
+    fun `list should forward limit and offset params`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("plans" to emptyList<Any>()))
+        val response = service.list(ListParams(limit = 5, offset = 20))
+        assertThat(response.plans).isEmpty()
     }
 }
