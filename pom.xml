@@ -12,13 +12,13 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>pagseguro-spring-boot-parent</artifactId>
+    <artifactId>pagbank-spring-boot-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
-        <module>pagseguro-spring-boot-autoconfigure</module>
-        <module>pagseguro-spring-boot-starter</module>
+        <module>pagbank-spring-boot-autoconfigure</module>
+        <module>pagbank-spring-boot-starter</module>
     </modules>
 
     <properties>
@@ -30,7 +30,7 @@
         <dependencies>
             <dependency>
                 <groupId>com.example</groupId>
-                <artifactId>pagseguro-spring-boot-autoconfigure</artifactId>
+                <artifactId>pagbank-spring-boot-autoconfigure</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

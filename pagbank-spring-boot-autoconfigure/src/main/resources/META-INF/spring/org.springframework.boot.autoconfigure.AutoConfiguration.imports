@@ -1,0 +1,2 @@
+com.example.pagbank.autoconfigure.PagBankAutoConfiguration
+com.example.pagbank.autoconfigure.PagBankHealthIndicatorAutoConfiguration
