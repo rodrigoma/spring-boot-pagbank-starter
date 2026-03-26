@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.service
 
+import io.github.rodrigoma.pagbank.model.common.ListParams
 import io.github.rodrigoma.pagbank.model.subscription.*
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
@@ -40,9 +41,9 @@ class PagBankSubscriptionService(private val restClient: RestClient) {
             .toBodilessEntity()
     }
 
-    fun list(): SubscriptionListResponse =
+    fun list(params: ListParams = ListParams()): SubscriptionListResponse =
         restClient.get()
-            .uri("/subscriptions")
+            .uri("/subscriptions?limit={limit}&offset={offset}", params.limit, params.offset)
             .retrieve()
             .body<SubscriptionListResponse>()!!
 }

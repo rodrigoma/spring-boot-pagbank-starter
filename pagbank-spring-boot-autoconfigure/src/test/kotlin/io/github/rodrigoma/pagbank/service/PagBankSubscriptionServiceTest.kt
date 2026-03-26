@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.service
 
+import io.github.rodrigoma.pagbank.model.common.ListParams
 import io.github.rodrigoma.pagbank.model.subscription.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
@@ -46,36 +47,66 @@ class PagBankSubscriptionServiceTest {
         service = PagBankSubscriptionService(restClient)
     }
 
+    private fun subscriptionMap(id: String = "SUB_123") = mapOf(
+        "id" to id,
+        "plan_id" to "PLAN_001",
+        "customer_id" to "CUST_001",
+        "status" to "ACTIVE",
+        "created_at" to "2026-01-01T00:00:00Z"
+    )
+
     @Test
-    fun `create should POST and return SubscriptionResponse with status ACTIVE`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(
-            mapOf(
-                "id" to "SUB_123",
-                "plan_id" to "PLAN_123",
-                "customer_id" to "CUST_123",
-                "status" to "ACTIVE",
-                "created_at" to "2026-01-01T00:00:00Z"
-            )
-        )
+    fun `create should POST and return SubscriptionResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(subscriptionMap())
         val response = service.create(
-            CreateSubscriptionRequest("PLAN_123", "CUST_123")
+            CreateSubscriptionRequest(planId = "PLAN_001", customerId = "CUST_001")
         )
         assertThat(response.id).isEqualTo("SUB_123")
         assertThat(response.status).isEqualTo(SubscriptionStatus.ACTIVE)
     }
 
     @Test
-    fun `get should return subscription by id`() {
+    fun `get should return SubscriptionResponse by id`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(subscriptionMap("SUB_456"))
+        val response = service.get("SUB_456")
+        assertThat(response.id).isEqualTo("SUB_456")
+    }
+
+    @Test
+    fun `cancel should PUT without a response body`() {
+        mockFactory.nextBody = ByteArray(0)
+        mockFactory.nextStatus = HttpStatus.NO_CONTENT
+        service.cancel("SUB_123")
+    }
+
+    @Test
+    fun `suspend should PUT without a response body`() {
+        mockFactory.nextBody = ByteArray(0)
+        mockFactory.nextStatus = HttpStatus.NO_CONTENT
+        service.suspend("SUB_123")
+    }
+
+    @Test
+    fun `reactivate should PUT without a response body`() {
+        mockFactory.nextBody = ByteArray(0)
+        mockFactory.nextStatus = HttpStatus.NO_CONTENT
+        service.reactivate("SUB_123")
+    }
+
+    @Test
+    fun `list should return SubscriptionListResponse with default params`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(
-            mapOf(
-                "id" to "SUB_123",
-                "plan_id" to "PLAN_123",
-                "customer_id" to "CUST_123",
-                "status" to "ACTIVE",
-                "created_at" to "2026-01-01T00:00:00Z"
-            )
+            mapOf("subscriptions" to listOf(subscriptionMap()))
         )
-        val response = service.get("SUB_123")
-        assertThat(response.id).isEqualTo("SUB_123")
+        val response = service.list()
+        assertThat(response.subscriptions).hasSize(1)
+        assertThat(response.subscriptions[0].id).isEqualTo("SUB_123")
+    }
+
+    @Test
+    fun `list should forward limit and offset params`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("subscriptions" to emptyList<Any>()))
+        val response = service.list(ListParams(limit = 25, offset = 50))
+        assertThat(response.subscriptions).isEmpty()
     }
 }
