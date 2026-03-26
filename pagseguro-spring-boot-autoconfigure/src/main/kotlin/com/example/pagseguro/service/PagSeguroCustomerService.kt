@@ -1,3 +1,34 @@
 package com.example.pagseguro.service
+
+import com.example.pagseguro.model.customer.*
 import org.springframework.web.client.RestClient
-class PagSeguroCustomerService(private val restClient: RestClient)
+import org.springframework.web.client.body
+
+class PagSeguroCustomerService(private val restClient: RestClient) {
+
+    fun create(request: CreateCustomerRequest): CustomerResponse =
+        restClient.post()
+            .uri("/customers")
+            .body(request)
+            .retrieve()
+            .body<CustomerResponse>()!!
+
+    fun get(id: String): CustomerResponse =
+        restClient.get()
+            .uri("/customers/{id}", id)
+            .retrieve()
+            .body<CustomerResponse>()!!
+
+    fun update(id: String, request: CreateCustomerRequest): CustomerResponse =
+        restClient.put()
+            .uri("/customers/{id}", id)
+            .body(request)
+            .retrieve()
+            .body<CustomerResponse>()!!
+
+    fun list(): CustomerListResponse =
+        restClient.get()
+            .uri("/customers")
+            .retrieve()
+            .body<CustomerListResponse>()!!
+}
