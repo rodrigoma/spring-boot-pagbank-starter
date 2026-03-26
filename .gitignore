@@ -1,12 +1,8 @@
 # Build output
-target/
 build/
 
 # Gradle
 .gradle/
-
-# Git worktrees
-.worktrees/
 
 # IDE
 .DS_Store
@@ -15,9 +11,6 @@ build/
 .settings/
 .project
 .classpath
-
-# Compiled files
-*.class
 
 # JARs — keep gradle wrapper and built artifacts in src/main
 *.jar
