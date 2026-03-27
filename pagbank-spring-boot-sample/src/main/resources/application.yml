@@ -1,0 +1,11 @@
+pagbank:
+  token: REPLACE_ME
+  environment: SANDBOX
+  log-requests: true
+
+server:
+  port: 8080
+
+logging:
+  level:
+    io.github.rodrigoma.pagbank: DEBUG
