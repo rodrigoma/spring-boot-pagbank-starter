@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.spring")
     id("com.diffplug.spotless")
     id("io.gitlab.arturbosch.detekt")
+    jacoco
 }
 
 kotlin {
@@ -26,6 +27,7 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    finalizedBy(tasks.named("jacocoTestReport"))
 }
 
 java {
@@ -48,4 +50,30 @@ detekt {
     config.setFrom(rootProject.file("detekt.yml"))
     buildUponDefaultConfig = true
     allRules = false
+}
+
+tasks.named<JacocoReport>("jacocoTestReport") {
+    dependsOn(tasks.named("test"))
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
+    dependsOn(tasks.named("jacocoTestReport"))
+    violationRules {
+        rule {
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.named("check") {
+    dependsOn(tasks.named("jacocoTestCoverageVerification"))
 }

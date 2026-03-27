@@ -30,3 +30,6 @@ jobs:
 
       - name: Build and test
         run: ./gradlew build
+
+      - name: Test coverage verification (JaCoCo)
+        run: ./gradlew jacocoTestCoverageVerification
