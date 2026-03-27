@@ -16,3 +16,6 @@ build/
 *.jar
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/*.jar
+
+# Git worktrees
+.worktrees/
