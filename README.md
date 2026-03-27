@@ -6,6 +6,12 @@
 
 A Spring Boot auto-configuration library for the **PagBank Subscriptions API** (formerly PagSeguro). Drop it on the classpath and get 9 fully configured service beans — no boilerplate required.
 
+## Compatibility
+
+| Library version | Spring Boot | Java | Kotlin |
+|---|---|---|---|
+| 1.x | 4.0+ | 21+ | 2.1+ |
+
 ## Requirements
 
 | Dependency   | Minimum version |

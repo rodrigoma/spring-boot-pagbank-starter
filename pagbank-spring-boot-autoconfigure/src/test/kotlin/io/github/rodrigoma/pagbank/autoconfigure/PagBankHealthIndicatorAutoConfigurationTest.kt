@@ -2,8 +2,8 @@ package io.github.rodrigoma.pagbank.autoconfigure
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.boot.actuate.health.HealthIndicator
 import org.springframework.boot.autoconfigure.AutoConfigurations
+import org.springframework.boot.health.contributor.HealthIndicator
 import org.springframework.boot.test.context.FilteredClassLoader
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 
