@@ -6,6 +6,7 @@ import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
 import java.io.ByteArrayInputStream
+import java.io.InputStream
 
 class PagBankLoggingInterceptor : ClientHttpRequestInterceptor {
     private val log = LoggerFactory.getLogger(PagBankLoggingInterceptor::class.java)
@@ -45,5 +46,5 @@ private class BufferedClientHttpResponse(
     private val delegate: ClientHttpResponse,
     private val bodyBytes: ByteArray,
 ) : ClientHttpResponse by delegate {
-    override fun getBody(): java.io.InputStream = ByteArrayInputStream(bodyBytes)
+    override fun getBody(): InputStream = ByteArrayInputStream(bodyBytes)
 }
