@@ -2,11 +2,21 @@ package io.github.rodrigoma.pagbank.model.plan
 
 enum class PlanStatus { ACTIVE, INACTIVE }
 
-data class Money(val value: Int, val currency: String = "BRL")
+data class Money(
+    val value: Int,
+    val currency: String = "BRL",
+)
 
-data class PlanInterval(val length: Int, val unit: String)  // unit: "month", "day", "year"
+data class PlanInterval(
+    val length: Int,
+    val unit: String,
+) // unit: "month", "day", "year"
 
-data class PlanTrial(val days: Int, val enabled: Boolean, val holdSetupFee: Boolean = false)
+data class PlanTrial(
+    val days: Int,
+    val enabled: Boolean,
+    val holdSetupFee: Boolean = false,
+)
 
 data class CreatePlanRequest(
     val name: String,
@@ -17,7 +27,7 @@ data class CreatePlanRequest(
     val description: String? = null,
     val setupFee: Int? = null,
     val limitSubscriptions: Int? = null,
-    val trial: PlanTrial? = null
+    val trial: PlanTrial? = null,
 )
 
 data class PlanResponse(
@@ -29,7 +39,9 @@ data class PlanResponse(
     val referenceId: String?,
     val trial: PlanTrial?,
     val createdAt: String?,
-    val updatedAt: String?
+    val updatedAt: String?,
 )
 
-data class PlanListResponse(val plans: List<PlanResponse>)
+data class PlanListResponse(
+    val plans: List<PlanResponse>,
+)

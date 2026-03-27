@@ -8,5 +8,5 @@ package io.github.rodrigoma.pagbank.model.common
  */
 data class ListParams(
     val limit: Int = 10,
-    val offset: Int = 0
+    val offset: Int = 0,
 )

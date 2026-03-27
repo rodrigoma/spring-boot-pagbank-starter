@@ -4,7 +4,7 @@ data class CreateCustomerRequest(
     val name: String,
     val email: String,
     val taxId: String,
-    val phone: String? = null
+    val phone: String? = null,
 )
 
 data class CustomerResponse(
@@ -12,7 +12,9 @@ data class CustomerResponse(
     val name: String,
     val email: String,
     val taxId: String,
-    val createdAt: String
+    val createdAt: String,
 )
 
-data class CustomerListResponse(val customers: List<CustomerResponse>)
+data class CustomerListResponse(
+    val customers: List<CustomerResponse>,
+)

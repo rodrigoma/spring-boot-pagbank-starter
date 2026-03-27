@@ -5,7 +5,7 @@ enum class SubscriptionStatus { ACTIVE, SUSPENDED, CANCELLED, PENDING }
 data class CreateSubscriptionRequest(
     val planId: String,
     val customerId: String,
-    val startDate: String? = null
+    val startDate: String? = null,
 )
 
 data class SubscriptionResponse(
@@ -13,7 +13,9 @@ data class SubscriptionResponse(
     val planId: String,
     val customerId: String,
     val status: SubscriptionStatus,
-    val createdAt: String
+    val createdAt: String,
 )
 
-data class SubscriptionListResponse(val subscriptions: List<SubscriptionResponse>)
+data class SubscriptionListResponse(
+    val subscriptions: List<SubscriptionResponse>,
+)

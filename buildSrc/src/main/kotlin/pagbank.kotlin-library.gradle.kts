@@ -1,15 +1,13 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
+    id("com.diffplug.spotless")
 }
 
 kotlin {
-    jvmToolchain(17)
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
+    jvmToolchain(21)
+    compilerOptions {
+        freeCompilerArgs.add("-Xjsr305=strict")
     }
 }
 
@@ -32,4 +30,15 @@ tasks.withType<Test>().configureEach {
 java {
     withSourcesJar()
     withJavadocJar()
+}
+
+spotless {
+    kotlin {
+        ktlint("1.5.0")
+        target("src/**/*.kt")
+    }
+    kotlinGradle {
+        ktlint("1.5.0")
+        target("*.gradle.kts")
+    }
 }

@@ -1,6 +1,15 @@
 package io.github.rodrigoma.pagbank.autoconfigure
 
-import io.github.rodrigoma.pagbank.service.*
+import io.github.rodrigoma.pagbank.service.PagBankChargeService
+import io.github.rodrigoma.pagbank.service.PagBankCouponService
+import io.github.rodrigoma.pagbank.service.PagBankCustomerService
+import io.github.rodrigoma.pagbank.service.PagBankInvoiceService
+import io.github.rodrigoma.pagbank.service.PagBankPaymentService
+import io.github.rodrigoma.pagbank.service.PagBankPlanService
+import io.github.rodrigoma.pagbank.service.PagBankPreferenceService
+import io.github.rodrigoma.pagbank.service.PagBankRefundService
+import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
+import io.github.rodrigoma.pagbank.service.PagBankWebhookParser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.autoconfigure.AutoConfigurations
@@ -8,9 +17,9 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.web.client.RestClient
 
 class PagBankAutoConfigurationTest {
-
-    private val contextRunner = ApplicationContextRunner()
-        .withConfiguration(AutoConfigurations.of(PagBankAutoConfiguration::class.java))
+    private val contextRunner =
+        ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(PagBankAutoConfiguration::class.java))
 
     @Test
     fun `should fail to start without token`() {

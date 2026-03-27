@@ -15,19 +15,20 @@ import org.springframework.web.client.RestClient
 @ConditionalOnProperty(name = ["pagbank.health-indicator-enabled"], havingValue = "true")
 @ConditionalOnBean(name = ["pagBankRestClient"])
 class PagBankHealthIndicatorAutoConfiguration {
-
     @Bean("pagBankHealthIndicator")
     fun pagBankHealthIndicator(
         @org.springframework.beans.factory.annotation.Qualifier("pagBankRestClient")
-        restClient: RestClient
+        restClient: RestClient,
     ): HealthIndicator = PagBankHealthIndicator(restClient)
 }
 
-class PagBankHealthIndicator(private val restClient: RestClient) : AbstractHealthIndicator() {
-
+class PagBankHealthIndicator(
+    private val restClient: RestClient,
+) : AbstractHealthIndicator() {
     override fun doHealthCheck(builder: Health.Builder) {
         try {
-            restClient.get()
+            restClient
+                .get()
                 .uri("/plans?limit=1")
                 .retrieve()
                 .toBodilessEntity()

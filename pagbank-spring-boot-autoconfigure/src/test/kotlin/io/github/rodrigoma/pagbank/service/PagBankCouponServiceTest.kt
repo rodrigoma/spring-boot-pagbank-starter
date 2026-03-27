@@ -1,9 +1,10 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.coupon.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.github.rodrigoma.pagbank.model.coupon.CreateCouponRequest
+import io.github.rodrigoma.pagbank.model.coupon.DiscountType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,53 +17,60 @@ import org.springframework.mock.http.client.MockClientHttpResponse
 import org.springframework.web.client.RestClient
 
 class PagBankCouponServiceTest {
-
     private lateinit var service: PagBankCouponService
-    private val mapper: ObjectMapper = jacksonObjectMapper().apply {
-        propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
-    }
-
-    private val mockFactory = object : org.springframework.http.client.ClientHttpRequestFactory {
-        var nextBody: ByteArray = ByteArray(0)
-        var nextStatus: HttpStatus = HttpStatus.OK
-        var nextContentType: MediaType = MediaType.APPLICATION_JSON
-
-        override fun createRequest(uri: java.net.URI, httpMethod: HttpMethod): org.springframework.http.client.ClientHttpRequest {
-            val response = MockClientHttpResponse(nextBody, nextStatus)
-            response.headers.contentType = nextContentType
-            return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
+    private val mapper: ObjectMapper =
+        jacksonObjectMapper().apply {
+            propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
         }
-    }
+
+    private val mockFactory =
+        object : org.springframework.http.client.ClientHttpRequestFactory {
+            var nextBody: ByteArray = ByteArray(0)
+            var nextStatus: HttpStatus = HttpStatus.OK
+            var nextContentType: MediaType = MediaType.APPLICATION_JSON
+
+            override fun createRequest(
+                uri: java.net.URI,
+                httpMethod: HttpMethod,
+            ): org.springframework.http.client.ClientHttpRequest {
+                val response = MockClientHttpResponse(nextBody, nextStatus)
+                response.headers.contentType = nextContentType
+                return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
+            }
+        }
 
     @BeforeEach
     fun setUp() {
-        val restClient = RestClient.builder()
-            .requestFactory(mockFactory)
-            .messageConverters { converters ->
-                converters.removeIf { it is MappingJackson2HttpMessageConverter }
-                converters.add(0, MappingJackson2HttpMessageConverter(mapper))
-            }
-            .build()
+        val restClient =
+            RestClient
+                .builder()
+                .requestFactory(mockFactory)
+                .messageConverters { converters ->
+                    converters.removeIf { it is MappingJackson2HttpMessageConverter }
+                    converters.add(0, MappingJackson2HttpMessageConverter(mapper))
+                }.build()
         service = PagBankCouponService(restClient)
     }
 
-    private fun couponMap(id: String = "CPN_123") = mapOf(
-        "id" to id,
-        "code" to "SAVE10",
-        "discount_type" to "PERCENT",
-        "discount_value" to 10
-    )
+    private fun couponMap(id: String = "CPN_123") =
+        mapOf(
+            "id" to id,
+            "code" to "SAVE10",
+            "discount_type" to "PERCENT",
+            "discount_value" to 10,
+        )
 
     @Test
     fun `create should POST and return CouponResponse`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(couponMap())
-        val response = service.create(
-            CreateCouponRequest(
-                code = "SAVE10",
-                discountType = DiscountType.PERCENT,
-                discountValue = 10
+        val response =
+            service.create(
+                CreateCouponRequest(
+                    code = "SAVE10",
+                    discountType = DiscountType.PERCENT,
+                    discountValue = 10,
+                ),
             )
-        )
         assertThat(response.id).isEqualTo("CPN_123")
         assertThat(response.code).isEqualTo("SAVE10")
         assertThat(response.discountType).isEqualTo(DiscountType.PERCENT)

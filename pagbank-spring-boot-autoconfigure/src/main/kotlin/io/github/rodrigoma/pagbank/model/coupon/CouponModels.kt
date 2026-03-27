@@ -6,12 +6,12 @@ data class CreateCouponRequest(
     val code: String,
     val discountType: DiscountType,
     val discountValue: Int,
-    val maxUses: Int? = null
+    val maxUses: Int? = null,
 )
 
 data class CouponResponse(
     val id: String,
     val code: String,
     val discountType: DiscountType,
-    val discountValue: Int
+    val discountValue: Int,
 )

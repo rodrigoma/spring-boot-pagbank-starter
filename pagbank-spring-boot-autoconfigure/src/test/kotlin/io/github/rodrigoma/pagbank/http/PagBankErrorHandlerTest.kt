@@ -1,7 +1,7 @@
 package io.github.rodrigoma.pagbank.http
 
-import io.github.rodrigoma.pagbank.exception.PagBankException
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.rodrigoma.pagbank.exception.PagBankException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.mock.http.client.MockClientHttpResponse
 
 class PagBankErrorHandlerTest {
-
     private val mapper = ObjectMapper()
     private val handler = PagBankErrorHandler(mapper)
 

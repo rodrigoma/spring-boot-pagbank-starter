@@ -5,6 +5,9 @@ data class InvoiceResponse(
     val subscriptionId: String,
     val amount: Int,
     val status: String,
-    val dueDate: String
+    val dueDate: String,
 )
-data class InvoiceListResponse(val invoices: List<InvoiceResponse>)
+
+data class InvoiceListResponse(
+    val invoices: List<InvoiceResponse>,
+)

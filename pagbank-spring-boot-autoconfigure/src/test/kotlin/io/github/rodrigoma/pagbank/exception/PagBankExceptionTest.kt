@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class PagBankExceptionTest {
-
     @Test
     fun `Unauthorized carries message`() {
         val ex = PagBankException.Unauthorized("invalid token")
@@ -31,12 +30,13 @@ class PagBankExceptionTest {
     @Test
     fun `sealed class enables exhaustive when`() {
         val ex: PagBankException = PagBankException.NotFound("plan not found")
-        val result = when (ex) {
-            is PagBankException.Unauthorized -> "auth"
-            is PagBankException.NotFound -> "not_found"
-            is PagBankException.ValidationError -> "validation"
-            is PagBankException.ServerError -> "server"
-        }
+        val result =
+            when (ex) {
+                is PagBankException.Unauthorized -> "auth"
+                is PagBankException.NotFound -> "not_found"
+                is PagBankException.ValidationError -> "validation"
+                is PagBankException.ServerError -> "server"
+            }
         assertThat(result).isEqualTo("not_found")
     }
 }

@@ -1,10 +1,10 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.charge.*
-import io.github.rodrigoma.pagbank.model.common.ListParams
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.github.rodrigoma.pagbank.model.charge.RetryChargeRequest
+import io.github.rodrigoma.pagbank.model.common.ListParams
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,42 +17,48 @@ import org.springframework.mock.http.client.MockClientHttpResponse
 import org.springframework.web.client.RestClient
 
 class PagBankChargeServiceTest {
-
     private lateinit var service: PagBankChargeService
-    private val mapper: ObjectMapper = jacksonObjectMapper().apply {
-        propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
-    }
-
-    private val mockFactory = object : org.springframework.http.client.ClientHttpRequestFactory {
-        var nextBody: ByteArray = ByteArray(0)
-        var nextStatus: HttpStatus = HttpStatus.OK
-        var nextContentType: MediaType = MediaType.APPLICATION_JSON
-
-        override fun createRequest(uri: java.net.URI, httpMethod: HttpMethod): org.springframework.http.client.ClientHttpRequest {
-            val response = MockClientHttpResponse(nextBody, nextStatus)
-            response.headers.contentType = nextContentType
-            return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
+    private val mapper: ObjectMapper =
+        jacksonObjectMapper().apply {
+            propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
         }
-    }
+
+    private val mockFactory =
+        object : org.springframework.http.client.ClientHttpRequestFactory {
+            var nextBody: ByteArray = ByteArray(0)
+            var nextStatus: HttpStatus = HttpStatus.OK
+            var nextContentType: MediaType = MediaType.APPLICATION_JSON
+
+            override fun createRequest(
+                uri: java.net.URI,
+                httpMethod: HttpMethod,
+            ): org.springframework.http.client.ClientHttpRequest {
+                val response = MockClientHttpResponse(nextBody, nextStatus)
+                response.headers.contentType = nextContentType
+                return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
+            }
+        }
 
     @BeforeEach
     fun setUp() {
-        val restClient = RestClient.builder()
-            .requestFactory(mockFactory)
-            .messageConverters { converters ->
-                converters.removeIf { it is MappingJackson2HttpMessageConverter }
-                converters.add(0, MappingJackson2HttpMessageConverter(mapper))
-            }
-            .build()
+        val restClient =
+            RestClient
+                .builder()
+                .requestFactory(mockFactory)
+                .messageConverters { converters ->
+                    converters.removeIf { it is MappingJackson2HttpMessageConverter }
+                    converters.add(0, MappingJackson2HttpMessageConverter(mapper))
+                }.build()
         service = PagBankChargeService(restClient)
     }
 
-    private fun chargeMap(id: String = "CHG_123") = mapOf(
-        "id" to id,
-        "subscription_id" to "SUB_001",
-        "amount" to 2990,
-        "status" to "PAID"
-    )
+    private fun chargeMap(id: String = "CHG_123") =
+        mapOf(
+            "id" to id,
+            "subscription_id" to "SUB_001",
+            "amount" to 2990,
+            "status" to "PAID",
+        )
 
     @Test
     fun `get should return ChargeResponse by id`() {
@@ -64,9 +70,10 @@ class PagBankChargeServiceTest {
 
     @Test
     fun `list should return ChargeListResponse with default params`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(
-            mapOf("charges" to listOf(chargeMap()))
-        )
+        mockFactory.nextBody =
+            mapper.writeValueAsBytes(
+                mapOf("charges" to listOf(chargeMap())),
+            )
         val response = service.list()
         assertThat(response.charges).hasSize(1)
         assertThat(response.charges[0].id).isEqualTo("CHG_123")

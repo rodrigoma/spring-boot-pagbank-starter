@@ -1,23 +1,28 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties
-import io.github.rodrigoma.pagbank.model.webhook.WebhookPayload
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties
+import io.github.rodrigoma.pagbank.model.webhook.WebhookPayload
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-class PagBankWebhookParser(private val properties: PagBankProperties) {
-
-    private val mapper: ObjectMapper = jacksonObjectMapper().apply {
-        propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
-    }
+class PagBankWebhookParser(
+    private val properties: PagBankProperties,
+) {
+    private val mapper: ObjectMapper =
+        jacksonObjectMapper().apply {
+            propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
+        }
 
     fun parse(rawBody: String): WebhookPayload = mapper.readValue(rawBody)
 
-    fun verify(rawBody: String, signature: String): Boolean {
+    fun verify(
+        rawBody: String,
+        signature: String,
+    ): Boolean {
         check(properties.webhookSecret != null) {
             "pagbank.webhook-secret must be configured to verify webhook signatures"
         }
@@ -30,7 +35,10 @@ class PagBankWebhookParser(private val properties: PagBankProperties) {
         return computeHmac(rawBody, secret)
     }
 
-    private fun computeHmac(data: String, secret: String): String {
+    private fun computeHmac(
+        data: String,
+        secret: String,
+    ): String {
         val mac = Mac.getInstance("HmacSHA256")
         mac.init(SecretKeySpec(secret.toByteArray(), "HmacSHA256"))
         return mac.doFinal(data.toByteArray()).joinToString("") { "%02x".format(it) }

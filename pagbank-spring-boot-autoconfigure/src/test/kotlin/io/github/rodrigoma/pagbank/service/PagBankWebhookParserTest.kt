@@ -1,18 +1,17 @@
 package io.github.rodrigoma.pagbank.service
 
 import io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties
-import io.github.rodrigoma.pagbank.autoconfigure.PagBankEnvironment
 import io.github.rodrigoma.pagbank.model.webhook.WebhookEventType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class PagBankWebhookParserTest {
-
-    private val propertiesWithSecret = PagBankProperties(
-        token = "TOKEN",
-        webhookSecret = "SECRET_KEY"
-    )
+    private val propertiesWithSecret =
+        PagBankProperties(
+            token = "TOKEN",
+            webhookSecret = "SECRET_KEY",
+        )
     private val propertiesWithoutSecret = PagBankProperties(token = "TOKEN")
     private val parser = PagBankWebhookParser(propertiesWithSecret)
 

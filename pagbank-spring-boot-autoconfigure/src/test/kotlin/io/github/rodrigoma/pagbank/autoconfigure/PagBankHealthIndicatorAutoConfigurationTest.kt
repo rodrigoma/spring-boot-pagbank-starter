@@ -8,15 +8,14 @@ import org.springframework.boot.test.context.FilteredClassLoader
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 
 class PagBankHealthIndicatorAutoConfigurationTest {
-
-    private val contextRunner = ApplicationContextRunner()
-        .withConfiguration(
-            AutoConfigurations.of(
-                PagBankAutoConfiguration::class.java,
-                PagBankHealthIndicatorAutoConfiguration::class.java
-            )
-        )
-        .withPropertyValues("pagbank.token=TEST_TOKEN")
+    private val contextRunner =
+        ApplicationContextRunner()
+            .withConfiguration(
+                AutoConfigurations.of(
+                    PagBankAutoConfiguration::class.java,
+                    PagBankHealthIndicatorAutoConfiguration::class.java,
+                ),
+            ).withPropertyValues("pagbank.token=TEST_TOKEN")
 
     @Test
     fun `health indicator should not be created when disabled`() {

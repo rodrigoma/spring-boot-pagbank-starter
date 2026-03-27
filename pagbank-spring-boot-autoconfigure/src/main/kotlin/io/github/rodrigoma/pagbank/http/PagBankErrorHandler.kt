@@ -1,10 +1,10 @@
 package io.github.rodrigoma.pagbank.http
 
-import io.github.rodrigoma.pagbank.exception.ApiError
-import io.github.rodrigoma.pagbank.exception.PagBankException
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import io.github.rodrigoma.pagbank.exception.ApiError
+import io.github.rodrigoma.pagbank.exception.PagBankException
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.client.ClientHttpResponse
 
@@ -12,15 +12,20 @@ import org.springframework.http.client.ClientHttpResponse
 //   .defaultStatusHandler({ it.isError }, handler::handle)
 // It does NOT implement ResponseErrorHandler (a RestTemplate interface).
 // The handle() method is called by RestClient for any 4xx/5xx response.
-class PagBankErrorHandler(objectMapper: ObjectMapper) {
-
-    private val objectMapper: ObjectMapper = objectMapper.copy().apply {
-        if (!registeredModuleIds.contains(KotlinModule::class.java.name)) {
-            registerModule(KotlinModule.Builder().build())
+class PagBankErrorHandler(
+    objectMapper: ObjectMapper,
+) {
+    private val objectMapper: ObjectMapper =
+        objectMapper.copy().apply {
+            if (!registeredModuleIds.contains(KotlinModule::class.java.name)) {
+                registerModule(KotlinModule.Builder().build())
+            }
         }
-    }
 
-    fun handle(statusCode: HttpStatusCode, response: ClientHttpResponse) {
+    fun handle(
+        statusCode: HttpStatusCode,
+        response: ClientHttpResponse,
+    ) {
         handle(response)
     }
 
@@ -36,7 +41,10 @@ class PagBankErrorHandler(objectMapper: ObjectMapper) {
         }
     }
 
-    private fun parseValidationError(body: ByteArray, statusCode: Int): PagBankException =
+    private fun parseValidationError(
+        body: ByteArray,
+        statusCode: Int,
+    ): PagBankException =
         try {
             val errors: List<ApiError> = objectMapper.readValue(body, object : TypeReference<List<ApiError>>() {})
             PagBankException.ValidationError(errors)
@@ -44,6 +52,5 @@ class PagBankErrorHandler(objectMapper: ObjectMapper) {
             PagBankException.ServerError(statusCode)
         }
 
-    private fun bodyAsString(body: ByteArray): String =
-        if (body.isEmpty()) "Unauthorized" else body.decodeToString()
+    private fun bodyAsString(body: ByteArray): String = if (body.isEmpty()) "Unauthorized" else body.decodeToString()
 }

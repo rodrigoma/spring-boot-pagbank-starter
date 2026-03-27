@@ -6,9 +6,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 
 class PagBankPropertiesTest {
-
-    private val contextRunner = ApplicationContextRunner()
-        .withUserConfiguration(PropertiesTestConfig::class.java)
+    private val contextRunner =
+        ApplicationContextRunner()
+            .withUserConfiguration(PropertiesTestConfig::class.java)
 
     @Test
     fun `should bind token and environment`() {
