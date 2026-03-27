@@ -52,4 +52,24 @@ class PagBankAutoConfigurationTest {
             assertThat(context.getBeanNamesForType(RestClient::class.java)).contains("pagBankRestClient")
         }
     }
+
+    @Test
+    fun `RestClient should NOT have logging interceptor when logRequests is false`() {
+        contextRunner
+            .withPropertyValues("pagbank.token=TEST_TOKEN", "pagbank.log-requests=false")
+            .run { context ->
+                assertThat(context).hasNotFailed()
+                assertThat(context.getBeanNamesForType(RestClient::class.java)).contains("pagBankRestClient")
+            }
+    }
+
+    @Test
+    fun `RestClient should have logging interceptor when logRequests is true`() {
+        contextRunner
+            .withPropertyValues("pagbank.token=TEST_TOKEN", "pagbank.log-requests=true")
+            .run { context ->
+                assertThat(context).hasNotFailed()
+                assertThat(context.getBeanNamesForType(RestClient::class.java)).contains("pagBankRestClient")
+            }
+    }
 }

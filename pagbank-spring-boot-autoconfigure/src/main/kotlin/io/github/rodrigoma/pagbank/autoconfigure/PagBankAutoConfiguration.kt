@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.github.rodrigoma.pagbank.http.PagBankErrorHandler
+import io.github.rodrigoma.pagbank.http.PagBankLoggingInterceptor
 import io.github.rodrigoma.pagbank.service.PagBankChargeService
 import io.github.rodrigoma.pagbank.service.PagBankCouponService
 import io.github.rodrigoma.pagbank.service.PagBankCustomerService
@@ -38,15 +39,19 @@ class PagBankAutoConfiguration(
         objectMapper: ObjectMapper,
     ): RestClient {
         val errorHandler = PagBankErrorHandler(objectMapper)
-        return RestClient
-            .builder()
-            .baseUrl(properties.environment.baseUrl())
-            .defaultHeader("Authorization", "Bearer ${properties.token}")
-            .messageConverters { converters ->
-                converters.removeIf { it is MappingJackson2HttpMessageConverter }
-                converters.add(0, MappingJackson2HttpMessageConverter(objectMapper))
-            }.defaultStatusHandler({ it.isError }) { _, response -> errorHandler.handle(response) }
-            .build()
+        val builder =
+            RestClient
+                .builder()
+                .baseUrl(properties.environment.baseUrl())
+                .defaultHeader("Authorization", "Bearer ${properties.token}")
+                .messageConverters { converters ->
+                    converters.removeIf { it is MappingJackson2HttpMessageConverter }
+                    converters.add(0, MappingJackson2HttpMessageConverter(objectMapper))
+                }.defaultStatusHandler({ it.isError }) { _, response -> errorHandler.handle(response) }
+        if (properties.logRequests) {
+            builder.requestInterceptor(PagBankLoggingInterceptor())
+        }
+        return builder.build()
     }
 
     @Bean fun pagBankPlanService(

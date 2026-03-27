@@ -21,6 +21,7 @@ data class PagBankProperties(
     val environment: PagBankEnvironment = PagBankEnvironment.SANDBOX,
     val webhookSecret: String? = null,
     val healthIndicatorEnabled: Boolean = false,
+    val logRequests: Boolean = false,
 ) : InitializingBean {
     override fun afterPropertiesSet() {
         require(token.isNotBlank()) {
