@@ -12,6 +12,7 @@ dependencies {
     compileOnly("org.springframework.boot:spring-boot-starter-actuator")
     kapt(platform("org.springframework.boot:spring-boot-dependencies:4.0.4"))
     kapt("org.springframework.boot:spring-boot-configuration-processor")
+    kapt("org.springframework.boot:spring-boot-health")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-web")
     testImplementation("org.springframework.boot:spring-boot-starter-actuator")
