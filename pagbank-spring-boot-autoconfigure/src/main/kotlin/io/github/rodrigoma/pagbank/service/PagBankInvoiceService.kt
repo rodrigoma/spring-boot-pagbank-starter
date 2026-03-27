@@ -22,7 +22,11 @@ class PagBankInvoiceService(
     ): InvoiceListResponse =
         restClient
             .get()
-            .uri("/subscriptions/{id}/invoices?limit={limit}&offset={offset}", subscriptionId, params.limit, params.offset)
-            .retrieve()
+            .uri(
+                "/subscriptions/{id}/invoices?limit={limit}&offset={offset}",
+                subscriptionId,
+                params.limit,
+                params.offset,
+            ).retrieve()
             .body<InvoiceListResponse>()!!
 }

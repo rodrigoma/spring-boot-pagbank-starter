@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
     id("com.diffplug.spotless")
+    id("io.gitlab.arturbosch.detekt")
 }
 
 kotlin {
@@ -41,4 +42,10 @@ spotless {
         ktlint("1.5.0")
         target("*.gradle.kts")
     }
+}
+
+detekt {
+    config.setFrom(rootProject.file("detekt.yml"))
+    buildUponDefaultConfig = true
+    allRules = false
 }

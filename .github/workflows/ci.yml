@@ -25,5 +25,8 @@ jobs:
       - name: Check formatting (Spotless + Ktlint)
         run: ./gradlew spotlessCheck
 
+      - name: Static analysis (Detekt)
+        run: ./gradlew detekt
+
       - name: Build and test
         run: ./gradlew build

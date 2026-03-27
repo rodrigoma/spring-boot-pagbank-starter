@@ -25,6 +25,7 @@ class PagBankHealthIndicatorAutoConfiguration {
 class PagBankHealthIndicator(
     private val restClient: RestClient,
 ) : AbstractHealthIndicator() {
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override fun doHealthCheck(builder: Health.Builder) {
         try {
             restClient
