@@ -16,9 +16,9 @@ A Spring Boot auto-configuration library for the **PagBank Subscriptions API** (
 
 | Dependency   | Minimum version |
 |--------------|-----------------|
-| Java         | 17              |
-| Spring Boot  | 3.2.0           |
-| Kotlin       | 1.9 (optional)  |
+| Java         | 21              |
+| Spring Boot  | 4.0.0           |
+| Kotlin       | 2.1 (optional)  |
 
 ## Installation
 
