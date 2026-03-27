@@ -1,10 +1,7 @@
 pagbank:
-  token: REPLACE_ME
+  token: REPLACE_ME  # Set your PagBank sandbox API token here before running
   environment: SANDBOX
   log-requests: true
-
-server:
-  port: 8080
 
 logging:
   level:

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.rodrigoma"
-version = "1.0.0-SNAPSHOT"
+version = rootProject.version
 
 dependencies {
     implementation(project(":pagbank-spring-boot-starter"))
@@ -15,6 +15,8 @@ dependencies {
 tasks.named<Jar>("jar") {
     enabled = false
 }
+tasks.named("sourcesJar") { enabled = false }
+tasks.named("javadocJar") { enabled = false }
 
 // Disable the JaCoCo coverage gate for the sample module
 tasks.named("jacocoTestCoverageVerification") {
