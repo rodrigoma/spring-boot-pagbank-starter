@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.github.rodrigoma.pagbank.model.coupon.CreateCouponRequest
+import io.github.rodrigoma.pagbank.model.coupon.Discount
 import io.github.rodrigoma.pagbank.model.coupon.DiscountType
+import io.github.rodrigoma.pagbank.model.coupon.Duration
+import io.github.rodrigoma.pagbank.model.coupon.DurationType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -52,12 +55,13 @@ class PagBankCouponServiceTest {
         service = PagBankCouponService(restClient)
     }
 
-    private fun couponMap(id: String = "CPN_123") =
+    private fun couponMap(id: String = "COUP_123") =
         mapOf(
             "id" to id,
-            "code" to "SAVE10",
-            "discount_type" to "PERCENT",
-            "discount_value" to 10,
+            "name" to "SAVE10",
+            "discount" to mapOf("value" to 10, "type" to "PERCENT"),
+            "duration" to mapOf("type" to "FOREVER"),
+            "status" to "ACTIVE",
         )
 
     @Test
@@ -66,22 +70,22 @@ class PagBankCouponServiceTest {
         val response =
             service.create(
                 CreateCouponRequest(
-                    code = "SAVE10",
-                    discountType = DiscountType.PERCENT,
-                    discountValue = 10,
+                    name = "SAVE10",
+                    discount = Discount(value = 10, type = DiscountType.PERCENT),
+                    duration = Duration(type = DurationType.FOREVER),
                 ),
             )
-        assertThat(response.id).isEqualTo("CPN_123")
-        assertThat(response.code).isEqualTo("SAVE10")
-        assertThat(response.discountType).isEqualTo(DiscountType.PERCENT)
-        assertThat(response.discountValue).isEqualTo(10)
+        assertThat(response.id).isEqualTo("COUP_123")
+        assertThat(response.name).isEqualTo("SAVE10")
+        assertThat(response.discount.type).isEqualTo(DiscountType.PERCENT)
+        assertThat(response.discount.value).isEqualTo(10)
     }
 
     @Test
     fun `get should return CouponResponse by id`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(couponMap("CPN_456"))
-        val response = service.get("CPN_456")
-        assertThat(response.id).isEqualTo("CPN_456")
+        mockFactory.nextBody = mapper.writeValueAsBytes(couponMap("COUP_456"))
+        val response = service.get("COUP_456")
+        assertThat(response.id).isEqualTo("COUP_456")
     }
 
     @Test
@@ -89,13 +93,13 @@ class PagBankCouponServiceTest {
         mockFactory.nextBody = ByteArray(0)
         mockFactory.nextStatus = HttpStatus.NO_CONTENT
         // No exception = success
-        service.delete("CPN_123")
+        service.delete("COUP_123")
     }
 
     @Test
     fun `applyToSubscription should POST without a response body`() {
         mockFactory.nextBody = ByteArray(0)
         mockFactory.nextStatus = HttpStatus.NO_CONTENT
-        service.applyToSubscription("SUB_001", "CPN_123")
+        service.applyToSubscription("SUB_001", "COUP_123")
     }
 }
