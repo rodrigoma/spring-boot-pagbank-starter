@@ -15,7 +15,7 @@ class PagBankWebhookParserTest {
     private val propertiesWithoutSecret = PagBankProperties(token = "TOKEN")
     private val parser = PagBankWebhookParser(propertiesWithSecret)
 
-    private val rawBody = """{"env":"sandbox","event":"subscription.recurrence","resource":{},"links":[]}"""
+    private val rawBody = """{"env":"sandbox","event":"subscription.recurrence","resource":{},"date":"2026-03-28T10:05:00Z"}"""
 
     @Test
     fun `parse should deserialize event type`() {

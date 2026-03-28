@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.github.rodrigoma.pagbank.model.common.ListParams
 import io.github.rodrigoma.pagbank.model.plan.CreatePlanRequest
+import io.github.rodrigoma.pagbank.model.plan.IntervalUnit
 import io.github.rodrigoma.pagbank.model.plan.Money
 import io.github.rodrigoma.pagbank.model.plan.PlanInterval
 import org.assertj.core.api.Assertions.assertThat
@@ -62,7 +63,7 @@ class PagBankPlanServiceTest {
                     "id" to "PLAN_123",
                     "name" to "Basic",
                     "amount" to mapOf("value" to 999, "currency" to "BRL"),
-                    "interval" to mapOf("length" to 1, "unit" to "month"),
+                    "interval" to mapOf("length" to 1, "unit" to "MONTH"),
                     "status" to "ACTIVE",
                     "created_at" to "2026-01-01T00:00:00Z",
                     "reference_id" to null,
@@ -72,7 +73,7 @@ class PagBankPlanServiceTest {
             )
         val response =
             service.create(
-                CreatePlanRequest("Basic", Money(999), PlanInterval(1, "month")),
+                CreatePlanRequest("Basic", Money(999), PlanInterval(1, IntervalUnit.MONTH)),
             )
         assertThat(response.id).isEqualTo("PLAN_123")
         assertThat(response.amount.value).isEqualTo(999)
@@ -86,7 +87,7 @@ class PagBankPlanServiceTest {
                     "id" to "PLAN_123",
                     "name" to "Basic",
                     "amount" to mapOf("value" to 999, "currency" to "BRL"),
-                    "interval" to mapOf("length" to 1, "unit" to "month"),
+                    "interval" to mapOf("length" to 1, "unit" to "MONTH"),
                     "status" to "ACTIVE",
                     "created_at" to "2026-01-01T00:00:00Z",
                     "reference_id" to null,
@@ -109,7 +110,7 @@ class PagBankPlanServiceTest {
                                 "id" to "PLAN_001",
                                 "name" to "Basic",
                                 "amount" to mapOf("value" to 999, "currency" to "BRL"),
-                                "interval" to mapOf("length" to 1, "unit" to "month"),
+                                "interval" to mapOf("length" to 1, "unit" to "MONTH"),
                                 "status" to "ACTIVE",
                                 "created_at" to "2026-01-01T00:00:00Z",
                                 "reference_id" to null,
