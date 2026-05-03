@@ -31,14 +31,20 @@ class PagBankCustomerServiceTest {
             var nextBody: ByteArray = ByteArray(0)
             var nextStatus: HttpStatus = HttpStatus.OK
             var nextContentType: MediaType = MediaType.APPLICATION_JSON
+            var lastUri: java.net.URI? = null
+            var lastRequest: MockClientHttpRequest? = null
 
             override fun createRequest(
                 uri: java.net.URI,
                 httpMethod: HttpMethod,
             ): org.springframework.http.client.ClientHttpRequest {
+                lastUri = uri
                 val response = MockClientHttpResponse(nextBody, nextStatus)
                 response.headers.contentType = nextContentType
-                return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
+                return MockClientHttpRequest(httpMethod, uri).also {
+                    it.setResponse(response)
+                    lastRequest = it
+                }
             }
         }
 
@@ -105,6 +111,8 @@ class PagBankCustomerServiceTest {
                     ),
             ),
         )
+        val body = mockFactory.lastRequest!!.bodyAsString
+        assertThat(body).contains("\"encrypted\"").doesNotContain("\"number\"").doesNotContain("\"exp_year\"")
     }
 
     @Test
@@ -131,6 +139,8 @@ class PagBankCustomerServiceTest {
                     ),
             ),
         )
+        val body = mockFactory.lastRequest!!.bodyAsString
+        assertThat(body).contains("\"number\"").doesNotContain("\"encrypted\"")
     }
 
     @Test
@@ -184,5 +194,7 @@ class PagBankCustomerServiceTest {
         val response = service.list(offset = 10, limit = 5, referenceId = "ref-abc")
         assertThat(response.customers).isEmpty()
         assertThat(response.resultSet.total).isEqualTo(0)
+        val query = mockFactory.lastUri!!.query
+        assertThat(query).contains("offset=10").contains("limit=5").contains("reference_id=ref-abc")
     }
 }

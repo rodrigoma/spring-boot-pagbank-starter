@@ -31,11 +31,13 @@ class PagBankPlanServiceTest {
             var nextBody: ByteArray = ByteArray(0)
             var nextStatus: HttpStatus = HttpStatus.OK
             var nextContentType: MediaType = MediaType.APPLICATION_JSON
+            var lastUri: java.net.URI? = null
 
             override fun createRequest(
                 uri: java.net.URI,
                 httpMethod: HttpMethod,
             ): org.springframework.http.client.ClientHttpRequest {
+                lastUri = uri
                 val response = MockClientHttpResponse(nextBody, nextStatus)
                 response.headers.contentType = nextContentType
                 return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
@@ -148,6 +150,8 @@ class PagBankPlanServiceTest {
         assertThat(response.plans).isEmpty()
         assertThat(response.resultSet.offset).isEqualTo(20)
         assertThat(response.resultSet.limit).isEqualTo(5)
+        val query = mockFactory.lastUri!!.query
+        assertThat(query).contains("offset=20").contains("limit=5")
     }
 
     @Test
