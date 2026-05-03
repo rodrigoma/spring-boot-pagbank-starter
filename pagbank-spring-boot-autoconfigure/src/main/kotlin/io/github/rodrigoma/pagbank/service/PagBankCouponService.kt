@@ -31,19 +31,21 @@ class PagBankCouponService(
             .retrieve()
             .body<CouponListResponse>()!!
 
-    fun inactivate(id: String): CouponResponse =
+    fun inactivate(id: String) {
         restClient
             .put()
             .uri("/coupons/{id}/inactivate", id)
             .retrieve()
-            .body<CouponResponse>()!!
+            .toBodilessEntity()
+    }
 
-    fun activate(id: String): CouponResponse =
+    fun activate(id: String) {
         restClient
             .put()
             .uri("/coupons/{id}/activate", id)
             .retrieve()
-            .body<CouponResponse>()!!
+            .toBodilessEntity()
+    }
 
     fun applyToSubscription(
         subscriptionId: String,

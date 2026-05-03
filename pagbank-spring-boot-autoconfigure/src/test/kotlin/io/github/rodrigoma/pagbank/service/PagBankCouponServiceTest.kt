@@ -95,19 +95,19 @@ class PagBankCouponServiceTest {
     }
 
     @Test
-    fun `inactivate should PUT and return updated CouponResponse`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(couponMap().plus("status" to "INACTIVE"))
-        val response = service.inactivate("COUP_123")
-        assertThat(response.id).isEqualTo("COUP_123")
-        assertThat(response.status).isEqualTo(io.github.rodrigoma.pagbank.model.coupon.CouponStatus.INACTIVE)
+    fun `inactivate should PUT without a response body`() {
+        mockFactory.nextBody = ByteArray(0)
+        mockFactory.nextStatus = HttpStatus.OK
+        // No exception = success
+        service.inactivate("COUP_123")
     }
 
     @Test
-    fun `activate should PUT and return updated CouponResponse`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(couponMap())
-        val response = service.activate("COUP_123")
-        assertThat(response.id).isEqualTo("COUP_123")
-        assertThat(response.status).isEqualTo(io.github.rodrigoma.pagbank.model.coupon.CouponStatus.ACTIVE)
+    fun `activate should PUT without a response body`() {
+        mockFactory.nextBody = ByteArray(0)
+        mockFactory.nextStatus = HttpStatus.OK
+        // No exception = success
+        service.activate("COUP_123")
     }
 
     @Test

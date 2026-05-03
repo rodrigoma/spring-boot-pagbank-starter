@@ -89,14 +89,16 @@ class PagBankSampleController(
     ): CouponResponse = couponService.get(id)
 
     @PutMapping("/coupons/{id}/inactivate")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun inactivateCoupon(
         @PathVariable id: String,
-    ): CouponResponse = couponService.inactivate(id)
+    ) = couponService.inactivate(id)
 
     @PutMapping("/coupons/{id}/activate")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun activateCoupon(
         @PathVariable id: String,
-    ): CouponResponse = couponService.activate(id)
+    ) = couponService.activate(id)
 
     @PostMapping("/subscriptions/{subscriptionId}/coupons/{couponId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
