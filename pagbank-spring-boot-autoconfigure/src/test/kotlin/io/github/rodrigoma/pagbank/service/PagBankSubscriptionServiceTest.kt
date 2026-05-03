@@ -128,6 +128,13 @@ class PagBankSubscriptionServiceTest {
     }
 
     @Test
+    fun `applyCoupon should POST without a response body`() {
+        mockFactory.nextBody = ByteArray(0)
+        mockFactory.nextStatus = HttpStatus.NO_CONTENT
+        service.applyCoupon("SUBS_123", "COUP_001")
+    }
+
+    @Test
     fun `list with custom params should return empty response`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("subscriptions" to emptyList<Any>()))
         val response = service.list(ListParams(limit = 25, offset = 50))

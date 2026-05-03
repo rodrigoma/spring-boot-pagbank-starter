@@ -137,10 +137,4 @@ class PagBankCouponServiceTest {
         service.activate("COUP_123")
     }
 
-    @Test
-    fun `applyToSubscription should POST without a response body`() {
-        mockFactory.nextBody = ByteArray(0)
-        mockFactory.nextStatus = HttpStatus.NO_CONTENT
-        service.applyToSubscription("SUB_001", "COUP_123")
-    }
 }

@@ -59,15 +59,4 @@ class PagBankCouponService(
             .toBodilessEntity()
     }
 
-    fun applyToSubscription(
-        subscriptionId: String,
-        couponId: String,
-    ) {
-        restClient
-            .post()
-            .uri("/subscriptions/{id}/coupons", subscriptionId)
-            .body(mapOf("couponId" to couponId))
-            .retrieve()
-            .toBodilessEntity()
-    }
 }

@@ -192,5 +192,5 @@ class PagBankSampleController(
     fun applyCouponToSubscription(
         @PathVariable subscriptionId: String,
         @PathVariable couponId: String,
-    ) = couponService.applyToSubscription(subscriptionId, couponId)
+    ) = subscriptionService.applyCoupon(subscriptionId, couponId)
 }
