@@ -1,8 +1,5 @@
 package io.github.rodrigoma.pagbank.autoconfigure
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.github.rodrigoma.pagbank.http.PagBankErrorHandler
 import io.github.rodrigoma.pagbank.http.PagBankLoggingInterceptor
 import io.github.rodrigoma.pagbank.service.PagBankChargeService
@@ -19,8 +16,11 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.RestClient
+import tools.jackson.databind.PropertyNamingStrategies
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 @AutoConfiguration
 @EnableConfigurationProperties(PagBankProperties::class)
@@ -28,15 +28,15 @@ class PagBankAutoConfiguration(
     private val properties: PagBankProperties,
 ) {
     @Bean(name = ["pagBankObjectMapper"])
-    fun pagBankObjectMapper(): ObjectMapper =
-        jacksonObjectMapper().apply {
-            propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
-        }
+    fun pagBankObjectMapper(): JsonMapper =
+        jacksonMapperBuilder()
+            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .build()
 
     @Bean(name = ["pagBankRestClient"])
     fun pagBankRestClient(
         @Qualifier("pagBankObjectMapper")
-        objectMapper: ObjectMapper,
+        objectMapper: JsonMapper,
     ): RestClient {
         val errorHandler = PagBankErrorHandler(objectMapper)
         val builder =
@@ -44,9 +44,8 @@ class PagBankAutoConfiguration(
                 .builder()
                 .baseUrl(properties.environment.baseUrl())
                 .defaultHeader("Authorization", "Bearer ${properties.token}")
-                .messageConverters { converters ->
-                    converters.removeIf { it is MappingJackson2HttpMessageConverter }
-                    converters.add(0, MappingJackson2HttpMessageConverter(objectMapper))
+                .configureMessageConverters { converters ->
+                    converters.registerDefaults().withJsonConverter(JacksonJsonHttpMessageConverter(objectMapper))
                 }.defaultStatusHandler({ it.isError }) { _, response -> errorHandler.handle(response) }
         if (properties.logRequests) {
             builder.requestInterceptor(PagBankLoggingInterceptor())

@@ -1,6 +1,5 @@
 package io.github.rodrigoma.pagbank.http
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.rodrigoma.pagbank.exception.PagBankException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -8,9 +7,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import org.springframework.mock.http.client.MockClientHttpResponse
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 class PagBankErrorHandlerTest {
-    private val mapper = ObjectMapper()
+    private val mapper = jacksonMapperBuilder().build()
     private val handler = PagBankErrorHandler(mapper)
 
     @Test
@@ -50,5 +51,16 @@ class PagBankErrorHandlerTest {
         val response = MockClientHttpResponse(ByteArray(0), HttpStatus.INTERNAL_SERVER_ERROR)
         val ex = assertThrows<PagBankException.ServerError> { handler.handle(response) }
         assertThat(ex.statusCode).isEqualTo(500)
+    }
+
+    @Test
+    fun `400 with valid JSON deserializes correctly even when mapper has no KotlinModule`() {
+        val bareMapper = JsonMapper.builder().build()
+        val bareHandler = PagBankErrorHandler(bareMapper)
+        val body = """[{"code":"40001","message":"amount is required"}]""".toByteArray()
+        val response = MockClientHttpResponse(body, HttpStatus.BAD_REQUEST)
+        val ex = assertThrows<PagBankException.ValidationError> { bareHandler.handle(response) }
+        assertThat(ex.errors).hasSize(1)
+        assertThat(ex.errors[0].code).isEqualTo("40001")
     }
 }
