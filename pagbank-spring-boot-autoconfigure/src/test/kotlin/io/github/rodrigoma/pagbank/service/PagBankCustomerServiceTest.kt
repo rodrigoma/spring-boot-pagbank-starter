@@ -1,7 +1,9 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.common.ListParams
+import io.github.rodrigoma.pagbank.model.customer.BillingInfo
+import io.github.rodrigoma.pagbank.model.customer.BillingInfoType
 import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
+import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -55,9 +57,19 @@ class PagBankCustomerServiceTest {
             "id" to id,
             "name" to "Maria Silva",
             "email" to "maria@example.com",
-            "tax_id" to "123.456.789-00",
+            "tax_id" to "12345678900",
             "created_at" to "2026-01-01T00:00:00Z",
         )
+
+    private fun listResponseMap(
+        customers: List<Map<String, Any>> = listOf(customerMap()),
+        total: Int = customers.size,
+        offset: Int = 0,
+        limit: Int = 100,
+    ) = mapOf(
+        "result_set" to mapOf("total" to total, "offset" to offset, "limit" to limit),
+        "customers" to customers,
+    )
 
     @Test
     fun `create should POST and return CustomerResponse`() {
@@ -67,7 +79,7 @@ class PagBankCustomerServiceTest {
                 CreateCustomerRequest(
                     name = "Maria Silva",
                     email = "maria@example.com",
-                    taxId = "123.456.789-00",
+                    taxId = "12345678900",
                 ),
             )
         assertThat(response.id).isEqualTo("CUST_123")
@@ -82,53 +94,43 @@ class PagBankCustomerServiceTest {
     }
 
     @Test
-    fun `update should PUT and return updated CustomerResponse`() {
+    fun `update should PUT with UpdateCustomerRequest and return CustomerResponse`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
         val response =
             service.update(
                 "CUST_123",
-                CreateCustomerRequest(
-                    name = "Maria Silva",
-                    email = "new@example.com",
-                    taxId = "123.456.789-00",
-                ),
+                UpdateCustomerRequest(name = "Maria Silva Atualizada", email = "new@example.com"),
             )
         assertThat(response.id).isEqualTo("CUST_123")
     }
 
     @Test
-    fun `list should return CustomerListResponse with default params`() {
-        mockFactory.nextBody =
-            mapper.writeValueAsBytes(
-                mapOf("customers" to listOf(customerMap())),
-            )
-        val response = service.list()
-        assertThat(response.customers).hasSize(1)
-        assertThat(response.customers[0].id).isEqualTo("CUST_123")
-    }
-
-    @Test
-    fun `list with custom params should return empty response`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("customers" to emptyList<Any>()))
-        val response = service.list(ListParams(limit = 5, offset = 10))
-        assertThat(response.customers).isEmpty()
-    }
-
-    @Test
-    fun `updateBillingInfo should PUT and return CustomerResponse`() {
+    fun `updateBillingInfo should PUT array body and return CustomerResponse`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
         val response =
             service.updateBillingInfo(
                 "CUST_123",
-                io.github.rodrigoma.pagbank.model.customer.UpdateBillingInfoRequest(
-                    billingInfo =
-                        listOf(
-                            io.github.rodrigoma.pagbank.model.customer.BillingInfo(
-                                type = io.github.rodrigoma.pagbank.model.customer.BillingInfoType.CREDIT_CARD,
-                            ),
-                        ),
-                ),
+                listOf(BillingInfo(type = BillingInfoType.CREDIT_CARD)),
             )
         assertThat(response.id).isEqualTo("CUST_123")
+    }
+
+    @Test
+    fun `list should return CustomerListResponse with result_set`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(listResponseMap(total = 133, offset = 0, limit = 100))
+        val response = service.list()
+        assertThat(response.customers).hasSize(1)
+        assertThat(response.customers[0].id).isEqualTo("CUST_123")
+        assertThat(response.resultSet.total).isEqualTo(133)
+        assertThat(response.resultSet.offset).isEqualTo(0)
+        assertThat(response.resultSet.limit).isEqualTo(100)
+    }
+
+    @Test
+    fun `list with params should pass offset limit and referenceId`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(listResponseMap(customers = emptyList(), total = 0))
+        val response = service.list(offset = 10, limit = 5, referenceId = "ref-abc")
+        assertThat(response.customers).isEmpty()
+        assertThat(response.resultSet.total).isEqualTo(0)
     }
 }

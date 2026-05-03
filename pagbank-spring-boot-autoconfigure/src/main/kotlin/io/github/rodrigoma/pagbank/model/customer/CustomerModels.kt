@@ -42,10 +42,6 @@ data class BillingInfo(
     val card: Card? = null,
 )
 
-data class UpdateBillingInfoRequest(
-    val billingInfo: List<BillingInfo>,
-)
-
 data class CustomerLink(
     val rel: String? = null,
     val href: String? = null,
@@ -64,6 +60,15 @@ data class CreateCustomerRequest(
     val billingInfo: List<BillingInfo>? = null,
 )
 
+data class UpdateCustomerRequest(
+    val name: String? = null,
+    val email: String? = null,
+    val referenceId: String? = null,
+    val birthDate: String? = null,
+    val phones: List<CustomerPhone>? = null,
+    val address: CustomerAddress? = null,
+)
+
 data class CustomerResponse(
     val id: String,
     val name: String,
@@ -79,6 +84,13 @@ data class CustomerResponse(
     val links: List<CustomerLink>? = null,
 )
 
+data class CustomerResultSet(
+    val total: Int,
+    val offset: Int,
+    val limit: Int,
+)
+
 data class CustomerListResponse(
+    val resultSet: CustomerResultSet,
     val customers: List<CustomerResponse>,
 )

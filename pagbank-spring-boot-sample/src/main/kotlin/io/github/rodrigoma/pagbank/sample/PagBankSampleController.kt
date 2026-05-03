@@ -16,8 +16,14 @@ import io.github.rodrigoma.pagbank.model.plan.PlanListResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanStatus
 import io.github.rodrigoma.pagbank.model.plan.UpdatePlanRequest
+import io.github.rodrigoma.pagbank.model.customer.BillingInfo
+import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
+import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
+import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
+import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionResponse
 import io.github.rodrigoma.pagbank.service.PagBankCouponService
+import io.github.rodrigoma.pagbank.service.PagBankCustomerService
 import io.github.rodrigoma.pagbank.service.PagBankPlanService
 import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
 import org.springframework.http.HttpStatus
@@ -37,6 +43,7 @@ class PagBankSampleController(
     private val planService: PagBankPlanService,
     private val subscriptionService: PagBankSubscriptionService,
     private val couponService: PagBankCouponService,
+    private val customerService: PagBankCustomerService,
 ) {
     // --- Plans ---
 
@@ -69,6 +76,37 @@ class PagBankSampleController(
                 description = "A demo plan created via the sample app",
             ),
         )
+
+    // --- Customers ---
+
+    @PostMapping("/customers")
+    fun createCustomer(
+        @RequestBody request: CreateCustomerRequest,
+    ): CustomerResponse = customerService.create(request)
+
+    @GetMapping("/customers/{id}")
+    fun getCustomer(
+        @PathVariable id: String,
+    ): CustomerResponse = customerService.get(id)
+
+    @PutMapping("/customers/{id}")
+    fun updateCustomer(
+        @PathVariable id: String,
+        @RequestBody request: UpdateCustomerRequest,
+    ): CustomerResponse = customerService.update(id, request)
+
+    @PutMapping("/customers/{id}/billing_info")
+    fun updateCustomerBillingInfo(
+        @PathVariable id: String,
+        @RequestBody billingInfo: List<BillingInfo>,
+    ): CustomerResponse = customerService.updateBillingInfo(id, billingInfo)
+
+    @GetMapping("/customers")
+    fun listCustomers(
+        @RequestParam(required = false) offset: Int?,
+        @RequestParam(required = false) limit: Int?,
+        @RequestParam(name = "reference_id", required = false) referenceId: String?,
+    ): CustomerListResponse = customerService.list(offset, limit, referenceId)
 
     // --- Subscriptions ---
 
