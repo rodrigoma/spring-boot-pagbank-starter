@@ -50,6 +50,12 @@ data class CouponResponse(
     val links: List<CouponLink>? = null,
 )
 
+data class CouponResultSet(
+    val total: Int,
+    val status: List<String> = emptyList(),
+)
+
 data class CouponListResponse(
+    val resultSet: CouponResultSet? = null,
     val coupons: List<CouponResponse>,
 )
