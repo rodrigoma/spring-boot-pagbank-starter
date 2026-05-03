@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.autoconfigure
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.github.rodrigoma.pagbank.http.PagBankErrorHandler
 import io.github.rodrigoma.pagbank.http.PagBankLoggingInterceptor
 import io.github.rodrigoma.pagbank.service.PagBankChargeService
@@ -18,7 +19,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.RestClient
-import com.fasterxml.jackson.annotation.JsonInclude
 import tools.jackson.databind.PropertyNamingStrategies
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.jacksonMapperBuilder
