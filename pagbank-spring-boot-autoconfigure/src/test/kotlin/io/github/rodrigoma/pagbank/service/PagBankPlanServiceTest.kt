@@ -67,6 +67,7 @@ class PagBankPlanServiceTest {
         "created_at" to "2026-01-01T00:00:00Z",
     )
 
+    @Suppress("LongParameterList")
     private fun listResponseMap(
         plans: List<Map<String, Any>> = listOf(planMap()),
         total: Int = plans.size,
