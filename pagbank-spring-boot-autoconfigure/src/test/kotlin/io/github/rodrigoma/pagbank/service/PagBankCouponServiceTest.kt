@@ -95,6 +95,13 @@ class PagBankCouponServiceTest {
     }
 
     @Test
+    fun `list with params should include query parameters`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("coupons" to listOf(couponMap())))
+        val response = service.list(offset = 0, limit = 10, referenceId = "ref-123")
+        assertThat(response.coupons).hasSize(1)
+    }
+
+    @Test
     fun `inactivate should PUT without a response body`() {
         mockFactory.nextBody = ByteArray(0)
         mockFactory.nextStatus = HttpStatus.OK

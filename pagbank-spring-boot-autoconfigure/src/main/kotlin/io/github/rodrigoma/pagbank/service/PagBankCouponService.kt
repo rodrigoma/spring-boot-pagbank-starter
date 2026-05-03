@@ -24,11 +24,20 @@ class PagBankCouponService(
             .retrieve()
             .body<CouponResponse>()!!
 
-    fun list(): CouponListResponse =
+    fun list(
+        offset: Int? = null,
+        limit: Int? = null,
+        referenceId: String? = null,
+    ): CouponListResponse =
         restClient
             .get()
-            .uri("/coupons")
-            .retrieve()
+            .uri { builder ->
+                builder.path("/coupons")
+                offset?.let { builder.queryParam("offset", it) }
+                limit?.let { builder.queryParam("limit", it) }
+                referenceId?.let { builder.queryParam("reference_id", it) }
+                builder.build()
+            }.retrieve()
             .body<CouponListResponse>()!!
 
     fun inactivate(id: String) {

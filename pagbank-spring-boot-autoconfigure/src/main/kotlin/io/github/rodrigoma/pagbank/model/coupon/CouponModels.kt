@@ -27,6 +27,7 @@ data class CreateCouponRequest(
     val name: String,
     val discount: Discount,
     val duration: Duration,
+    val status: CouponStatus? = null,
     val referenceId: String? = null,
     val description: String? = null,
     val redemptionLimit: Int? = null,
