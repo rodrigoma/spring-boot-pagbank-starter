@@ -115,4 +115,22 @@ class PagBankCustomerServiceTest {
         val response = service.list(ListParams(limit = 5, offset = 10))
         assertThat(response.customers).isEmpty()
     }
+
+    @Test
+    fun `updateBillingInfo should PUT and return CustomerResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
+        val response =
+            service.updateBillingInfo(
+                "CUST_123",
+                io.github.rodrigoma.pagbank.model.customer.UpdateBillingInfoRequest(
+                    billingInfo =
+                        listOf(
+                            io.github.rodrigoma.pagbank.model.customer.BillingInfo(
+                                type = io.github.rodrigoma.pagbank.model.customer.BillingInfoType.CREDIT_CARD,
+                            ),
+                        ),
+                ),
+            )
+        assertThat(response.id).isEqualTo("CUST_123")
+    }
 }

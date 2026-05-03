@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 // --- Notifications (GET/PUT /preferences/notifications) ---
 
-enum class FinalAction { SUSPEND, CANCEL }
-
 data class NotificationChannel(
     val enabled: Boolean,
 )
@@ -21,6 +19,8 @@ data class NotificationPreferences(
 )
 
 // --- Retries (GET/PUT /preferences/retries) ---
+
+enum class FinalAction { SUSPEND, CANCEL }
 
 data class RetryPreferences(
     val firstTry: Int,

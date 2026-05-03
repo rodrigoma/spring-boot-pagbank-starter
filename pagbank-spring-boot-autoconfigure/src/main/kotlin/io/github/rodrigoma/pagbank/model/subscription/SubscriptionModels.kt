@@ -1,5 +1,7 @@
 package io.github.rodrigoma.pagbank.model.subscription
 
+import io.github.rodrigoma.pagbank.model.plan.IntervalUnit
+
 enum class SubscriptionStatus { ACTIVE, EXPIRED, CANCELED, SUSPENDED, OVERDUE, TRIAL, PENDING, PENDING_ACTION }
 
 enum class RetryAttempt { FIRST, SECOND, THIRD }
@@ -57,7 +59,7 @@ data class SubscriptionPlan(
 
 data class SubscriptionPlanInterval(
     val length: Int,
-    val unit: String,
+    val unit: IntervalUnit,
 )
 
 data class SubscriptionCustomer(

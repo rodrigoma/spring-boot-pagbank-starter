@@ -58,11 +58,11 @@ class PagBankInvoiceServiceTest {
             "status" to "PAID",
             "occurrence" to 1,
             "plan" to mapOf("id" to "PLAN_001", "name" to "Basic"),
-            "items" to listOf(
-                mapOf("amount" to mapOf("value" to 2990, "currency" to "BRL"), "type" to "SUBSCRIPTION_AMOUNT"),
-            ),
+            "items" to
+                listOf(
+                    mapOf("amount" to mapOf("value" to 2990, "currency" to "BRL"), "type" to "SUBSCRIPTION_AMOUNT"),
+                ),
             "subscription" to mapOf("id" to "SUBS_001"),
-            "occurrence" to 1,
             "customer" to mapOf("id" to "CUST_001", "name" to "Maria Silva", "email" to "maria@example.com"),
             "created_at" to "2026-01-01T00:00:00Z",
             "updated_at" to "2026-01-01T00:00:00Z",

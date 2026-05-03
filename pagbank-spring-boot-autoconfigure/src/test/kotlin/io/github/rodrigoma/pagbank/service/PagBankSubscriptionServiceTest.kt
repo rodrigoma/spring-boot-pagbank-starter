@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.github.rodrigoma.pagbank.model.common.ListParams
 import io.github.rodrigoma.pagbank.model.subscription.CreateSubscriptionRequest
-import io.github.rodrigoma.pagbank.model.subscription.SubscriptionCustomerRef
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionCard
+import io.github.rodrigoma.pagbank.model.subscription.SubscriptionCustomerRef
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionPaymentMethod
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionPlanRef
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionStatus
@@ -75,12 +75,13 @@ class PagBankSubscriptionServiceTest {
                 CreateSubscriptionRequest(
                     plan = SubscriptionPlanRef("PLAN_001"),
                     customer = SubscriptionCustomerRef("CUST_001"),
-                    paymentMethod = listOf(
-                        SubscriptionPaymentMethod(
-                            type = "CREDIT_CARD",
-                            card = SubscriptionCard(token = "CARD_123", securityCode = "123"),
+                    paymentMethod =
+                        listOf(
+                            SubscriptionPaymentMethod(
+                                type = "CREDIT_CARD",
+                                card = SubscriptionCard(token = "CARD_123", securityCode = "123"),
+                            ),
                         ),
-                    ),
                 ),
             )
         assertThat(response.id).isEqualTo("SUBS_123")

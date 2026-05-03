@@ -32,7 +32,7 @@ data class PaymentCard(
     val holder: PaymentCardHolder? = null,
 )
 
-data class PaymentMethod(
+data class PaymentMethodDetails(
     val type: String,
     val card: PaymentCard? = null,
 )
@@ -57,7 +57,7 @@ data class PaymentResponse(
     val status: PaymentStatus,
     val invoice: PaymentInvoice? = null,
     val customer: PaymentCustomer? = null,
-    val paymentMethod: PaymentMethod? = null,
+    val paymentMethod: PaymentMethodDetails? = null,
     val provider: PaymentProvider? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,

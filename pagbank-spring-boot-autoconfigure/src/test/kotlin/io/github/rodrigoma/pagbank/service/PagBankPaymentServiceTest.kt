@@ -55,15 +55,17 @@ class PagBankPaymentServiceTest {
         mapOf(
             "id" to id,
             "status" to "APPROVED",
-            "invoice" to mapOf(
-                "id" to "INVO_001",
-                "amount" to mapOf("value" to 999, "currency" to "BRL"),
-            ),
+            "invoice" to
+                mapOf(
+                    "id" to "INVO_001",
+                    "amount" to mapOf("value" to 999, "currency" to "BRL"),
+                ),
             "customer" to mapOf("id" to "CUST_001", "name" to "Maria Silva", "email" to "maria@example.com"),
-            "payment_method" to mapOf(
-                "type" to "CREDIT_CARD",
-                "card" to mapOf("brand" to "visa", "first_digits" to "411111", "last_digits" to "1111"),
-            ),
+            "payment_method" to
+                mapOf(
+                    "type" to "CREDIT_CARD",
+                    "card" to mapOf("brand" to "visa", "first_digits" to "411111", "last_digits" to "1111"),
+                ),
             "provider" to mapOf("name" to "PAGSEGURO", "transaction_id" to "CHAR_123", "code" to "00", "message" to "Aprovado"),
             "created_at" to "2026-01-15T10:00:00Z",
             "updated_at" to "2026-01-15T10:00:00Z",

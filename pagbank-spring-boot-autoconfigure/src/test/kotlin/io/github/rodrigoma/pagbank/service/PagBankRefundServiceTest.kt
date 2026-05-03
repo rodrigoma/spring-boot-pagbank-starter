@@ -60,10 +60,11 @@ class PagBankRefundServiceTest {
             "amount" to mapOf("value" to 2990, "currency" to "BRL"),
             "status" to "SUCCESS",
             "type" to "FULL",
-            "payment" to mapOf(
-                "id" to "PAYM_001",
-                "amount" to mapOf("value" to 2990, "currency" to "BRL"),
-            ),
+            "payment" to
+                mapOf(
+                    "id" to "PAYM_001",
+                    "amount" to mapOf("value" to 2990, "currency" to "BRL"),
+                ),
             "created_at" to "2026-01-20T12:00:00Z",
         )
 

@@ -56,10 +56,11 @@ class PagBankPreferenceServiceTest {
 
     private fun notificationsMap() =
         mapOf(
-            "email" to mapOf(
-                "merchant" to mapOf("enabled" to true),
-                "customer" to mapOf("enabled" to true),
-            ),
+            "email" to
+                mapOf(
+                    "merchant" to mapOf("enabled" to true),
+                    "customer" to mapOf("enabled" to true),
+                ),
         )
 
     private fun retriesMap() =
@@ -87,14 +88,16 @@ class PagBankPreferenceServiceTest {
     @Test
     fun `updateNotifications should PUT and return NotificationPreferences`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(notificationsMap())
-        val response = service.updateNotifications(
-            NotificationPreferences(
-                email = NotificationEmail(
-                    merchant = NotificationChannel(enabled = true),
-                    customer = NotificationChannel(enabled = false),
+        val response =
+            service.updateNotifications(
+                NotificationPreferences(
+                    email =
+                        NotificationEmail(
+                            merchant = NotificationChannel(enabled = true),
+                            customer = NotificationChannel(enabled = false),
+                        ),
                 ),
-            ),
-        )
+            )
         assertThat(response.email.merchant.enabled).isTrue()
     }
 
@@ -111,9 +114,15 @@ class PagBankPreferenceServiceTest {
     @Test
     fun `updateRetries should PUT and return RetryPreferences`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(retriesMap())
-        val response = service.updateRetries(
-            RetryPreferences(firstTry = 1, secondTry = 3, thirdTry = 5, finalAction = io.github.rodrigoma.pagbank.model.preference.FinalAction.CANCEL),
-        )
+        val response =
+            service.updateRetries(
+                RetryPreferences(
+                    firstTry = 1,
+                    secondTry = 3,
+                    thirdTry = 5,
+                    finalAction = io.github.rodrigoma.pagbank.model.preference.FinalAction.CANCEL,
+                ),
+            )
         assertThat(response.firstTry).isEqualTo(1)
     }
 
@@ -121,6 +130,17 @@ class PagBankPreferenceServiceTest {
     fun `getPublicKey should return PublicKeyResponse`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(publicKeyMap())
         val response = service.getPublicKey()
+        assertThat(response.publicKey).isEqualTo("MIIBIjAN...")
+    }
+
+    @Test
+    fun `updatePublicKey should PUT and return PublicKeyResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(publicKeyMap())
+        val response =
+            service.updatePublicKey(
+                io.github.rodrigoma.pagbank.model.preference
+                    .PublicKeyResponse(publicKey = "MIIBIjAN..."),
+            )
         assertThat(response.publicKey).isEqualTo("MIIBIjAN...")
     }
 }
