@@ -21,10 +21,14 @@ import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
 import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
 import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
 import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
+import io.github.rodrigoma.pagbank.model.preference.NotificationPreferences
+import io.github.rodrigoma.pagbank.model.preference.PublicKeyResponse
+import io.github.rodrigoma.pagbank.model.preference.RetryPreferences
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionResponse
 import io.github.rodrigoma.pagbank.service.PagBankCouponService
 import io.github.rodrigoma.pagbank.service.PagBankCustomerService
 import io.github.rodrigoma.pagbank.service.PagBankPlanService
+import io.github.rodrigoma.pagbank.service.PagBankPreferenceService
 import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
@@ -44,6 +48,7 @@ class PagBankSampleController(
     private val subscriptionService: PagBankSubscriptionService,
     private val couponService: PagBankCouponService,
     private val customerService: PagBankCustomerService,
+    private val preferenceService: PagBankPreferenceService,
 ) {
     // --- Plans ---
 
@@ -107,6 +112,30 @@ class PagBankSampleController(
         @RequestParam(required = false) limit: Int?,
         @RequestParam(name = "reference_id", required = false) referenceId: String?,
     ): CustomerListResponse = customerService.list(offset, limit, referenceId)
+
+    // --- Preferences (Merchant) ---
+
+    @GetMapping("/preferences/notifications")
+    fun getNotifications(): NotificationPreferences = preferenceService.getNotifications()
+
+    @PutMapping("/preferences/notifications")
+    fun updateNotifications(
+        @RequestBody request: NotificationPreferences,
+    ): NotificationPreferences = preferenceService.updateNotifications(request)
+
+    @GetMapping("/preferences/retries")
+    fun getRetries(): RetryPreferences = preferenceService.getRetries()
+
+    @PutMapping("/preferences/retries")
+    fun updateRetries(
+        @RequestBody request: RetryPreferences,
+    ): RetryPreferences = preferenceService.updateRetries(request)
+
+    @GetMapping("/public-keys")
+    fun getPublicKey(): PublicKeyResponse = preferenceService.getPublicKey()
+
+    @PutMapping("/public-keys")
+    fun rotatePublicKey(): PublicKeyResponse = preferenceService.rotatePublicKey()
 
     // --- Subscriptions ---
 

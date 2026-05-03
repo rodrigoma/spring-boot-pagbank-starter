@@ -132,13 +132,9 @@ class PagBankPreferenceServiceTest {
     }
 
     @Test
-    fun `updatePublicKey should PUT and return PublicKeyResponse`() {
+    fun `rotatePublicKey should PUT without body and return PublicKeyResponse`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(publicKeyMap())
-        val response =
-            service.updatePublicKey(
-                io.github.rodrigoma.pagbank.model.preference
-                    .PublicKeyResponse(publicKey = "MIIBIjAN..."),
-            )
+        val response = service.rotatePublicKey()
         assertThat(response.publicKey).isEqualTo("MIIBIjAN...")
     }
 }
