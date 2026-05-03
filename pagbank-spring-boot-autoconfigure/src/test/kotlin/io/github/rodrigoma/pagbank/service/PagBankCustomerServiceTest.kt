@@ -1,7 +1,9 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.customer.BillingInfo
+import io.github.rodrigoma.pagbank.model.customer.BillingInfoRequest
 import io.github.rodrigoma.pagbank.model.customer.BillingInfoType
+import io.github.rodrigoma.pagbank.model.customer.CardHolder
+import io.github.rodrigoma.pagbank.model.customer.CardRequest
 import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
 import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
 import org.assertj.core.api.Assertions.assertThat
@@ -87,6 +89,48 @@ class PagBankCustomerServiceTest {
     }
 
     @Test
+    fun `create with encrypted card should serialize without plain fields`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
+        service.create(
+            CreateCustomerRequest(
+                name = "Maria Silva",
+                email = "maria@example.com",
+                taxId = "12345678900",
+                billingInfo = listOf(
+                    BillingInfoRequest(
+                        type = BillingInfoType.CREDIT_CARD,
+                        card = CardRequest.Encrypted(encrypted = "ENC_TOKEN_ABC"),
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `create with plain card should serialize without encrypted field`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
+        service.create(
+            CreateCustomerRequest(
+                name = "Maria Silva",
+                email = "maria@example.com",
+                taxId = "12345678900",
+                billingInfo = listOf(
+                    BillingInfoRequest(
+                        type = BillingInfoType.CREDIT_CARD,
+                        card = CardRequest.Plain(
+                            number = "4111111111111111",
+                            expYear = "2043",
+                            expMonth = "12",
+                            holder = CardHolder(name = "Maria Silva"),
+                            securityCode = "123",
+                        ),
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
     fun `get should return CustomerResponse by id`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(customerMap("CUST_456"))
         val response = service.get("CUST_456")
@@ -105,12 +149,17 @@ class PagBankCustomerServiceTest {
     }
 
     @Test
-    fun `updateBillingInfo should PUT array body and return CustomerResponse`() {
+    fun `updateBillingInfo should PUT array of BillingInfoRequest and return CustomerResponse`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
         val response =
             service.updateBillingInfo(
                 "CUST_123",
-                listOf(BillingInfo(type = BillingInfoType.CREDIT_CARD)),
+                listOf(
+                    BillingInfoRequest(
+                        type = BillingInfoType.CREDIT_CARD,
+                        card = CardRequest.Encrypted(encrypted = "ENC_TOKEN_ABC"),
+                    ),
+                ),
             )
         assertThat(response.id).isEqualTo("CUST_123")
     }

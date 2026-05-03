@@ -16,7 +16,7 @@ import io.github.rodrigoma.pagbank.model.plan.PlanListResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanStatus
 import io.github.rodrigoma.pagbank.model.plan.UpdatePlanRequest
-import io.github.rodrigoma.pagbank.model.customer.BillingInfo
+import io.github.rodrigoma.pagbank.model.customer.BillingInfoRequest
 import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
 import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
 import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
@@ -98,7 +98,7 @@ class PagBankSampleController(
     @PutMapping("/customers/{id}/billing_info")
     fun updateCustomerBillingInfo(
         @PathVariable id: String,
-        @RequestBody billingInfo: List<BillingInfo>,
+        @RequestBody billingInfo: List<BillingInfoRequest>,
     ): CustomerResponse = customerService.updateBillingInfo(id, billingInfo)
 
     @GetMapping("/customers")

@@ -1,6 +1,6 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.customer.BillingInfo
+import io.github.rodrigoma.pagbank.model.customer.BillingInfoRequest
 import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
 import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
 import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
@@ -39,7 +39,7 @@ class PagBankCustomerService(
 
     fun updateBillingInfo(
         id: String,
-        billingInfo: List<BillingInfo>,
+        billingInfo: List<BillingInfoRequest>,
     ): CustomerResponse =
         restClient
             .put()

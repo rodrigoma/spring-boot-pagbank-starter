@@ -1,5 +1,10 @@
 package io.github.rodrigoma.pagbank.model.customer
 
+import tools.jackson.core.JsonGenerator
+import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.annotation.JsonSerialize
+import tools.jackson.databind.ser.std.StdSerializer
+
 enum class BillingInfoType { CREDIT_CARD }
 
 data class CustomerPhone(
@@ -24,22 +29,56 @@ data class CardHolder(
     val name: String,
 )
 
-data class Card(
-    val encrypted: String? = null,
+@JsonSerialize(using = CardRequestSerializer::class)
+sealed class CardRequest {
+    data class Plain(
+        val number: String,
+        val expYear: String,
+        val expMonth: String,
+        val holder: CardHolder,
+        val securityCode: String,
+    ) : CardRequest()
+
+    data class Encrypted(
+        val encrypted: String,
+    ) : CardRequest()
+}
+
+class CardRequestSerializer : StdSerializer<CardRequest>(CardRequest::class.java) {
+    override fun serialize(value: CardRequest, gen: JsonGenerator, ctxt: SerializationContext) {
+        gen.writeStartObject()
+        when (value) {
+            is CardRequest.Plain -> {
+                gen.writeStringProperty("number", value.number)
+                gen.writeStringProperty("exp_year", value.expYear)
+                gen.writeStringProperty("exp_month", value.expMonth)
+                gen.writeStringProperty("security_code", value.securityCode)
+                gen.writePOJOProperty("holder", value.holder)
+            }
+            is CardRequest.Encrypted -> gen.writeStringProperty("encrypted", value.encrypted)
+        }
+        gen.writeEndObject()
+    }
+}
+
+data class CardInfo(
     val token: String? = null,
-    val number: String? = null,
-    val securityCode: String? = null,
-    val expYear: String? = null,
-    val expMonth: String? = null,
-    val holder: CardHolder? = null,
     val brand: String? = null,
     val firstDigits: String? = null,
     val lastDigits: String? = null,
+    val expYear: String? = null,
+    val expMonth: String? = null,
+    val holder: CardHolder? = null,
+)
+
+data class BillingInfoRequest(
+    val type: BillingInfoType,
+    val card: CardRequest? = null,
 )
 
 data class BillingInfo(
     val type: BillingInfoType,
-    val card: Card? = null,
+    val card: CardInfo? = null,
 )
 
 data class CustomerLink(
@@ -57,7 +96,7 @@ data class CreateCustomerRequest(
     val birthDate: String? = null,
     val phones: List<CustomerPhone>? = null,
     val address: CustomerAddress? = null,
-    val billingInfo: List<BillingInfo>? = null,
+    val billingInfo: List<BillingInfoRequest>? = null,
 )
 
 data class UpdateCustomerRequest(
