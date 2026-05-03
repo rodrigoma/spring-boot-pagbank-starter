@@ -1,8 +1,5 @@
 package io.github.rodrigoma.pagbank.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.github.rodrigoma.pagbank.model.preference.NotificationChannel
 import io.github.rodrigoma.pagbank.model.preference.NotificationEmail
 import io.github.rodrigoma.pagbank.model.preference.NotificationPreferences
@@ -13,17 +10,19 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.mock.http.client.MockClientHttpRequest
 import org.springframework.mock.http.client.MockClientHttpResponse
 import org.springframework.web.client.RestClient
+import tools.jackson.databind.PropertyNamingStrategies
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 class PagBankPreferenceServiceTest {
     private lateinit var service: PagBankPreferenceService
-    private val mapper: ObjectMapper =
-        jacksonObjectMapper().apply {
-            propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
-        }
+    private val mapper =
+        jacksonMapperBuilder()
+            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .build()
 
     private val mockFactory =
         object : org.springframework.http.client.ClientHttpRequestFactory {
@@ -47,9 +46,8 @@ class PagBankPreferenceServiceTest {
             RestClient
                 .builder()
                 .requestFactory(mockFactory)
-                .messageConverters { converters ->
-                    converters.removeIf { it is MappingJackson2HttpMessageConverter }
-                    converters.add(0, MappingJackson2HttpMessageConverter(mapper))
+                .configureMessageConverters { converters ->
+                    converters.registerDefaults().withJsonConverter(JacksonJsonHttpMessageConverter(mapper))
                 }.build()
         service = PagBankPreferenceService(restClient)
     }

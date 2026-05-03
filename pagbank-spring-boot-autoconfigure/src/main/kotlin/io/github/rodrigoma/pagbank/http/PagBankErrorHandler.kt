@@ -1,20 +1,19 @@
 package io.github.rodrigoma.pagbank.http
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.github.rodrigoma.pagbank.exception.ApiError
 import io.github.rodrigoma.pagbank.exception.PagBankException
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.client.ClientHttpResponse
+import tools.jackson.core.JacksonException
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.ObjectMapper
 
 // PagBankErrorHandler is registered on the RestClient builder via:
 //   .defaultStatusHandler({ it.isError }, handler::handle)
 // It does NOT implement ResponseErrorHandler (a RestTemplate interface).
 // The handle() method is called by RestClient for any 4xx/5xx response.
 class PagBankErrorHandler(
-    objectMapper: ObjectMapper,
+    private val objectMapper: ObjectMapper,
 ) {
     companion object {
         private const val HTTP_UNAUTHORIZED = 401
@@ -23,13 +22,6 @@ class PagBankErrorHandler(
         private const val HTTP_BAD_REQUEST = 400
         private const val HTTP_UNPROCESSABLE = 422
     }
-
-    private val objectMapper: ObjectMapper =
-        objectMapper.copy().apply {
-            if (!registeredModuleIds.contains(KotlinModule::class.java.name)) {
-                registerModule(KotlinModule.Builder().build())
-            }
-        }
 
     @Suppress("UnusedParameter")
     fun handle(
@@ -59,7 +51,7 @@ class PagBankErrorHandler(
         try {
             val errors: List<ApiError> = objectMapper.readValue(body, object : TypeReference<List<ApiError>>() {})
             PagBankException.ValidationError(errors)
-        } catch (e: JsonProcessingException) {
+        } catch (e: JacksonException) {
             PagBankException.ServerError(statusCode)
         }
 
