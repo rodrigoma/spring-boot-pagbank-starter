@@ -3,8 +3,12 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Improve code quality, consistency, test coverage enforcement, contributor experience, and dependency currency across the `spring-boot-pagbank-starter` library project.
+
 **Architecture:** All build tooling changes (Spotless, Detekt, JaCoCo) are applied via the shared convention plugin `buildSrc/src/main/kotlin/pagbank.kotlin-library.gradle.kts` so they automatically apply to both `pagbank-spring-boot-autoconfigure` and `pagbank-spring-boot-starter` modules. CI is extended to run each new check as a dedicated step. Documentation and version bumps are standalone changes applied at the root level.
-**Tech Stack:** Kotlin 1.9.22, Java 17, Spring Boot 3.4.x, Gradle 8.12 with Kotlin DSL, Spotless 6.x + Ktlint 1.x, Detekt, JaCoCo.
+
+**Tech Stack:** Kotlin 2.1.x, Java 21, Spring Boot 4.x, Gradle 8.12 with Kotlin DSL, Spotless 7.x + Ktlint 1.x, Detekt 1.23.x, JaCoCo.
+
+> **Minimum runtime requirement after this plan:** Spring Boot 4.x, Java 21. Users on Spring Boot 3.x or Java 17 must upgrade before using versions of this library built with these settings.
 
 ---
 
@@ -17,7 +21,7 @@
 
 ### Steps
 
-- [ ] **1.1** Add the Spotless plugin dependency to `buildSrc/build.gradle.kts` so it is available to all convention plugins.
+- [ ] **1.1** Add the Spotless plugin dependency to `buildSrc/build.gradle.kts`.
 
   Open `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/buildSrc/build.gradle.kts` and replace its full content with:
 
@@ -32,9 +36,9 @@
   }
 
   dependencies {
-      implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22")
-      implementation("org.jetbrains.kotlin:kotlin-allopen:1.9.22")
-      implementation("com.diffplug.spotless:spotless-plugin-gradle:6.25.0")
+      implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20")
+      implementation("org.jetbrains.kotlin:kotlin-allopen:2.1.20")
+      implementation("com.diffplug.spotless:spotless-plugin-gradle:7.0.2")
   }
   ```
 
@@ -50,12 +54,9 @@
   }
 
   kotlin {
-      jvmToolchain(17)
-  }
-
-  tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-      kotlinOptions {
-          freeCompilerArgs = listOf("-Xjsr305=strict")
+      jvmToolchain(21)
+      compilerOptions {
+          freeCompilerArgs.add("-Xjsr305=strict")
       }
   }
 
@@ -82,19 +83,19 @@
 
   spotless {
       kotlin {
-          ktlint("1.2.1")
+          ktlint("1.5.0")
           target("src/**/*.kt")
       }
       kotlinGradle {
-          ktlint("1.2.1")
+          ktlint("1.5.0")
           target("*.gradle.kts")
       }
   }
   ```
 
-  Note: The `implementation(platform(...))` line still references `3.2.0` here — Task 5 will bump it. Keep it as-is for now so each task remains independently applicable.
+  > Note: The BOM still references `3.2.0` here — Task 5 will bump it to Spring Boot 4. Keep it as-is so each task remains independently applicable.
 
-- [ ] **1.3** Add `spotlessCheck` and `spotlessApply` steps to CI.
+- [ ] **1.3** Update CI to use Java 21 and add `spotlessCheck`.
 
   Open `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/.github/workflows/ci.yml` and replace its full content with:
 
@@ -114,10 +115,10 @@
       steps:
         - uses: actions/checkout@v4
 
-        - name: Set up Java 17
+        - name: Set up Java 21
           uses: actions/setup-java@v4
           with:
-            java-version: '17'
+            java-version: '21'
             distribution: 'temurin'
 
         - name: Setup Gradle
@@ -152,7 +153,7 @@
   git add buildSrc/build.gradle.kts \
            buildSrc/src/main/kotlin/pagbank.kotlin-library.gradle.kts \
            .github/workflows/ci.yml
-  git commit -m "feat: add Spotless + Ktlint code formatting enforcement"
+  git commit -m "feat: add Spotless + Ktlint formatting, bump Kotlin to 2.1.20 and Java to 21"
   ```
 
 ---
@@ -173,18 +174,16 @@
 
   ```kotlin
   dependencies {
-      implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22")
-      implementation("org.jetbrains.kotlin:kotlin-allopen:1.9.22")
-      implementation("com.diffplug.spotless:spotless-plugin-gradle:6.25.0")
-      implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.6")
+      implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20")
+      implementation("org.jetbrains.kotlin:kotlin-allopen:2.1.20")
+      implementation("com.diffplug.spotless:spotless-plugin-gradle:7.0.2")
+      implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.8")
   }
   ```
 
 - [ ] **2.2** Apply and configure Detekt in the convention plugin.
 
-  In `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/buildSrc/src/main/kotlin/pagbank.kotlin-library.gradle.kts`, add `id("io.gitlab.arturbosch.detekt")` to the `plugins` block and append the following configuration block at the end of the file:
-
-  The full file content after Tasks 1 and 2 combined:
+  Full file content of `pagbank.kotlin-library.gradle.kts` after Tasks 1 and 2 combined:
 
   ```kotlin
   plugins {
@@ -195,12 +194,9 @@
   }
 
   kotlin {
-      jvmToolchain(17)
-  }
-
-  tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-      kotlinOptions {
-          freeCompilerArgs = listOf("-Xjsr305=strict")
+      jvmToolchain(21)
+      compilerOptions {
+          freeCompilerArgs.add("-Xjsr305=strict")
       }
   }
 
@@ -227,11 +223,11 @@
 
   spotless {
       kotlin {
-          ktlint("1.2.1")
+          ktlint("1.5.0")
           target("src/**/*.kt")
       }
       kotlinGradle {
-          ktlint("1.2.1")
+          ktlint("1.5.0")
           target("*.gradle.kts")
       }
   }
@@ -245,7 +241,7 @@
 
 - [ ] **2.3** Create the Detekt configuration file at the repo root.
 
-  Create `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/detekt.yml` with the following content (enables default rules, adjusts a few commonly noisy ones for library code):
+  Create `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/detekt.yml`:
 
   ```yaml
   build:
@@ -296,9 +292,9 @@
         - 'kotlinx.coroutines.*'
   ```
 
-- [ ] **2.4** Add the `detekt` step to CI (append after `spotlessCheck` step).
+- [ ] **2.4** Add the `detekt` step to CI.
 
-  Full updated `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/.github/workflows/ci.yml`:
+  Full updated `.github/workflows/ci.yml`:
 
   ```yaml
   name: CI
@@ -316,10 +312,10 @@
       steps:
         - uses: actions/checkout@v4
 
-        - name: Set up Java 17
+        - name: Set up Java 21
           uses: actions/setup-java@v4
           with:
-            java-version: '17'
+            java-version: '21'
             distribution: 'temurin'
 
         - name: Setup Gradle
@@ -342,7 +338,7 @@
   ./gradlew detekt
   ```
 
-  Expected output ends with `BUILD SUCCESSFUL`. If any issues are reported, fix them in the offending source files before committing.
+  Expected: `BUILD SUCCESSFUL`. If issues are reported, fix them in the offending source files before committing.
 
 - [ ] **2.6** Commit.
 
@@ -365,9 +361,9 @@
 
 ### Steps
 
-- [ ] **3.1** Add the `jacoco` plugin and configure report and verification tasks in the convention plugin.
+- [ ] **3.1** Add the `jacoco` plugin and configure report and verification tasks.
 
-  The full file content of `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/buildSrc/src/main/kotlin/pagbank.kotlin-library.gradle.kts` after Tasks 1, 2, and 3 combined:
+  Full file content of `pagbank.kotlin-library.gradle.kts` after Tasks 1, 2, and 3 combined:
 
   ```kotlin
   plugins {
@@ -379,12 +375,9 @@
   }
 
   kotlin {
-      jvmToolchain(17)
-  }
-
-  tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-      kotlinOptions {
-          freeCompilerArgs = listOf("-Xjsr305=strict")
+      jvmToolchain(21)
+      compilerOptions {
+          freeCompilerArgs.add("-Xjsr305=strict")
       }
   }
 
@@ -412,11 +405,11 @@
 
   spotless {
       kotlin {
-          ktlint("1.2.1")
+          ktlint("1.5.0")
           target("src/**/*.kt")
       }
       kotlinGradle {
-          ktlint("1.2.1")
+          ktlint("1.5.0")
           target("*.gradle.kts")
       }
   }
@@ -454,11 +447,11 @@
   }
   ```
 
-  Note: `jacoco` is a core Gradle plugin and requires no additional `buildSrc` dependency entry. The `jacocoTestReport` HTML output will appear at `<module>/build/reports/jacoco/test/html/index.html` and the XML at `<module>/build/reports/jacoco/test/jacocoTestReport.xml`.
+  > `jacoco` is a core Gradle plugin — no additional `buildSrc` dependency needed.
 
 - [ ] **3.2** Add the coverage verification step to CI.
 
-  Full updated `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/.github/workflows/ci.yml`:
+  Full updated `.github/workflows/ci.yml`:
 
   ```yaml
   name: CI
@@ -476,10 +469,10 @@
       steps:
         - uses: actions/checkout@v4
 
-        - name: Set up Java 17
+        - name: Set up Java 21
           uses: actions/setup-java@v4
           with:
-            java-version: '17'
+            java-version: '21'
             distribution: 'temurin'
 
         - name: Setup Gradle
@@ -498,8 +491,6 @@
           run: ./gradlew jacocoTestCoverageVerification
   ```
 
-  Note: `jacocoTestCoverageVerification` is listed after `build` (which runs `test`) to benefit from Gradle's build cache — the `test` task results are already cached and JaCoCo exec data is already present.
-
 - [ ] **3.3** Verify JaCoCo tasks run cleanly locally.
 
   ```bash
@@ -507,11 +498,11 @@
   ./gradlew test jacocoTestReport jacocoTestCoverageVerification
   ```
 
-  Expected: `BUILD SUCCESSFUL`. HTML reports are at:
+  Expected: `BUILD SUCCESSFUL`. HTML reports at:
   - `pagbank-spring-boot-autoconfigure/build/reports/jacoco/test/html/index.html`
   - `pagbank-spring-boot-starter/build/reports/jacoco/test/html/index.html`
 
-  If `jacocoTestCoverageVerification` fails because instruction coverage is below 80%, investigate which classes are under-tested and add missing unit tests before committing.
+  If `jacocoTestCoverageVerification` fails (instruction coverage below 80%), add missing unit tests before committing.
 
 - [ ] **3.4** Commit.
 
@@ -535,7 +526,7 @@
 
   Create `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/CONTRIBUTING.md` with the following exact content:
 
-  ```markdown
+  ````markdown
   # Contributing to spring-boot-pagbank-starter
 
   Thank you for your interest in contributing! This document explains how to get started,
@@ -547,7 +538,7 @@
 
   | Tool | Minimum version |
   |------|----------------|
-  | JDK  | 17 (Temurin recommended) |
+  | JDK  | 21 (Temurin recommended) |
   | Git  | 2.40+ |
 
   Gradle is provided via the Gradle Wrapper (`./gradlew`); you do not need to install it separately.
@@ -629,7 +620,7 @@
   feat: add support for PagBank subscription pause API
   fix: handle 401 response without rethrowing raw exception
   docs: add usage example for PagBankSubscriptionService
-  chore: bump Spring Boot to 3.4.3
+  chore: bump Spring Boot to 4.0.0
   ```
 
   Keep the summary line under 72 characters. Add a body when the change needs explanation beyond the summary.
@@ -664,7 +655,7 @@
   - The full stack trace or error message if applicable.
 
   For security vulnerabilities, do **not** open a public issue. Contact the maintainer directly.
-  ```
+  ````
 
 - [ ] **4.2** Commit.
 
@@ -676,19 +667,20 @@
 
 ---
 
-## Task 5: Spring Boot Version Bump (3.2.0 → 3.4.3)
+## Task 5: Dependency bump — Spring Boot 4, Kotlin 2.1, Java 21
 
 **Files:**
 - Modify: `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/buildSrc/src/main/kotlin/pagbank.kotlin-library.gradle.kts`
 - Modify: `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/pagbank-spring-boot-autoconfigure/build.gradle.kts`
+- Modify: `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/README.md`
 
-Note: `buildSrc/build.gradle.kts` and `pagbank.publish.gradle.kts` do not reference the Spring Boot version and require no changes.
+> **Before starting this task:** check the latest Spring Boot 4 GA version at https://spring.io/projects/spring-boot and substitute it for `4.0.x` below. At time of writing the plan, `4.0.0` is used as the placeholder.
 
 ### Steps
 
-- [ ] **5.1** Update the BOM version in the convention plugin.
+- [ ] **5.1** Update the Spring Boot BOM in the convention plugin.
 
-  In `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/buildSrc/src/main/kotlin/pagbank.kotlin-library.gradle.kts`, change:
+  In `pagbank.kotlin-library.gradle.kts`, change:
 
   ```kotlin
   implementation(platform("org.springframework.boot:spring-boot-dependencies:3.2.0"))
@@ -697,12 +689,12 @@ Note: `buildSrc/build.gradle.kts` and `pagbank.publish.gradle.kts` do not refere
   to:
 
   ```kotlin
-  implementation(platform("org.springframework.boot:spring-boot-dependencies:3.4.3"))
+  implementation(platform("org.springframework.boot:spring-boot-dependencies:4.0.x"))
   ```
 
-- [ ] **5.2** Update the BOM version for the `kapt` configuration in the autoconfigure module.
+- [ ] **5.2** Update the BOM for the `kapt` configuration in the autoconfigure module.
 
-  In `/Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter/pagbank-spring-boot-autoconfigure/build.gradle.kts`, change:
+  In `pagbank-spring-boot-autoconfigure/build.gradle.kts`, change:
 
   ```kotlin
   kapt(platform("org.springframework.boot:spring-boot-dependencies:3.2.0"))
@@ -711,22 +703,40 @@ Note: `buildSrc/build.gradle.kts` and `pagbank.publish.gradle.kts` do not refere
   to:
 
   ```kotlin
-  kapt(platform("org.springframework.boot:spring-boot-dependencies:3.4.3"))
+  kapt(platform("org.springframework.boot:spring-boot-dependencies:4.0.x"))
   ```
 
-- [ ] **5.3** Verify the build compiles and all tests pass.
+- [ ] **5.3** Update the compatibility table in `README.md`.
+
+  Find the compatibility section (or add one after the badges) and set:
+
+  ```markdown
+  ## Compatibility
+
+  | Library version | Spring Boot | Java | Kotlin |
+  |---|---|---|---|
+  | 1.x | 4.0+ | 21+ | 2.1+ |
+  ```
+
+- [ ] **5.4** Verify the build compiles and all tests pass.
 
   ```bash
   cd /Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter
   ./gradlew build
   ```
 
-  Expected: `BUILD SUCCESSFUL` with no test failures. If any tests fail due to API changes in Spring Boot 3.4.x (e.g., changed bean wiring, renamed test utilities), fix them before committing. Consult the [Spring Boot 3.4 release notes](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.4-Release-Notes) for breaking changes. Common migration points from 3.2 to 3.4 include:
-  - `MockMvcBuilderCustomizer` and `MockMvcAutoConfiguration` may have changed.
-  - Some deprecated `@AutoConfigureMockMvc` behaviour may have been removed.
-  - Properties migrated under new namespaces (use `spring-boot-properties-migrator` if needed).
+  Expected: `BUILD SUCCESSFUL` with no test failures.
 
-- [ ] **5.4** Run the full quality gate to confirm nothing was broken.
+  **Common Spring Boot 4 / Spring Framework 7 migration points to watch for:**
+  - `RestClient` API: verify no constructor or builder method signatures changed.
+  - `HealthIndicator`: interface is in `org.springframework.boot.actuate.health` — unchanged, but verify import paths.
+  - Auto-configuration: `AutoConfiguration.imports` format is the same; `spring.factories` support was removed in Boot 3.x already.
+  - Jakarta EE 11: already on `jakarta.*` since Boot 3 — no change needed.
+  - `@SpringBootTest` and test slice annotations: check for any deprecation removals.
+
+  If any API is missing or renamed, fix the source file before committing.
+
+- [ ] **5.5** Run the full quality gate.
 
   ```bash
   cd /Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter
@@ -735,13 +745,14 @@ Note: `buildSrc/build.gradle.kts` and `pagbank.publish.gradle.kts` do not refere
 
   Expected: `BUILD SUCCESSFUL`.
 
-- [ ] **5.5** Commit.
+- [ ] **5.6** Commit.
 
   ```bash
   cd /Users/montanha/workspace/org_rodrigoma/spring-boot-pagbank-starter
   git add buildSrc/src/main/kotlin/pagbank.kotlin-library.gradle.kts \
-           pagbank-spring-boot-autoconfigure/build.gradle.kts
-  git commit -m "chore: bump Spring Boot from 3.2.0 to 3.4.3"
+           pagbank-spring-boot-autoconfigure/build.gradle.kts \
+           README.md
+  git commit -m "chore: bump to Spring Boot 4, Kotlin 2.1, Java 21 — requires Boot 4+ at runtime"
   ```
 
 ---
