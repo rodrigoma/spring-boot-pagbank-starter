@@ -6,15 +6,23 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.client.ClientHttpResponse
 import tools.jackson.core.JacksonException
 import tools.jackson.core.type.TypeReference
-import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
 
 // PagBankErrorHandler is registered on the RestClient builder via:
 //   .defaultStatusHandler({ it.isError }, handler::handle)
 // It does NOT implement ResponseErrorHandler (a RestTemplate interface).
 // The handle() method is called by RestClient for any 4xx/5xx response.
 class PagBankErrorHandler(
-    private val objectMapper: ObjectMapper,
+    objectMapper: JsonMapper,
 ) {
+    private val objectMapper: JsonMapper =
+        if (objectMapper.registeredModules().none { it is KotlinModule }) {
+            objectMapper.rebuild().addModule(KotlinModule.Builder().build()).build()
+        } else {
+            objectMapper
+        }
+
     companion object {
         private const val HTTP_UNAUTHORIZED = 401
         private const val HTTP_FORBIDDEN = 403
