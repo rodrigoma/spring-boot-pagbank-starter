@@ -80,7 +80,7 @@ class PagBankChargeServiceTest {
     }
 
     @Test
-    fun `list should forward limit and offset params`() {
+    fun `list with custom params should return empty response`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("charges" to emptyList<Any>()))
         val response = service.list(ListParams(limit = 50, offset = 100))
         assertThat(response.charges).isEmpty()

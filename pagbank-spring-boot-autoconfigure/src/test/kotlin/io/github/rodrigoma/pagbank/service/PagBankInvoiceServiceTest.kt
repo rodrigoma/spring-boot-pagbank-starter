@@ -89,7 +89,7 @@ class PagBankInvoiceServiceTest {
     }
 
     @Test
-    fun `listBySubscription should forward limit and offset params`() {
+    fun `listBySubscription with custom params should return empty response`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("invoices" to emptyList<Any>()))
         val response = service.listBySubscription("SUBS_001", ListParams(limit = 3, offset = 6))
         assertThat(response.invoices).isEmpty()

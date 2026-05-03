@@ -55,6 +55,10 @@ detekt {
 
 tasks.named<JacocoReport>("jacocoTestReport") {
     dependsOn(tasks.named("test"))
+    // Exclude model data classes — no logic to measure, keeps report consistent with the coverage gate
+    classDirectories.setFrom(
+        classDirectories.files.map { fileTree(it) { exclude("**/model/**") } },
+    )
     reports {
         html.required.set(true)
         xml.required.set(true)
