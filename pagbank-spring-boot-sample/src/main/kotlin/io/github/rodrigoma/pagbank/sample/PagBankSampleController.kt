@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.sample
 
+import io.github.rodrigoma.pagbank.model.coupon.CouponListResponse
 import io.github.rodrigoma.pagbank.model.coupon.CouponResponse
 import io.github.rodrigoma.pagbank.model.coupon.CreateCouponRequest
 import io.github.rodrigoma.pagbank.model.coupon.Discount
@@ -17,10 +18,10 @@ import io.github.rodrigoma.pagbank.service.PagBankCouponService
 import io.github.rodrigoma.pagbank.service.PagBankPlanService
 import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -79,16 +80,23 @@ class PagBankSampleController(
             ),
         )
 
+    @GetMapping("/coupons")
+    fun listCoupons(): CouponListResponse = couponService.list()
+
     @GetMapping("/coupons/{id}")
     fun getCoupon(
         @PathVariable id: String,
     ): CouponResponse = couponService.get(id)
 
-    @DeleteMapping("/coupons/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun deleteCoupon(
+    @PutMapping("/coupons/{id}/inactivate")
+    fun inactivateCoupon(
         @PathVariable id: String,
-    ) = couponService.delete(id)
+    ): CouponResponse = couponService.inactivate(id)
+
+    @PutMapping("/coupons/{id}/activate")
+    fun activateCoupon(
+        @PathVariable id: String,
+    ): CouponResponse = couponService.activate(id)
 
     @PostMapping("/subscriptions/{subscriptionId}/coupons/{couponId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

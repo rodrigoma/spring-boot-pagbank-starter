@@ -87,11 +87,27 @@ class PagBankCouponServiceTest {
     }
 
     @Test
-    fun `delete should DELETE without a response body`() {
-        mockFactory.nextBody = ByteArray(0)
-        mockFactory.nextStatus = HttpStatus.NO_CONTENT
-        // No exception = success
-        service.delete("COUP_123")
+    fun `list should GET and return CouponListResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("coupons" to listOf(couponMap())))
+        val response = service.list()
+        assertThat(response.coupons).hasSize(1)
+        assertThat(response.coupons[0].id).isEqualTo("COUP_123")
+    }
+
+    @Test
+    fun `inactivate should PUT and return updated CouponResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(couponMap().plus("status" to "INACTIVE"))
+        val response = service.inactivate("COUP_123")
+        assertThat(response.id).isEqualTo("COUP_123")
+        assertThat(response.status).isEqualTo(io.github.rodrigoma.pagbank.model.coupon.CouponStatus.INACTIVE)
+    }
+
+    @Test
+    fun `activate should PUT and return updated CouponResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(couponMap())
+        val response = service.activate("COUP_123")
+        assertThat(response.id).isEqualTo("COUP_123")
+        assertThat(response.status).isEqualTo(io.github.rodrigoma.pagbank.model.coupon.CouponStatus.ACTIVE)
     }
 
     @Test

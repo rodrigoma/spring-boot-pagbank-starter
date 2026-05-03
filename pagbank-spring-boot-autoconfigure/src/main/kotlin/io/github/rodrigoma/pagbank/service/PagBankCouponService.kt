@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.service
 
+import io.github.rodrigoma.pagbank.model.coupon.CouponListResponse
 import io.github.rodrigoma.pagbank.model.coupon.CouponResponse
 import io.github.rodrigoma.pagbank.model.coupon.CreateCouponRequest
 import org.springframework.web.client.RestClient
@@ -23,13 +24,26 @@ class PagBankCouponService(
             .retrieve()
             .body<CouponResponse>()!!
 
-    fun delete(id: String) {
+    fun list(): CouponListResponse =
         restClient
-            .delete()
-            .uri("/coupons/{id}", id)
+            .get()
+            .uri("/coupons")
             .retrieve()
-            .toBodilessEntity()
-    }
+            .body<CouponListResponse>()!!
+
+    fun inactivate(id: String): CouponResponse =
+        restClient
+            .put()
+            .uri("/coupons/{id}/inactivate", id)
+            .retrieve()
+            .body<CouponResponse>()!!
+
+    fun activate(id: String): CouponResponse =
+        restClient
+            .put()
+            .uri("/coupons/{id}/activate", id)
+            .retrieve()
+            .body<CouponResponse>()!!
 
     fun applyToSubscription(
         subscriptionId: String,
