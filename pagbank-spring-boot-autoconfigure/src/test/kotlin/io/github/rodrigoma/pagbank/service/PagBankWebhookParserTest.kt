@@ -15,7 +15,8 @@ class PagBankWebhookParserTest {
     private val propertiesWithoutSecret = PagBankProperties(token = "TOKEN")
     private val parser = PagBankWebhookParser(propertiesWithSecret)
 
-    private val rawBody = """{"env":"sandbox","event":"subscription.recurrence","resource":{},"links":[]}"""
+    private val rawBody =
+        """{"env":"sandbox","event":"subscription.recurrence","resource":{},"date":"2026-03-28T10:05:00Z"}"""
 
     @Test
     fun `parse should deserialize event type`() {
@@ -41,5 +42,14 @@ class PagBankWebhookParserTest {
         assertThatThrownBy { parserNoSecret.verify(rawBody, "sig") }
             .isInstanceOf(IllegalStateException::class.java)
             .hasMessageContaining("pagbank.webhook-secret")
+    }
+
+    @Test
+    fun `parse should succeed when payload contains unknown fields like links`() {
+        val bodyWithLinks =
+            """{"env":"sandbox","event":"subscription.recurrence","resource":{}""" +
+                ""","date":"2026-03-28T10:05:00Z","links":[{"rel":"self","href":"https://example.com"}]}"""
+        val payload = parser.parse(bodyWithLinks)
+        assertThat(payload.event).isEqualTo(WebhookEventType.SUBSCRIPTION_RECURRENCE)
     }
 }

@@ -2,6 +2,10 @@ package io.github.rodrigoma.pagbank.model.plan
 
 enum class PlanStatus { ACTIVE, INACTIVE }
 
+enum class IntervalUnit { DAY, MONTH, YEAR }
+
+enum class PaymentMethod { CREDIT_CARD, BOLETO }
+
 data class Money(
     val value: Int,
     val currency: String = "BRL",
@@ -9,8 +13,8 @@ data class Money(
 
 data class PlanInterval(
     val length: Int,
-    val unit: String,
-) // unit: "month", "day", "year"
+    val unit: IntervalUnit,
+)
 
 data class PlanTrial(
     val days: Int,
@@ -18,11 +22,18 @@ data class PlanTrial(
     val holdSetupFee: Boolean = false,
 )
 
+data class PlanLink(
+    val rel: String,
+    val href: String,
+    val media: String? = null,
+    val type: String? = null,
+)
+
 data class CreatePlanRequest(
     val name: String,
     val amount: Money,
     val interval: PlanInterval,
-    val paymentMethod: List<String> = listOf("CARD"),
+    val paymentMethod: List<PaymentMethod> = listOf(PaymentMethod.CREDIT_CARD),
     val referenceId: String? = null,
     val description: String? = null,
     val setupFee: Int? = null,
@@ -36,10 +47,16 @@ data class PlanResponse(
     val amount: Money,
     val interval: PlanInterval,
     val status: PlanStatus,
-    val referenceId: String?,
-    val trial: PlanTrial?,
-    val createdAt: String?,
-    val updatedAt: String?,
+    val paymentMethod: List<PaymentMethod>?,
+    val referenceId: String? = null,
+    val description: String? = null,
+    val setupFee: Int? = null,
+    val limitSubscriptions: Int? = null,
+    val trial: PlanTrial? = null,
+    val editable: Boolean? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null,
+    val links: List<PlanLink>? = null,
 )
 
 data class PlanListResponse(

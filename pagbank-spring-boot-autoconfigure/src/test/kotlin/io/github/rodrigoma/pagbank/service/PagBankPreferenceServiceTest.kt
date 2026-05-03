@@ -3,7 +3,10 @@ package io.github.rodrigoma.pagbank.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.github.rodrigoma.pagbank.model.preference.UpdatePreferenceRequest
+import io.github.rodrigoma.pagbank.model.preference.NotificationChannel
+import io.github.rodrigoma.pagbank.model.preference.NotificationEmail
+import io.github.rodrigoma.pagbank.model.preference.NotificationPreferences
+import io.github.rodrigoma.pagbank.model.preference.RetryPreferences
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -51,47 +54,93 @@ class PagBankPreferenceServiceTest {
         service = PagBankPreferenceService(restClient)
     }
 
-    private fun preferenceMap(
-        retryDays: Int = 3,
-        email: String? = "ops@example.com",
-    ) = mapOf(
-        "retry_days" to retryDays,
-        "notification_email" to email,
-    )
+    private fun notificationsMap() =
+        mapOf(
+            "email" to
+                mapOf(
+                    "merchant" to mapOf("enabled" to true),
+                    "customer" to mapOf("enabled" to true),
+                ),
+        )
+
+    private fun retriesMap() =
+        mapOf(
+            "first_try" to 1,
+            "second_try" to 3,
+            "third_try" to 5,
+            "finally" to "CANCEL",
+        )
+
+    private fun publicKeyMap() =
+        mapOf(
+            "public_key" to "MIIBIjAN...",
+            "links" to emptyList<Any>(),
+        )
 
     @Test
-    fun `get should return PreferenceResponse`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(preferenceMap())
-        val response = service.get()
-        assertThat(response.retryDays).isEqualTo(3)
-        assertThat(response.notificationEmail).isEqualTo("ops@example.com")
+    fun `getNotifications should return NotificationPreferences`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(notificationsMap())
+        val response = service.getNotifications()
+        assertThat(response.email.merchant.enabled).isTrue()
+        assertThat(response.email.customer.enabled).isTrue()
     }
 
     @Test
-    fun `get should return PreferenceResponse with null notificationEmail`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(preferenceMap(retryDays = 5, email = null))
-        val response = service.get()
-        assertThat(response.retryDays).isEqualTo(5)
-        assertThat(response.notificationEmail).isNull()
-    }
-
-    @Test
-    fun `update should PUT and return updated PreferenceResponse`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(preferenceMap(retryDays = 7))
-        val response = service.update(UpdatePreferenceRequest(retryDays = 7))
-        assertThat(response.retryDays).isEqualTo(7)
-    }
-
-    @Test
-    fun `update should PUT with notificationEmail and return updated PreferenceResponse`() {
-        mockFactory.nextBody =
-            mapper.writeValueAsBytes(
-                preferenceMap(retryDays = 3, email = "new@example.com"),
-            )
+    fun `updateNotifications should PUT and return NotificationPreferences`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(notificationsMap())
         val response =
-            service.update(
-                UpdatePreferenceRequest(notificationEmail = "new@example.com"),
+            service.updateNotifications(
+                NotificationPreferences(
+                    email =
+                        NotificationEmail(
+                            merchant = NotificationChannel(enabled = true),
+                            customer = NotificationChannel(enabled = false),
+                        ),
+                ),
             )
-        assertThat(response.notificationEmail).isEqualTo("new@example.com")
+        assertThat(response.email.merchant.enabled).isTrue()
+    }
+
+    @Test
+    fun `getRetries should return RetryPreferences`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(retriesMap())
+        val response = service.getRetries()
+        assertThat(response.firstTry).isEqualTo(1)
+        assertThat(response.secondTry).isEqualTo(3)
+        assertThat(response.thirdTry).isEqualTo(5)
+        assertThat(response.finalAction).isEqualTo(io.github.rodrigoma.pagbank.model.preference.FinalAction.CANCEL)
+    }
+
+    @Test
+    fun `updateRetries should PUT and return RetryPreferences`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(retriesMap())
+        val response =
+            service.updateRetries(
+                RetryPreferences(
+                    firstTry = 1,
+                    secondTry = 3,
+                    thirdTry = 5,
+                    finalAction = io.github.rodrigoma.pagbank.model.preference.FinalAction.CANCEL,
+                ),
+            )
+        assertThat(response.firstTry).isEqualTo(1)
+    }
+
+    @Test
+    fun `getPublicKey should return PublicKeyResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(publicKeyMap())
+        val response = service.getPublicKey()
+        assertThat(response.publicKey).isEqualTo("MIIBIjAN...")
+    }
+
+    @Test
+    fun `updatePublicKey should PUT and return PublicKeyResponse`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(publicKeyMap())
+        val response =
+            service.updatePublicKey(
+                io.github.rodrigoma.pagbank.model.preference
+                    .PublicKeyResponse(publicKey = "MIIBIjAN..."),
+            )
+        assertThat(response.publicKey).isEqualTo("MIIBIjAN...")
     }
 }
