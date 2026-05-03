@@ -1,6 +1,7 @@
 package io.github.rodrigoma.pagbank.sample
 
 import io.github.rodrigoma.pagbank.model.plan.CreatePlanRequest
+import io.github.rodrigoma.pagbank.model.plan.IntervalUnit
 import io.github.rodrigoma.pagbank.model.plan.Money
 import io.github.rodrigoma.pagbank.model.plan.PlanInterval
 import io.github.rodrigoma.pagbank.model.plan.PlanListResponse
@@ -34,7 +35,7 @@ class PagBankSampleController(
             CreatePlanRequest(
                 name = "Demo Monthly Plan",
                 amount = Money(value = 1990),
-                interval = PlanInterval(length = 1, unit = "month"),
+                interval = PlanInterval(length = 1, unit = IntervalUnit.MONTH),
                 description = "A demo plan created via the sample app",
             ),
         )

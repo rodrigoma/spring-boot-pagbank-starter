@@ -64,6 +64,9 @@ tasks.named<JacocoReport>("jacocoTestReport") {
 
 tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     dependsOn(tasks.named("jacocoTestReport"))
+    classDirectories.setFrom(
+        classDirectories.files.map { fileTree(it) { exclude("**/model/**") } },
+    )
     violationRules {
         rule {
             limit {

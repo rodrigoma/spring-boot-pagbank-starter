@@ -66,7 +66,8 @@ class PagBankPaymentServiceTest {
                     "type" to "CREDIT_CARD",
                     "card" to mapOf("brand" to "visa", "first_digits" to "411111", "last_digits" to "1111"),
                 ),
-            "provider" to mapOf("name" to "PAGSEGURO", "transaction_id" to "CHAR_123", "code" to "00", "message" to "Aprovado"),
+            "provider" to
+                mapOf("name" to "PAGSEGURO", "transaction_id" to "CHAR_123", "code" to "00", "message" to "Aprovado"),
             "created_at" to "2026-01-15T10:00:00Z",
             "updated_at" to "2026-01-15T10:00:00Z",
         )
