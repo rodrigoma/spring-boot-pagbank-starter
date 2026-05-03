@@ -96,12 +96,13 @@ class PagBankCustomerServiceTest {
                 name = "Maria Silva",
                 email = "maria@example.com",
                 taxId = "12345678900",
-                billingInfo = listOf(
-                    BillingInfoRequest(
-                        type = BillingInfoType.CREDIT_CARD,
-                        card = CardRequest.Encrypted(encrypted = "ENC_TOKEN_ABC"),
+                billingInfo =
+                    listOf(
+                        BillingInfoRequest(
+                            type = BillingInfoType.CREDIT_CARD,
+                            card = CardRequest.Encrypted(encrypted = "ENC_TOKEN_ABC"),
+                        ),
                     ),
-                ),
             ),
         )
     }
@@ -114,18 +115,20 @@ class PagBankCustomerServiceTest {
                 name = "Maria Silva",
                 email = "maria@example.com",
                 taxId = "12345678900",
-                billingInfo = listOf(
-                    BillingInfoRequest(
-                        type = BillingInfoType.CREDIT_CARD,
-                        card = CardRequest.Plain(
-                            number = "4111111111111111",
-                            expYear = "2043",
-                            expMonth = "12",
-                            holder = CardHolder(name = "Maria Silva"),
-                            securityCode = "123",
+                billingInfo =
+                    listOf(
+                        BillingInfoRequest(
+                            type = BillingInfoType.CREDIT_CARD,
+                            card =
+                                CardRequest.Plain(
+                                    number = "4111111111111111",
+                                    expYear = "2043",
+                                    expMonth = "12",
+                                    holder = CardHolder(name = "Maria Silva"),
+                                    securityCode = "123",
+                                ),
                         ),
                     ),
-                ),
             ),
         )
     }

@@ -136,5 +136,4 @@ class PagBankCouponServiceTest {
         mockFactory.nextStatus = HttpStatus.OK
         service.activate("COUP_123")
     }
-
 }

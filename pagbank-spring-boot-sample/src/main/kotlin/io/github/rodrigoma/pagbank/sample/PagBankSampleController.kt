@@ -2,12 +2,17 @@ package io.github.rodrigoma.pagbank.sample
 
 import io.github.rodrigoma.pagbank.model.coupon.CouponListResponse
 import io.github.rodrigoma.pagbank.model.coupon.CouponResponse
-import io.github.rodrigoma.pagbank.model.coupon.CreateCouponRequest
 import io.github.rodrigoma.pagbank.model.coupon.CouponStatus
+import io.github.rodrigoma.pagbank.model.coupon.CreateCouponRequest
 import io.github.rodrigoma.pagbank.model.coupon.Discount
 import io.github.rodrigoma.pagbank.model.coupon.DiscountType
 import io.github.rodrigoma.pagbank.model.coupon.Duration
 import io.github.rodrigoma.pagbank.model.coupon.DurationType
+import io.github.rodrigoma.pagbank.model.customer.BillingInfoRequest
+import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
+import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
+import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
+import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
 import io.github.rodrigoma.pagbank.model.plan.CreatePlanRequest
 import io.github.rodrigoma.pagbank.model.plan.IntervalUnit
 import io.github.rodrigoma.pagbank.model.plan.Money
@@ -16,11 +21,6 @@ import io.github.rodrigoma.pagbank.model.plan.PlanListResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanStatus
 import io.github.rodrigoma.pagbank.model.plan.UpdatePlanRequest
-import io.github.rodrigoma.pagbank.model.customer.BillingInfoRequest
-import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
-import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
-import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
-import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
 import io.github.rodrigoma.pagbank.model.preference.NotificationPreferences
 import io.github.rodrigoma.pagbank.model.preference.PublicKeyResponse
 import io.github.rodrigoma.pagbank.model.preference.RetryPreferences

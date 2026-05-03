@@ -45,7 +45,11 @@ sealed class CardRequest {
 }
 
 class CardRequestSerializer : StdSerializer<CardRequest>(CardRequest::class.java) {
-    override fun serialize(value: CardRequest, gen: JsonGenerator, ctxt: SerializationContext) {
+    override fun serialize(
+        value: CardRequest,
+        gen: JsonGenerator,
+        ctxt: SerializationContext,
+    ) {
         gen.writeStartObject()
         when (value) {
             is CardRequest.Plain -> {

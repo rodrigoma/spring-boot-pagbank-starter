@@ -58,5 +58,4 @@ class PagBankCouponService(
             .retrieve()
             .toBodilessEntity()
     }
-
 }
