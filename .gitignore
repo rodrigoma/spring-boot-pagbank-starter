@@ -19,3 +19,9 @@ build/
 
 # Git worktrees
 .worktrees/
+
+# Claude Code
+.claude/
+
+# Maven build output
+target/
