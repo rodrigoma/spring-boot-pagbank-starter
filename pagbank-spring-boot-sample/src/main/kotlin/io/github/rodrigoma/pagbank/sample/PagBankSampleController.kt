@@ -14,6 +14,8 @@ import io.github.rodrigoma.pagbank.model.plan.Money
 import io.github.rodrigoma.pagbank.model.plan.PlanInterval
 import io.github.rodrigoma.pagbank.model.plan.PlanListResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanResponse
+import io.github.rodrigoma.pagbank.model.plan.PlanStatus
+import io.github.rodrigoma.pagbank.model.plan.UpdatePlanRequest
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionResponse
 import io.github.rodrigoma.pagbank.service.PagBankCouponService
 import io.github.rodrigoma.pagbank.service.PagBankPlanService
@@ -39,12 +41,23 @@ class PagBankSampleController(
     // --- Plans ---
 
     @GetMapping("/plans")
-    fun listPlans(): PlanListResponse = planService.list()
+    fun listPlans(
+        @RequestParam(required = false) offset: Int?,
+        @RequestParam(required = false) limit: Int?,
+        @RequestParam(name = "reference_id", required = false) referenceId: String?,
+        @RequestParam(required = false) status: PlanStatus?,
+    ): PlanListResponse = planService.list(offset, limit, referenceId, status)
 
     @GetMapping("/plans/{id}")
     fun getPlan(
         @PathVariable id: String,
     ): PlanResponse = planService.get(id)
+
+    @PutMapping("/plans/{id}")
+    fun updatePlan(
+        @PathVariable id: String,
+        @RequestBody request: UpdatePlanRequest,
+    ): PlanResponse = planService.update(id, request)
 
     @PostMapping("/plans/demo")
     fun createDemoPlan(): PlanResponse =

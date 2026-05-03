@@ -1,9 +1,10 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.common.ListParams
 import io.github.rodrigoma.pagbank.model.plan.CreatePlanRequest
 import io.github.rodrigoma.pagbank.model.plan.PlanListResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanResponse
+import io.github.rodrigoma.pagbank.model.plan.PlanStatus
+import io.github.rodrigoma.pagbank.model.plan.UpdatePlanRequest
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 
@@ -25,11 +26,33 @@ class PagBankPlanService(
             .retrieve()
             .body<PlanResponse>()!!
 
-    fun list(params: ListParams = ListParams()): PlanListResponse =
+    fun update(
+        id: String,
+        request: UpdatePlanRequest,
+    ): PlanResponse =
+        restClient
+            .put()
+            .uri("/plans/{id}", id)
+            .body(request)
+            .retrieve()
+            .body<PlanResponse>()!!
+
+    fun list(
+        offset: Int? = null,
+        limit: Int? = null,
+        referenceId: String? = null,
+        status: PlanStatus? = null,
+    ): PlanListResponse =
         restClient
             .get()
-            .uri("/plans?limit={limit}&offset={offset}", params.limit, params.offset)
-            .retrieve()
+            .uri { builder ->
+                builder.path("/plans")
+                offset?.let { builder.queryParam("offset", it) }
+                limit?.let { builder.queryParam("limit", it) }
+                referenceId?.let { builder.queryParam("reference_id", it) }
+                status?.let { builder.queryParam("status", it.name) }
+                builder.build()
+            }.retrieve()
             .body<PlanListResponse>()!!
 
     fun activate(id: String) {

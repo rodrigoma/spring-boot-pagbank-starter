@@ -41,6 +41,16 @@ data class CreatePlanRequest(
     val trial: PlanTrial? = null,
 )
 
+data class UpdatePlanRequest(
+    val name: String? = null,
+    val description: String? = null,
+    val amount: Money? = null,
+    val setupFee: Int? = null,
+    val limitSubscriptions: Int? = null,
+    val trial: PlanTrial? = null,
+    val paymentMethod: List<PaymentMethod>? = null,
+)
+
 data class PlanResponse(
     val id: String,
     val name: String,
@@ -59,6 +69,15 @@ data class PlanResponse(
     val links: List<PlanLink>? = null,
 )
 
+data class PlanResultSet(
+    val total: Int,
+    val offset: Int,
+    val limit: Int,
+    val referenceId: String? = null,
+    val status: List<String> = emptyList(),
+)
+
 data class PlanListResponse(
+    val resultSet: PlanResultSet,
     val plans: List<PlanResponse>,
 )
