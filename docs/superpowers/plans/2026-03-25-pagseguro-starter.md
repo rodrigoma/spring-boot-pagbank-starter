@@ -472,8 +472,8 @@ enum class PagSeguroEnvironment {
     SANDBOX, PRODUCTION;
 
     fun baseUrl(): String = when (this) {
-        SANDBOX -> "https://sandbox.assinaturas.pagseguro.uol.com.br"
-        PRODUCTION -> "https://assinaturas.pagseguro.uol.com.br"
+        SANDBOX -> "https://sandbox.api.assinaturas.pagseguro.com"
+        PRODUCTION -> "https://api.assinaturas.pagseguro.com"
     }
 }
 
