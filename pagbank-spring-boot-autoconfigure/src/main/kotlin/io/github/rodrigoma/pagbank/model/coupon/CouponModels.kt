@@ -56,6 +56,6 @@ data class CouponResultSet(
 )
 
 data class CouponListResponse(
-    val resultSet: CouponResultSet? = null,
+    val resultSet: CouponResultSet,
     val coupons: List<CouponResponse>,
 )

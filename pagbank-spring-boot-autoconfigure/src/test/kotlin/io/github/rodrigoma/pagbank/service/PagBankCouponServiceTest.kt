@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.service
 
+import io.github.rodrigoma.pagbank.model.coupon.CouponStatus
 import io.github.rodrigoma.pagbank.model.coupon.CreateCouponRequest
 import io.github.rodrigoma.pagbank.model.coupon.Discount
 import io.github.rodrigoma.pagbank.model.coupon.DiscountType
@@ -62,6 +63,15 @@ class PagBankCouponServiceTest {
             "status" to "ACTIVE",
         )
 
+    private fun listResponseMap(
+        coupons: List<Map<String, Any>> = listOf(couponMap()),
+        total: Int = coupons.size,
+        statusFilter: List<String> = emptyList(),
+    ) = mapOf(
+        "result_set" to mapOf("total" to total, "status" to statusFilter),
+        "coupons" to coupons,
+    )
+
     @Test
     fun `create should POST and return CouponResponse`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(couponMap())
@@ -87,25 +97,36 @@ class PagBankCouponServiceTest {
     }
 
     @Test
-    fun `list should GET and return CouponListResponse`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("coupons" to listOf(couponMap())))
+    fun `list should GET and return CouponListResponse with result_set`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(listResponseMap(total = 5))
         val response = service.list()
         assertThat(response.coupons).hasSize(1)
         assertThat(response.coupons[0].id).isEqualTo("COUP_123")
+        assertThat(response.resultSet.total).isEqualTo(5)
+        assertThat(response.resultSet.status).isEmpty()
     }
 
     @Test
     fun `list with params should include query parameters`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("coupons" to listOf(couponMap())))
+        mockFactory.nextBody = mapper.writeValueAsBytes(listResponseMap())
         val response = service.list(offset = 0, limit = 10, referenceId = "ref-123")
         assertThat(response.coupons).hasSize(1)
+        assertThat(response.resultSet.total).isEqualTo(1)
+    }
+
+    @Test
+    fun `list with status filter should return result_set with status`() {
+        mockFactory.nextBody =
+            mapper.writeValueAsBytes(listResponseMap(statusFilter = listOf("ACTIVE")))
+        val response = service.list(status = CouponStatus.ACTIVE)
+        assertThat(response.coupons).hasSize(1)
+        assertThat(response.resultSet.status).containsExactly("ACTIVE")
     }
 
     @Test
     fun `inactivate should PUT without a response body`() {
         mockFactory.nextBody = ByteArray(0)
         mockFactory.nextStatus = HttpStatus.OK
-        // No exception = success
         service.inactivate("COUP_123")
     }
 
@@ -113,7 +134,6 @@ class PagBankCouponServiceTest {
     fun `activate should PUT without a response body`() {
         mockFactory.nextBody = ByteArray(0)
         mockFactory.nextStatus = HttpStatus.OK
-        // No exception = success
         service.activate("COUP_123")
     }
 

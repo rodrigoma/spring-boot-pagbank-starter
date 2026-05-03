@@ -3,6 +3,7 @@ package io.github.rodrigoma.pagbank.sample
 import io.github.rodrigoma.pagbank.model.coupon.CouponListResponse
 import io.github.rodrigoma.pagbank.model.coupon.CouponResponse
 import io.github.rodrigoma.pagbank.model.coupon.CreateCouponRequest
+import io.github.rodrigoma.pagbank.model.coupon.CouponStatus
 import io.github.rodrigoma.pagbank.model.coupon.Discount
 import io.github.rodrigoma.pagbank.model.coupon.DiscountType
 import io.github.rodrigoma.pagbank.model.coupon.Duration
@@ -86,7 +87,8 @@ class PagBankSampleController(
         @RequestParam(required = false) offset: Int?,
         @RequestParam(required = false) limit: Int?,
         @RequestParam(name = "reference_id", required = false) referenceId: String?,
-    ): CouponListResponse = couponService.list(offset, limit, referenceId)
+        @RequestParam(required = false) status: CouponStatus?,
+    ): CouponListResponse = couponService.list(offset, limit, referenceId, status)
 
     @GetMapping("/coupons/{id}")
     fun getCoupon(
