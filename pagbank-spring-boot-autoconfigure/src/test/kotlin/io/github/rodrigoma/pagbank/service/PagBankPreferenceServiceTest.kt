@@ -29,6 +29,7 @@ class PagBankPreferenceServiceTest {
             var nextBody: ByteArray = ByteArray(0)
             var nextStatus: HttpStatus = HttpStatus.OK
             var nextContentType: MediaType = MediaType.APPLICATION_JSON
+            var lastRequest: MockClientHttpRequest? = null
 
             override fun createRequest(
                 uri: java.net.URI,
@@ -36,7 +37,10 @@ class PagBankPreferenceServiceTest {
             ): org.springframework.http.client.ClientHttpRequest {
                 val response = MockClientHttpResponse(nextBody, nextStatus)
                 response.headers.contentType = nextContentType
-                return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
+                return MockClientHttpRequest(httpMethod, uri).also {
+                    it.setResponse(response)
+                    lastRequest = it
+                }
             }
         }
 
@@ -136,5 +140,6 @@ class PagBankPreferenceServiceTest {
         mockFactory.nextBody = mapper.writeValueAsBytes(publicKeyMap())
         val response = service.rotatePublicKey()
         assertThat(response.publicKey).isEqualTo("MIIBIjAN...")
+        assertThat(mockFactory.lastRequest!!.bodyAsString).isEmpty()
     }
 }

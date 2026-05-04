@@ -72,4 +72,13 @@ class PagBankAutoConfigurationTest {
                 assertThat(context.getBeanNamesForType(RestClient::class.java)).contains("pagBankRestClient")
             }
     }
+
+    @Test
+    fun `pagBankObjectMapper should omit null fields`() {
+        contextRunner.withPropertyValues("pagbank.token=TEST_TOKEN").run { context ->
+            val mapper = context.getBean("pagBankObjectMapper") as tools.jackson.databind.ObjectMapper
+            val json = mapper.writeValueAsString(mapOf("name" to "test", "absent" to null))
+            assertThat(json).contains("\"name\"").doesNotContain("\"absent\"")
+        }
+    }
 }

@@ -175,6 +175,7 @@ class PagBankCustomerServiceTest {
                 ),
             )
         assertThat(response.id).isEqualTo("CUST_123")
+        assertThat(mockFactory.lastRequest!!.bodyAsString).startsWith("[")
     }
 
     @Test

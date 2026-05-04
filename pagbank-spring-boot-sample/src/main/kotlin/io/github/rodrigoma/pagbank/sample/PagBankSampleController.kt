@@ -83,6 +83,16 @@ class PagBankSampleController(
             ),
         )
 
+    @PutMapping("/plans/{id}/activate")
+    fun activatePlan(
+        @PathVariable id: String,
+    ) = planService.activate(id)
+
+    @PutMapping("/plans/{id}/deactivate")
+    fun deactivatePlan(
+        @PathVariable id: String,
+    ) = planService.deactivate(id)
+
     // --- Customers ---
 
     @PostMapping("/customers")

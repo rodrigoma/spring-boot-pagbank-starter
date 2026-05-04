@@ -56,10 +56,14 @@ class PagBankSubscriptionService(
         restClient
             .post()
             .uri("/subscriptions/{id}/coupons", subscriptionId)
-            .body(mapOf("couponId" to couponId))
+            .body(ApplyCouponRequest(couponId))
             .retrieve()
             .toBodilessEntity()
     }
+
+    private data class ApplyCouponRequest(
+        val couponId: String,
+    )
 
     fun list(params: ListParams = ListParams()): SubscriptionListResponse =
         restClient

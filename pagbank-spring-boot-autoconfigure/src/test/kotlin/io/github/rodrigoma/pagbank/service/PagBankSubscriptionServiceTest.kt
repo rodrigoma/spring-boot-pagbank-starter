@@ -32,6 +32,7 @@ class PagBankSubscriptionServiceTest {
             var nextBody: ByteArray = ByteArray(0)
             var nextStatus: HttpStatus = HttpStatus.OK
             var nextContentType: MediaType = MediaType.APPLICATION_JSON
+            var lastRequest: MockClientHttpRequest? = null
 
             override fun createRequest(
                 uri: java.net.URI,
@@ -39,7 +40,10 @@ class PagBankSubscriptionServiceTest {
             ): org.springframework.http.client.ClientHttpRequest {
                 val response = MockClientHttpResponse(nextBody, nextStatus)
                 response.headers.contentType = nextContentType
-                return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
+                return MockClientHttpRequest(httpMethod, uri).also {
+                    it.setResponse(response)
+                    lastRequest = it
+                }
             }
         }
 
@@ -132,6 +136,7 @@ class PagBankSubscriptionServiceTest {
         mockFactory.nextBody = ByteArray(0)
         mockFactory.nextStatus = HttpStatus.NO_CONTENT
         service.applyCoupon("SUBS_123", "COUP_001")
+        assertThat(mockFactory.lastRequest!!.bodyAsString).contains("coupon_id")
     }
 
     @Test
