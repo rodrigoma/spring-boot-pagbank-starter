@@ -2,8 +2,8 @@ package io.github.rodrigoma.pagbank.sample
 
 import io.github.rodrigoma.pagbank.model.customer.BillingInfoRequest
 import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
-import io.github.rodrigoma.pagbank.model.customer.CustomerPhone
 import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
+import io.github.rodrigoma.pagbank.model.customer.CustomerPhone
 import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
 import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
 import io.github.rodrigoma.pagbank.service.PagBankCustomerService

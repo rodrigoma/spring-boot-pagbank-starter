@@ -1,7 +1,9 @@
 package io.github.rodrigoma.pagbank.sample
 
 import io.github.rodrigoma.pagbank.model.invoice.InvoiceStatus
+import io.github.rodrigoma.pagbank.model.plan.PaymentMethod
 import io.github.rodrigoma.pagbank.model.subscription.CreateSubscriptionRequest
+import io.github.rodrigoma.pagbank.model.subscription.SubscriptionCard
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionCustomerRef
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionInvoiceListResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionListResponse
@@ -10,8 +12,6 @@ import io.github.rodrigoma.pagbank.model.subscription.SubscriptionPlanRef
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionStatus
 import io.github.rodrigoma.pagbank.model.subscription.UpdateSubscriptionRequest
-import io.github.rodrigoma.pagbank.model.plan.PaymentMethod
-import io.github.rodrigoma.pagbank.model.subscription.SubscriptionCard
 import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -36,12 +36,13 @@ class PagBankSampleSubscriptionController(
             CreateSubscriptionRequest(
                 plan = SubscriptionPlanRef(id = "PLAN_D0468208-3528-4FC9-B640-3C38C12F58AA"),
                 customer = SubscriptionCustomerRef(id = "CUST_DB860896-D21D-43F0-B299-60E912BE353C"),
-                paymentMethod = listOf(
-                    SubscriptionPaymentMethod(
-                        type = PaymentMethod.CREDIT_CARD,
-                        card = SubscriptionCard(token = "CARD_F07EF61F-4425-4FCA-87DE-EDF1F33B912C", securityCode = "123"),
+                paymentMethod =
+                    listOf(
+                        SubscriptionPaymentMethod(
+                            type = PaymentMethod.CREDIT_CARD,
+                            card = SubscriptionCard(token = "CARD_F07EF61F-4425-4FCA-87DE-EDF1F33B912C", securityCode = "123"),
+                        ),
                     ),
-                ),
                 referenceId = "demo-subscription-001",
             ),
         )
