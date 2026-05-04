@@ -2,6 +2,7 @@ package io.github.rodrigoma.pagbank.sample
 
 import io.github.rodrigoma.pagbank.model.customer.BillingInfoRequest
 import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
+import io.github.rodrigoma.pagbank.model.customer.CustomerPhone
 import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
 import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
 import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
@@ -27,6 +28,7 @@ class PagBankSampleCustomerController(
                 name = "Maria Silva",
                 email = "maria@example.com",
                 taxId = "12345678909",
+                phones = listOf(CustomerPhone(country = "55", area = "11", number = "912345678")),
                 referenceId = "demo-customer-001",
             ),
         )

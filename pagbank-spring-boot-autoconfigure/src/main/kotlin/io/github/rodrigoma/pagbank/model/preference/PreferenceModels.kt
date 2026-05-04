@@ -1,6 +1,7 @@
 package io.github.rodrigoma.pagbank.model.preference
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.github.rodrigoma.pagbank.model.common.PagBankLink
 
 // --- Notifications (GET/PUT /preferences/notifications) ---
 
@@ -32,14 +33,7 @@ data class RetryPreferences(
 
 // --- Public Keys (GET/PUT /public-keys) ---
 
-data class PublicKeyLink(
-    val rel: String? = null,
-    val href: String? = null,
-    val media: String? = null,
-    val type: String? = null,
-)
-
 data class PublicKeyResponse(
     val publicKey: String,
-    val links: List<PublicKeyLink>? = null,
+    val links: List<PagBankLink>? = null,
 )

@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.model.customer
 
+import io.github.rodrigoma.pagbank.model.common.PagBankLink
 import tools.jackson.core.JsonGenerator
 import tools.jackson.core.JsonParser
 import tools.jackson.databind.DeserializationContext
@@ -121,20 +122,13 @@ data class BillingInfo(
     val card: CardInfo? = null,
 )
 
-data class CustomerLink(
-    val rel: String? = null,
-    val href: String? = null,
-    val media: String? = null,
-    val type: String? = null,
-)
-
 data class CreateCustomerRequest(
     val name: String,
     val email: String,
     val taxId: String,
+    val phones: List<CustomerPhone>,
     val referenceId: String? = null,
     val birthDate: String? = null,
-    val phones: List<CustomerPhone>? = null,
     val address: CustomerAddress? = null,
     val billingInfo: List<BillingInfoRequest>? = null,
 )
@@ -160,7 +154,7 @@ data class CustomerResponse(
     val billingInfo: List<BillingInfo>? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
-    val links: List<CustomerLink>? = null,
+    val links: List<PagBankLink>? = null,
 )
 
 data class CustomerResultSet(

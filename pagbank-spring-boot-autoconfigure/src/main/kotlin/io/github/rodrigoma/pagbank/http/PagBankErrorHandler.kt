@@ -1,11 +1,10 @@
 package io.github.rodrigoma.pagbank.http
 
-import io.github.rodrigoma.pagbank.exception.ApiError
+import io.github.rodrigoma.pagbank.exception.ApiErrorResponse
 import io.github.rodrigoma.pagbank.exception.PagBankException
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.client.ClientHttpResponse
 import tools.jackson.core.JacksonException
-import tools.jackson.core.type.TypeReference
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule
 
@@ -29,6 +28,7 @@ class PagBankErrorHandler(
         private const val HTTP_NOT_FOUND = 404
         private const val HTTP_BAD_REQUEST = 400
         private const val HTTP_UNPROCESSABLE = 422
+        private const val HTTP_CONFLICT = 409
     }
 
     @Suppress("UnusedParameter")
@@ -46,7 +46,7 @@ class PagBankErrorHandler(
         throw when (statusCode) {
             HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> PagBankException.Unauthorized(bodyAsString(body))
             HTTP_NOT_FOUND -> PagBankException.NotFound("Resource not found")
-            HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE -> parseValidationError(body, statusCode)
+            HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE, HTTP_CONFLICT -> parseValidationError(body, statusCode)
             else -> PagBankException.ServerError(statusCode)
         }
     }
@@ -57,8 +57,8 @@ class PagBankErrorHandler(
         statusCode: Int,
     ): PagBankException =
         try {
-            val errors: List<ApiError> = objectMapper.readValue(body, object : TypeReference<List<ApiError>>() {})
-            PagBankException.ValidationError(errors)
+            val response = objectMapper.readValue(body, ApiErrorResponse::class.java)
+            PagBankException.ValidationError(response.errorMessages)
         } catch (e: JacksonException) {
             PagBankException.ServerError(statusCode)
         }

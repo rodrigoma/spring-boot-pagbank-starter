@@ -97,8 +97,16 @@ enum class WebhookEventType {
     PAYMENT_REFUND_CANCELED,
 }
 
+enum class WebhookEnv {
+    @JsonProperty("sandbox")
+    SANDBOX,
+
+    @JsonProperty("production")
+    PRODUCTION,
+}
+
 data class WebhookPayload(
-    val env: String,
+    val env: WebhookEnv,
     val event: WebhookEventType,
     val resource: Map<String, Any>,
     val date: String? = null,
