@@ -98,8 +98,8 @@ pagseguro:
 **Registration:** `@EnableConfigurationProperties(PagSeguroProperties::class)` on `PagSeguroAutoConfiguration` ensures Spring binds the properties.
 
 Base URLs:
-- Sandbox: `https://sandbox.assinaturas.pagseguro.uol.com.br`
-- Production: `https://assinaturas.pagseguro.uol.com.br`
+- Sandbox: `https://sandbox.api.assinaturas.pagseguro.com`
+- Production: `https://api.assinaturas.pagseguro.com`
 
 ## Auto-Configuration
 

@@ -27,6 +27,7 @@ data class CreateCouponRequest(
     val name: String,
     val discount: Discount,
     val duration: Duration,
+    val status: CouponStatus? = null,
     val referenceId: String? = null,
     val description: String? = null,
     val redemptionLimit: Int? = null,
@@ -49,6 +50,12 @@ data class CouponResponse(
     val links: List<CouponLink>? = null,
 )
 
+data class CouponResultSet(
+    val total: Int,
+    val status: List<String> = emptyList(),
+)
+
 data class CouponListResponse(
+    val resultSet: CouponResultSet,
     val coupons: List<CouponResponse>,
 )

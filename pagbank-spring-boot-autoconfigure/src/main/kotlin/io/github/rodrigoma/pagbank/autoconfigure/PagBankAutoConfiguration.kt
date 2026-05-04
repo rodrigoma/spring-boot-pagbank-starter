@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.autoconfigure
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.github.rodrigoma.pagbank.http.PagBankErrorHandler
 import io.github.rodrigoma.pagbank.http.PagBankLoggingInterceptor
 import io.github.rodrigoma.pagbank.service.PagBankChargeService
@@ -31,7 +32,9 @@ class PagBankAutoConfiguration(
     fun pagBankObjectMapper(): JsonMapper =
         jacksonMapperBuilder()
             .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .build()
+            .changeDefaultPropertyInclusion {
+                JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL)
+            }.build()
 
     @Bean(name = ["pagBankRestClient"])
     fun pagBankRestClient(

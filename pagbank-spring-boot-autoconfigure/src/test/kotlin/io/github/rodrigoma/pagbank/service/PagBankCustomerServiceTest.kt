@@ -1,7 +1,11 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.common.ListParams
+import io.github.rodrigoma.pagbank.model.customer.BillingInfoRequest
+import io.github.rodrigoma.pagbank.model.customer.BillingInfoType
+import io.github.rodrigoma.pagbank.model.customer.CardHolder
+import io.github.rodrigoma.pagbank.model.customer.CardRequest
 import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
+import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,14 +31,20 @@ class PagBankCustomerServiceTest {
             var nextBody: ByteArray = ByteArray(0)
             var nextStatus: HttpStatus = HttpStatus.OK
             var nextContentType: MediaType = MediaType.APPLICATION_JSON
+            var lastUri: java.net.URI? = null
+            var lastRequest: MockClientHttpRequest? = null
 
             override fun createRequest(
                 uri: java.net.URI,
                 httpMethod: HttpMethod,
             ): org.springframework.http.client.ClientHttpRequest {
+                lastUri = uri
                 val response = MockClientHttpResponse(nextBody, nextStatus)
                 response.headers.contentType = nextContentType
-                return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
+                return MockClientHttpRequest(httpMethod, uri).also {
+                    it.setResponse(response)
+                    lastRequest = it
+                }
             }
         }
 
@@ -55,9 +65,19 @@ class PagBankCustomerServiceTest {
             "id" to id,
             "name" to "Maria Silva",
             "email" to "maria@example.com",
-            "tax_id" to "123.456.789-00",
+            "tax_id" to "12345678900",
             "created_at" to "2026-01-01T00:00:00Z",
         )
+
+    private fun listResponseMap(
+        customers: List<Map<String, Any>> = listOf(customerMap()),
+        total: Int = customers.size,
+        offset: Int = 0,
+        limit: Int = 100,
+    ) = mapOf(
+        "result_set" to mapOf("total" to total, "offset" to offset, "limit" to limit),
+        "customers" to customers,
+    )
 
     @Test
     fun `create should POST and return CustomerResponse`() {
@@ -67,11 +87,60 @@ class PagBankCustomerServiceTest {
                 CreateCustomerRequest(
                     name = "Maria Silva",
                     email = "maria@example.com",
-                    taxId = "123.456.789-00",
+                    taxId = "12345678900",
                 ),
             )
         assertThat(response.id).isEqualTo("CUST_123")
         assertThat(response.email).isEqualTo("maria@example.com")
+    }
+
+    @Test
+    fun `create with encrypted card should serialize without plain fields`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
+        service.create(
+            CreateCustomerRequest(
+                name = "Maria Silva",
+                email = "maria@example.com",
+                taxId = "12345678900",
+                billingInfo =
+                    listOf(
+                        BillingInfoRequest(
+                            type = BillingInfoType.CREDIT_CARD,
+                            card = CardRequest.Encrypted(encrypted = "ENC_TOKEN_ABC"),
+                        ),
+                    ),
+            ),
+        )
+        val body = mockFactory.lastRequest!!.bodyAsString
+        assertThat(body).contains("\"encrypted\"").doesNotContain("\"number\"").doesNotContain("\"exp_year\"")
+    }
+
+    @Test
+    fun `create with plain card should serialize without encrypted field`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
+        service.create(
+            CreateCustomerRequest(
+                name = "Maria Silva",
+                email = "maria@example.com",
+                taxId = "12345678900",
+                billingInfo =
+                    listOf(
+                        BillingInfoRequest(
+                            type = BillingInfoType.CREDIT_CARD,
+                            card =
+                                CardRequest.Plain(
+                                    number = "4111111111111111",
+                                    expYear = "2043",
+                                    expMonth = "12",
+                                    holder = CardHolder(name = "Maria Silva"),
+                                    securityCode = "123",
+                                ),
+                        ),
+                    ),
+            ),
+        )
+        val body = mockFactory.lastRequest!!.bodyAsString
+        assertThat(body).contains("\"number\"").doesNotContain("\"encrypted\"")
     }
 
     @Test
@@ -82,53 +151,79 @@ class PagBankCustomerServiceTest {
     }
 
     @Test
-    fun `update should PUT and return updated CustomerResponse`() {
+    fun `update should PUT with UpdateCustomerRequest and return CustomerResponse`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
         val response =
             service.update(
                 "CUST_123",
-                CreateCustomerRequest(
-                    name = "Maria Silva",
-                    email = "new@example.com",
-                    taxId = "123.456.789-00",
-                ),
+                UpdateCustomerRequest(name = "Maria Silva Atualizada", email = "new@example.com"),
             )
         assertThat(response.id).isEqualTo("CUST_123")
     }
 
     @Test
-    fun `list should return CustomerListResponse with default params`() {
-        mockFactory.nextBody =
-            mapper.writeValueAsBytes(
-                mapOf("customers" to listOf(customerMap())),
-            )
-        val response = service.list()
-        assertThat(response.customers).hasSize(1)
-        assertThat(response.customers[0].id).isEqualTo("CUST_123")
-    }
-
-    @Test
-    fun `list with custom params should return empty response`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("customers" to emptyList<Any>()))
-        val response = service.list(ListParams(limit = 5, offset = 10))
-        assertThat(response.customers).isEmpty()
-    }
-
-    @Test
-    fun `updateBillingInfo should PUT and return CustomerResponse`() {
+    fun `updateBillingInfo should PUT array of BillingInfoRequest and return CustomerResponse`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(customerMap())
         val response =
             service.updateBillingInfo(
                 "CUST_123",
-                io.github.rodrigoma.pagbank.model.customer.UpdateBillingInfoRequest(
-                    billingInfo =
-                        listOf(
-                            io.github.rodrigoma.pagbank.model.customer.BillingInfo(
-                                type = io.github.rodrigoma.pagbank.model.customer.BillingInfoType.CREDIT_CARD,
-                            ),
-                        ),
+                listOf(
+                    BillingInfoRequest(
+                        type = BillingInfoType.CREDIT_CARD,
+                        card = CardRequest.Encrypted(encrypted = "ENC_TOKEN_ABC"),
+                    ),
                 ),
             )
         assertThat(response.id).isEqualTo("CUST_123")
+        assertThat(mockFactory.lastRequest!!.bodyAsString).startsWith("[")
+    }
+
+    @Test
+    fun `list should return CustomerListResponse with result_set`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(listResponseMap(total = 133, offset = 0, limit = 100))
+        val response = service.list()
+        assertThat(response.customers).hasSize(1)
+        assertThat(response.customers[0].id).isEqualTo("CUST_123")
+        assertThat(response.resultSet.total).isEqualTo(133)
+        assertThat(response.resultSet.offset).isEqualTo(0)
+        assertThat(response.resultSet.limit).isEqualTo(100)
+    }
+
+    @Test
+    fun `list with params should pass offset limit and referenceId`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(listResponseMap(customers = emptyList(), total = 0))
+        val response = service.list(offset = 10, limit = 5, referenceId = "ref-abc")
+        assertThat(response.customers).isEmpty()
+        assertThat(response.resultSet.total).isEqualTo(0)
+        val query = mockFactory.lastUri!!.query
+        assertThat(query).contains("offset=10").contains("limit=5").contains("reference_id=ref-abc")
+    }
+
+    @Test
+    fun `CardRequest Encrypted should round-trip through serialize and deserialize`() {
+        val original = CardRequest.Encrypted(encrypted = "ENC_TOKEN_ABC")
+        val json = mapper.writeValueAsString(BillingInfoRequest(type = BillingInfoType.CREDIT_CARD, card = original))
+        val result = mapper.readValue(json, BillingInfoRequest::class.java)
+        assertThat(result.card).isInstanceOf(CardRequest.Encrypted::class.java)
+        assertThat((result.card as CardRequest.Encrypted).encrypted).isEqualTo("ENC_TOKEN_ABC")
+    }
+
+    @Test
+    fun `CardRequest Plain should round-trip through serialize and deserialize`() {
+        val original =
+            CardRequest.Plain(
+                number = "4111111111111111",
+                expYear = "2043",
+                expMonth = "12",
+                holder = CardHolder(name = "Maria Silva"),
+                securityCode = "123",
+            )
+        val json = mapper.writeValueAsString(BillingInfoRequest(type = BillingInfoType.CREDIT_CARD, card = original))
+        val result = mapper.readValue(json, BillingInfoRequest::class.java)
+        assertThat(result.card).isInstanceOf(CardRequest.Plain::class.java)
+        val plain = result.card as CardRequest.Plain
+        assertThat(plain.number).isEqualTo("4111111111111111")
+        assertThat(plain.expYear).isEqualTo("2043")
+        assertThat(plain.holder.name).isEqualTo("Maria Silva")
     }
 }

@@ -46,11 +46,10 @@ class PagBankPreferenceService(
             .retrieve()
             .body<PublicKeyResponse>()!!
 
-    fun updatePublicKey(request: PublicKeyResponse): PublicKeyResponse =
+    fun rotatePublicKey(): PublicKeyResponse =
         restClient
             .put()
             .uri("/public-keys")
-            .body(request)
             .retrieve()
             .body<PublicKeyResponse>()!!
 }

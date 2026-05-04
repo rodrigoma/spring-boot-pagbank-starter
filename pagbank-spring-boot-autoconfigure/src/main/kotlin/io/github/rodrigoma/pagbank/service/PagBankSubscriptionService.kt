@@ -49,6 +49,22 @@ class PagBankSubscriptionService(
             .toBodilessEntity()
     }
 
+    fun applyCoupon(
+        subscriptionId: String,
+        couponId: String,
+    ) {
+        restClient
+            .post()
+            .uri("/subscriptions/{id}/coupons", subscriptionId)
+            .body(ApplyCouponRequest(couponId))
+            .retrieve()
+            .toBodilessEntity()
+    }
+
+    private data class ApplyCouponRequest(
+        val couponId: String,
+    )
+
     fun list(params: ListParams = ListParams()): SubscriptionListResponse =
         restClient
             .get()
