@@ -13,6 +13,7 @@ import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
 import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
 import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
 import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
+import io.github.rodrigoma.pagbank.model.invoice.InvoiceStatus
 import io.github.rodrigoma.pagbank.model.plan.CreatePlanRequest
 import io.github.rodrigoma.pagbank.model.plan.IntervalUnit
 import io.github.rodrigoma.pagbank.model.plan.Money
@@ -24,13 +25,17 @@ import io.github.rodrigoma.pagbank.model.plan.UpdatePlanRequest
 import io.github.rodrigoma.pagbank.model.preference.NotificationPreferences
 import io.github.rodrigoma.pagbank.model.preference.PublicKeyResponse
 import io.github.rodrigoma.pagbank.model.preference.RetryPreferences
+import io.github.rodrigoma.pagbank.model.subscription.SubscriptionInvoiceListResponse
+import io.github.rodrigoma.pagbank.model.subscription.SubscriptionListResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionResponse
+import io.github.rodrigoma.pagbank.model.subscription.SubscriptionStatus
+import io.github.rodrigoma.pagbank.model.subscription.UpdateSubscriptionRequest
 import io.github.rodrigoma.pagbank.service.PagBankCouponService
 import io.github.rodrigoma.pagbank.service.PagBankCustomerService
 import io.github.rodrigoma.pagbank.service.PagBankPlanService
 import io.github.rodrigoma.pagbank.service.PagBankPreferenceService
 import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
-import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -38,7 +43,6 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @Suppress("TooManyFunctions")
@@ -156,10 +160,57 @@ class PagBankSampleController(
 
     // --- Subscriptions ---
 
+    @GetMapping("/subscriptions")
+    fun listSubscriptions(
+        @RequestParam(required = false) offset: Int?,
+        @RequestParam(required = false) limit: Int?,
+        @RequestParam(name = "reference_id", required = false) referenceId: String?,
+        @RequestParam(required = false) status: SubscriptionStatus?,
+    ): SubscriptionListResponse = subscriptionService.list(offset, limit, referenceId, status)
+
     @GetMapping("/subscriptions/{id}")
     fun getSubscription(
         @PathVariable id: String,
     ): SubscriptionResponse = subscriptionService.get(id)
+
+    @PutMapping("/subscriptions/{id}")
+    fun updateSubscription(
+        @PathVariable id: String,
+        @RequestBody request: UpdateSubscriptionRequest,
+    ): SubscriptionResponse = subscriptionService.update(id, request)
+
+    @PutMapping("/subscriptions/{id}/cancel")
+    fun cancelSubscription(
+        @PathVariable id: String,
+    ) = subscriptionService.cancel(id)
+
+    @PutMapping("/subscriptions/{id}/suspend")
+    fun suspendSubscription(
+        @PathVariable id: String,
+    ) = subscriptionService.suspend(id)
+
+    @PutMapping("/subscriptions/{id}/activate")
+    fun activateSubscription(
+        @PathVariable id: String,
+    ) = subscriptionService.activate(id)
+
+    @PutMapping("/subscriptions/{id}/retry")
+    fun retrySubscription(
+        @PathVariable id: String,
+    ) = subscriptionService.retry(id)
+
+    @DeleteMapping("/subscriptions/{id}/coupons")
+    fun removeSubscriptionCoupon(
+        @PathVariable id: String,
+    ) = subscriptionService.removeCoupon(id)
+
+    @GetMapping("/subscriptions/{id}/invoices")
+    fun listSubscriptionInvoices(
+        @PathVariable id: String,
+        @RequestParam(required = false) offset: Int?,
+        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) status: InvoiceStatus?,
+    ): SubscriptionInvoiceListResponse = subscriptionService.listInvoices(id, offset, limit, status)
 
     // --- Coupons ---
 
@@ -201,11 +252,4 @@ class PagBankSampleController(
     fun activateCoupon(
         @PathVariable id: String,
     ) = couponService.activate(id)
-
-    @PostMapping("/subscriptions/{subscriptionId}/coupons/{couponId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun applyCouponToSubscription(
-        @PathVariable subscriptionId: String,
-        @PathVariable couponId: String,
-    ) = subscriptionService.applyCoupon(subscriptionId, couponId)
 }

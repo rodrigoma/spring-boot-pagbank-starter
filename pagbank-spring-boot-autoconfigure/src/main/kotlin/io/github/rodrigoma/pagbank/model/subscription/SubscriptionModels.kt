@@ -1,5 +1,7 @@
 package io.github.rodrigoma.pagbank.model.subscription
 
+import io.github.rodrigoma.pagbank.model.invoice.InvoiceResponse
+import io.github.rodrigoma.pagbank.model.invoice.InvoiceStatus
 import io.github.rodrigoma.pagbank.model.plan.IntervalUnit
 
 enum class SubscriptionStatus { ACTIVE, EXPIRED, CANCELED, SUSPENDED, OVERDUE, TRIAL, PENDING, PENDING_ACTION }
@@ -167,3 +169,24 @@ data class SubscriptionResponse(
 data class SubscriptionListResponse(
     val subscriptions: List<SubscriptionResponse>,
 )
+
+data class UpdateSubscriptionRequest(
+    val plan: SubscriptionPlanRef? = null,
+    val amount: SubscriptionAmount? = null,
+    val nextInvoiceAt: String? = null,
+    val proRata: Boolean? = null,
+    val bestInvoiceDate: BestInvoiceDate? = null,
+    val coupon: SubscriptionCoupon? = null,
+)
+
+data class SubscriptionInvoiceResultSet(
+    val total: Int,
+)
+
+data class SubscriptionInvoiceListResponse(
+    val resultSet: SubscriptionInvoiceResultSet,
+    val invoices: List<InvoiceResponse>,
+)
+
+// Re-export InvoiceStatus so callers don't need a separate import
+typealias SubscriptionInvoiceStatus = InvoiceStatus
