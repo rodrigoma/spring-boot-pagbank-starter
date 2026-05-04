@@ -132,6 +132,7 @@ class PagBankPlanServiceTest {
         val response = service.list(referenceId = "plano")
         assertThat(response.resultSet.referenceId).isEqualTo("plano")
         assertThat(response.resultSet.total).isEqualTo(5)
+        assertThat(mockFactory.lastUri!!.query).contains("reference_id=plano")
     }
 
     @Test
