@@ -7,6 +7,7 @@ import io.github.rodrigoma.pagbank.model.refund.RefundListResponse
 import io.github.rodrigoma.pagbank.model.refund.RefundRequest
 import io.github.rodrigoma.pagbank.model.refund.RefundResponse
 import io.github.rodrigoma.pagbank.service.PagBankHeaders.IDEMPOTENCY_KEY
+import io.github.rodrigoma.pagbank.service.PagBankHeaders.Q
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.CREATED_AT_END
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.CREATED_AT_START
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
@@ -75,7 +76,7 @@ class PagBankPaymentService(
                 createdAtEnd?.let { builder.queryParam(CREATED_AT_END, it) }
                 paymentMethodType?.let { builder.queryParam(PAYMENT_METHOD_TYPE, it) }
                 builder.build()
-            }.apply { q?.let { header("q", it) } }
+            }.apply { q?.let { header(Q, it) } }
             .retrieve()
             .body<PaymentListResponse>()!!
 }
