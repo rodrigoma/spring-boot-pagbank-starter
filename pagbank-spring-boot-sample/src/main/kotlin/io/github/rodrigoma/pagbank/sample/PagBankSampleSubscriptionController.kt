@@ -46,10 +46,11 @@ class PagBankSampleSubscriptionController(
                     listOf(
                         SubscriptionPaymentMethod(
                             type = PaymentMethod.CREDIT_CARD,
-                            card = SubscriptionCard(
-                                token = cardToken,
-                                securityCode = securityCode,
-                            ),
+                            card =
+                                SubscriptionCard(
+                                    token = cardToken,
+                                    securityCode = securityCode,
+                                ),
                         ),
                     ),
                 referenceId = referenceId,
