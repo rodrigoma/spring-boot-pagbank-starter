@@ -64,6 +64,18 @@ data class PaymentResponse(
     val links: List<PaymentLink>? = null,
 )
 
+data class PaymentResultSet(
+    val total: Int,
+    val offset: Int? = null,
+    val limit: Int? = null,
+    val status: List<String>? = null,
+    val paymentMethodType: List<String>? = null,
+    val q: String? = null,
+    val createdAtStart: String? = null,
+    val createdAtEnd: String? = null,
+)
+
 data class PaymentListResponse(
+    val resultSet: PaymentResultSet,
     val payments: List<PaymentResponse>,
 )

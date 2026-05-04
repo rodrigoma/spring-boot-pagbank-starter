@@ -1,9 +1,5 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.common.ListParams
-import io.github.rodrigoma.pagbank.model.refund.RefundAmount
-import io.github.rodrigoma.pagbank.model.refund.RefundRequest
-import io.github.rodrigoma.pagbank.model.refund.RefundStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,11 +25,13 @@ class PagBankRefundServiceTest {
             var nextBody: ByteArray = ByteArray(0)
             var nextStatus: HttpStatus = HttpStatus.OK
             var nextContentType: MediaType = MediaType.APPLICATION_JSON
+            var lastUri: java.net.URI? = null
 
             override fun createRequest(
                 uri: java.net.URI,
                 httpMethod: HttpMethod,
             ): org.springframework.http.client.ClientHttpRequest {
+                lastUri = uri
                 val response = MockClientHttpResponse(nextBody, nextStatus)
                 response.headers.contentType = nextContentType
                 return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
@@ -67,23 +65,6 @@ class PagBankRefundServiceTest {
         )
 
     @Test
-    fun `create should POST full refund and return RefundResponse`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(refundMap())
-        val response = service.create("PAYM_001", RefundRequest(amount = RefundAmount(value = 2990)))
-        assertThat(response.id).isEqualTo("REF_123")
-        assertThat(response.amount.value).isEqualTo(2990)
-        assertThat(response.status).isEqualTo(RefundStatus.SUCCESS)
-        assertThat(response.payment?.id).isEqualTo("PAYM_001")
-    }
-
-    @Test
-    fun `create should POST partial refund with amount`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(refundMap())
-        val response = service.create("PAYM_001", RefundRequest(amount = RefundAmount(value = 1000)))
-        assertThat(response.id).isEqualTo("REF_123")
-    }
-
-    @Test
     fun `get should return RefundResponse by id`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(refundMap("REF_456"))
         val response = service.get("REF_456")
@@ -91,30 +72,17 @@ class PagBankRefundServiceTest {
     }
 
     @Test
-    fun `listByPayment should return RefundListResponse`() {
-        mockFactory.nextBody =
-            mapper.writeValueAsBytes(
-                mapOf("refunds" to listOf(refundMap())),
-            )
-        val response = service.listByPayment("PAYM_001")
-        assertThat(response.refunds).hasSize(1)
-        assertThat(response.refunds[0].id).isEqualTo("REF_123")
-    }
-
-    @Test
     fun `list should return RefundListResponse with default params`() {
-        mockFactory.nextBody =
-            mapper.writeValueAsBytes(
-                mapOf("refunds" to listOf(refundMap())),
-            )
+        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("refunds" to listOf(refundMap())))
         val response = service.list()
         assertThat(response.refunds).hasSize(1)
     }
 
     @Test
-    fun `list with custom params should return empty response`() {
+    fun `list with filters should encode query params in URI`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("refunds" to emptyList<Any>()))
-        val response = service.list(ListParams(limit = 5, offset = 10))
-        assertThat(response.refunds).isEmpty()
+        service.list(offset = 5, limit = 50)
+        val query = mockFactory.lastUri!!.query
+        assertThat(query).contains("offset=5").contains("limit=50")
     }
 }

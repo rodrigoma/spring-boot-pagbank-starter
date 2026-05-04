@@ -1,6 +1,9 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.common.ListParams
+import io.github.rodrigoma.pagbank.model.payment.PaymentStatus
+import io.github.rodrigoma.pagbank.model.refund.RefundAmount
+import io.github.rodrigoma.pagbank.model.refund.RefundRequest
+import io.github.rodrigoma.pagbank.model.refund.RefundStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -26,14 +29,20 @@ class PagBankPaymentServiceTest {
             var nextBody: ByteArray = ByteArray(0)
             var nextStatus: HttpStatus = HttpStatus.OK
             var nextContentType: MediaType = MediaType.APPLICATION_JSON
+            var lastUri: java.net.URI? = null
+            var lastRequest: MockClientHttpRequest? = null
 
             override fun createRequest(
                 uri: java.net.URI,
                 httpMethod: HttpMethod,
             ): org.springframework.http.client.ClientHttpRequest {
+                lastUri = uri
                 val response = MockClientHttpResponse(nextBody, nextStatus)
                 response.headers.contentType = nextContentType
-                return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
+                return MockClientHttpRequest(httpMethod, uri).also {
+                    it.setResponse(response)
+                    lastRequest = it
+                }
             }
         }
 
@@ -48,6 +57,16 @@ class PagBankPaymentServiceTest {
                 }.build()
         service = PagBankPaymentService(restClient)
     }
+
+    private fun refundMap(id: String = "REF_123") =
+        mapOf(
+            "id" to id,
+            "amount" to mapOf("value" to 2990, "currency" to "BRL"),
+            "status" to "SUCCESS",
+            "type" to "FULL",
+            "payment" to mapOf("id" to "PAYM_001"),
+            "created_at" to "2026-01-20T12:00:00Z",
+        )
 
     private fun paymentMap(id: String = "PAYM_123") =
         mapOf(
@@ -75,26 +94,81 @@ class PagBankPaymentServiceTest {
         mockFactory.nextBody = mapper.writeValueAsBytes(paymentMap())
         val response = service.get("PAYM_123")
         assertThat(response.id).isEqualTo("PAYM_123")
-        assertThat(response.status).isEqualTo(io.github.rodrigoma.pagbank.model.payment.PaymentStatus.APPROVED)
+        assertThat(response.status).isEqualTo(PaymentStatus.APPROVED)
         assertThat(response.invoice?.id).isEqualTo("INVO_001")
         assertThat(response.provider?.transactionId).isEqualTo("CHAR_123")
     }
 
+    private fun resultSetMap() =
+        mapOf(
+            "total" to 1,
+            "offset" to 0,
+            "limit" to 100,
+            "status" to listOf("APPROVED"),
+            "payment_method_type" to listOf("CREDIT_CARD"),
+            "q" to "email@teste.com",
+            "created_at_start" to "2026-01-01",
+            "created_at_end" to "2026-02-01",
+        )
+
     @Test
-    fun `list should return PaymentListResponse with default params`() {
+    fun `list should return PaymentListResponse with result_set`() {
         mockFactory.nextBody =
-            mapper.writeValueAsBytes(
-                mapOf("payments" to listOf(paymentMap())),
-            )
+            mapper.writeValueAsBytes(mapOf("result_set" to resultSetMap(), "payments" to listOf(paymentMap())))
         val response = service.list()
         assertThat(response.payments).hasSize(1)
         assertThat(response.payments[0].id).isEqualTo("PAYM_123")
+        assertThat(response.resultSet.total).isEqualTo(1)
     }
 
     @Test
-    fun `list with custom params should return empty response`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("payments" to emptyList<Any>()))
-        val response = service.list(ListParams(limit = 20, offset = 40))
-        assertThat(response.payments).isEmpty()
+    fun `list with filters should encode query params in URI`() {
+        mockFactory.nextBody =
+            mapper.writeValueAsBytes(mapOf("result_set" to resultSetMap(), "payments" to emptyList<Any>()))
+        service.list(
+            offset = 10,
+            limit = 25,
+            status = PaymentStatus.APPROVED,
+            createdAtStart = "2026-01-01",
+            createdAtEnd = "2026-01-31",
+            paymentMethodType = "CREDIT_CARD",
+        )
+        val query = mockFactory.lastUri!!.query
+        assertThat(query).contains("offset=10").contains("limit=25")
+        assertThat(query).contains("status=APPROVED")
+        assertThat(query).contains("created_at_start=2026-01-01").contains("created_at_end=2026-01-31")
+        assertThat(query).contains("payment_method_type=CREDIT_CARD")
+    }
+
+    @Test
+    fun `list with q should send it as header`() {
+        mockFactory.nextBody =
+            mapper.writeValueAsBytes(mapOf("result_set" to resultSetMap(), "payments" to emptyList<Any>()))
+        service.list(q = "email@teste.com")
+        assertThat(mockFactory.lastRequest!!.headers.getFirst("q")).isEqualTo("email@teste.com")
+    }
+
+    @Test
+    fun `createRefund should POST refund for a payment`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(refundMap())
+        val response = service.createRefund("PAYM_001", RefundRequest(amount = RefundAmount(value = 2990)))
+        assertThat(response.id).isEqualTo("REF_123")
+        assertThat(response.status).isEqualTo(RefundStatus.SUCCESS)
+    }
+
+    @Test
+    fun `listRefunds should GET refunds for a payment`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("refunds" to listOf(refundMap())))
+        val response = service.listRefunds("PAYM_001")
+        assertThat(response.refunds).hasSize(1)
+        assertThat(mockFactory.lastUri!!.path).contains("/payments/PAYM_001/refunds")
+    }
+
+    @Test
+    fun `listRefunds with filters should encode query params in URI`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("refunds" to emptyList<Any>()))
+        service.listRefunds("PAYM_001", offset = 0, limit = 10)
+        val query = mockFactory.lastUri!!.query
+        assertThat(query).contains("offset=0").contains("limit=10")
     }
 }

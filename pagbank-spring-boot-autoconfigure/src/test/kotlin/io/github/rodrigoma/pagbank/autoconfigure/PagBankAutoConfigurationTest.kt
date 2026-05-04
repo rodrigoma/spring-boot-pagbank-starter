@@ -1,6 +1,5 @@
 package io.github.rodrigoma.pagbank.autoconfigure
 
-import io.github.rodrigoma.pagbank.service.PagBankChargeService
 import io.github.rodrigoma.pagbank.service.PagBankCouponService
 import io.github.rodrigoma.pagbank.service.PagBankCustomerService
 import io.github.rodrigoma.pagbank.service.PagBankInvoiceService
@@ -38,7 +37,6 @@ class PagBankAutoConfigurationTest {
             assertThat(context).hasSingleBean(PagBankCouponService::class.java)
             assertThat(context).hasSingleBean(PagBankInvoiceService::class.java)
             assertThat(context).hasSingleBean(PagBankPaymentService::class.java)
-            assertThat(context).hasSingleBean(PagBankChargeService::class.java)
             assertThat(context).hasSingleBean(PagBankRefundService::class.java)
             assertThat(context).hasSingleBean(PagBankPreferenceService::class.java)
             assertThat(context).hasSingleBean(PagBankWebhookParser::class.java)
