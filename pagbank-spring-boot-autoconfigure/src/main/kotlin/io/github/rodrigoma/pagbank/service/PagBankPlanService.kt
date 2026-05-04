@@ -5,6 +5,10 @@ import io.github.rodrigoma.pagbank.model.plan.PlanListResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanStatus
 import io.github.rodrigoma.pagbank.model.plan.UpdatePlanRequest
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.REFERENCE_ID
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.STATUS
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 
@@ -47,10 +51,10 @@ class PagBankPlanService(
             .get()
             .uri { builder ->
                 builder.path("/plans")
-                offset.let { builder.queryParam("offset", it) }
-                limit.let { builder.queryParam("limit", it) }
-                referenceId?.let { builder.queryParam("reference_id", it) }
-                status?.let { builder.queryParam("status", it.name) }
+                offset.let { builder.queryParam(OFFSET, it) }
+                limit.let { builder.queryParam(LIMIT, it) }
+                referenceId?.let { builder.queryParam(REFERENCE_ID, it) }
+                status?.let { builder.queryParam(STATUS, it.name) }
                 builder.build()
             }.retrieve()
             .body<PlanListResponse>()!!

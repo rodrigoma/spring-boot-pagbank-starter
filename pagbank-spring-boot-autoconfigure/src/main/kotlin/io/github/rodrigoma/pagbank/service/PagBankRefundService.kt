@@ -2,6 +2,8 @@ package io.github.rodrigoma.pagbank.service
 
 import io.github.rodrigoma.pagbank.model.refund.RefundListResponse
 import io.github.rodrigoma.pagbank.model.refund.RefundResponse
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 
@@ -23,8 +25,8 @@ class PagBankRefundService(
             .get()
             .uri { builder ->
                 builder.path("/refunds")
-                offset.let { builder.queryParam("offset", it) }
-                limit.let { builder.queryParam("limit", it) }
+                offset.let { builder.queryParam(OFFSET, it) }
+                limit.let { builder.queryParam(LIMIT, it) }
                 builder.build()
             }.retrieve()
             .body<RefundListResponse>()!!

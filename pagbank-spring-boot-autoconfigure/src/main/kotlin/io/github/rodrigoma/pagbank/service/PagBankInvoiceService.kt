@@ -2,6 +2,8 @@ package io.github.rodrigoma.pagbank.service
 
 import io.github.rodrigoma.pagbank.model.invoice.InvoiceResponse
 import io.github.rodrigoma.pagbank.model.payment.PaymentListResponse
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 
@@ -24,8 +26,8 @@ class PagBankInvoiceService(
             .get()
             .uri { builder ->
                 builder.path("/invoices/{id}/payments")
-                offset.let { builder.queryParam("offset", it) }
-                limit.let { builder.queryParam("limit", it) }
+                offset.let { builder.queryParam(OFFSET, it) }
+                limit.let { builder.queryParam(LIMIT, it) }
                 builder.build(id)
             }.retrieve()
             .body<PaymentListResponse>()!!

@@ -6,6 +6,12 @@ import io.github.rodrigoma.pagbank.model.payment.PaymentStatus
 import io.github.rodrigoma.pagbank.model.refund.RefundListResponse
 import io.github.rodrigoma.pagbank.model.refund.RefundRequest
 import io.github.rodrigoma.pagbank.model.refund.RefundResponse
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.CREATED_AT_END
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.CREATED_AT_START
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.PAYMENT_METHOD_TYPE
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.STATUS
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 
@@ -39,8 +45,8 @@ class PagBankPaymentService(
             .get()
             .uri { builder ->
                 builder.path("/payments/{id}/refunds")
-                offset.let { builder.queryParam("offset", it) }
-                limit.let { builder.queryParam("limit", it) }
+                offset.let { builder.queryParam(OFFSET, it) }
+                limit.let { builder.queryParam(LIMIT, it) }
                 builder.build(id)
             }.retrieve()
             .body<RefundListResponse>()!!
@@ -59,12 +65,12 @@ class PagBankPaymentService(
             .get()
             .uri { builder ->
                 builder.path("/payments")
-                offset.let { builder.queryParam("offset", it) }
-                limit.let { builder.queryParam("limit", it) }
-                status?.let { builder.queryParam("status", it.name) }
-                createdAtStart?.let { builder.queryParam("created_at_start", it) }
-                createdAtEnd?.let { builder.queryParam("created_at_end", it) }
-                paymentMethodType?.let { builder.queryParam("payment_method_type", it) }
+                offset.let { builder.queryParam(OFFSET, it) }
+                limit.let { builder.queryParam(LIMIT, it) }
+                status?.let { builder.queryParam(STATUS, it.name) }
+                createdAtStart?.let { builder.queryParam(CREATED_AT_START, it) }
+                createdAtEnd?.let { builder.queryParam(CREATED_AT_END, it) }
+                paymentMethodType?.let { builder.queryParam(PAYMENT_METHOD_TYPE, it) }
                 builder.build()
             }.apply { q?.let { header("q", it) } }
             .retrieve()

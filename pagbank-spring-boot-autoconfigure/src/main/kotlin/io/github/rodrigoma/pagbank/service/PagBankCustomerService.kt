@@ -5,6 +5,9 @@ import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
 import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
 import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
 import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.REFERENCE_ID
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 
@@ -57,9 +60,9 @@ class PagBankCustomerService(
             .get()
             .uri { builder ->
                 builder.path("/customers")
-                offset.let { builder.queryParam("offset", it) }
-                limit.let { builder.queryParam("limit", it) }
-                referenceId?.let { builder.queryParam("reference_id", it) }
+                offset.let { builder.queryParam(OFFSET, it) }
+                limit.let { builder.queryParam(LIMIT, it) }
+                referenceId?.let { builder.queryParam(REFERENCE_ID, it) }
                 builder.build()
             }.retrieve()
             .body<CustomerListResponse>()!!
