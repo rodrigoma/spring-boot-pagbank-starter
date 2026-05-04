@@ -198,4 +198,32 @@ class PagBankCustomerServiceTest {
         val query = mockFactory.lastUri!!.query
         assertThat(query).contains("offset=10").contains("limit=5").contains("reference_id=ref-abc")
     }
+
+    @Test
+    fun `CardRequest Encrypted should round-trip through serialize and deserialize`() {
+        val original = CardRequest.Encrypted(encrypted = "ENC_TOKEN_ABC")
+        val json = mapper.writeValueAsString(BillingInfoRequest(type = BillingInfoType.CREDIT_CARD, card = original))
+        val result = mapper.readValue(json, BillingInfoRequest::class.java)
+        assertThat(result.card).isInstanceOf(CardRequest.Encrypted::class.java)
+        assertThat((result.card as CardRequest.Encrypted).encrypted).isEqualTo("ENC_TOKEN_ABC")
+    }
+
+    @Test
+    fun `CardRequest Plain should round-trip through serialize and deserialize`() {
+        val original =
+            CardRequest.Plain(
+                number = "4111111111111111",
+                expYear = "2043",
+                expMonth = "12",
+                holder = CardHolder(name = "Maria Silva"),
+                securityCode = "123",
+            )
+        val json = mapper.writeValueAsString(BillingInfoRequest(type = BillingInfoType.CREDIT_CARD, card = original))
+        val result = mapper.readValue(json, BillingInfoRequest::class.java)
+        assertThat(result.card).isInstanceOf(CardRequest.Plain::class.java)
+        val plain = result.card as CardRequest.Plain
+        assertThat(plain.number).isEqualTo("4111111111111111")
+        assertThat(plain.expYear).isEqualTo("2043")
+        assertThat(plain.holder.name).isEqualTo("Maria Silva")
+    }
 }

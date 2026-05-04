@@ -1,8 +1,13 @@
 package io.github.rodrigoma.pagbank.model.customer
 
 import tools.jackson.core.JsonGenerator
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
 import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.annotation.JsonDeserialize
 import tools.jackson.databind.annotation.JsonSerialize
+import tools.jackson.databind.deser.std.StdDeserializer
 import tools.jackson.databind.ser.std.StdSerializer
 
 enum class BillingInfoType { CREDIT_CARD }
@@ -30,6 +35,7 @@ data class CardHolder(
 )
 
 @JsonSerialize(using = CardRequestSerializer::class)
+@JsonDeserialize(using = CardRequestDeserializer::class)
 sealed class CardRequest {
     data class Plain(
         val number: String,
@@ -62,6 +68,26 @@ class CardRequestSerializer : StdSerializer<CardRequest>(CardRequest::class.java
             is CardRequest.Encrypted -> gen.writeStringProperty("encrypted", value.encrypted)
         }
         gen.writeEndObject()
+    }
+}
+
+class CardRequestDeserializer : StdDeserializer<CardRequest>(CardRequest::class.java) {
+    override fun deserialize(
+        p: JsonParser,
+        ctxt: DeserializationContext,
+    ): CardRequest {
+        val node = p.readValueAsTree<JsonNode>()
+        return if (node.has("encrypted")) {
+            CardRequest.Encrypted(encrypted = node.get("encrypted").asText())
+        } else {
+            CardRequest.Plain(
+                number = node.get("number").asText(),
+                expYear = node.get("exp_year").asText(),
+                expMonth = node.get("exp_month").asText(),
+                securityCode = node.get("security_code").asText(),
+                holder = CardHolder(name = node.get("holder").get("name").asText()),
+            )
+        }
     }
 }
 
