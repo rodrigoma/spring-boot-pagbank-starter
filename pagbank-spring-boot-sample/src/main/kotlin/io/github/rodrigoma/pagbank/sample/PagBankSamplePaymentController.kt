@@ -7,6 +7,12 @@ import io.github.rodrigoma.pagbank.model.refund.RefundListResponse
 import io.github.rodrigoma.pagbank.model.refund.RefundRequest
 import io.github.rodrigoma.pagbank.model.refund.RefundResponse
 import io.github.rodrigoma.pagbank.service.PagBankPaymentService
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.CREATED_AT_END
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.CREATED_AT_START
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.PAYMENT_METHOD_TYPE
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.STATUS
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -29,12 +35,12 @@ class PagBankSamplePaymentController(
     @Suppress("LongParameterList")
     @GetMapping
     fun listPayments(
-        @RequestParam(required = false) offset: Int = 0,
-        @RequestParam(required = false) limit: Int = 100,
-        @RequestParam(required = false) status: PaymentStatus?,
-        @RequestParam(name = "created_at_start", required = false) createdAtStart: String?,
-        @RequestParam(name = "created_at_end", required = false) createdAtEnd: String?,
-        @RequestParam(name = "payment_method_type", required = false) paymentMethodType: String?,
+        @RequestParam(name = OFFSET, required = false) offset: Int = 0,
+        @RequestParam(name = LIMIT, required = false) limit: Int = 100,
+        @RequestParam(name = STATUS, required = false) status: PaymentStatus?,
+        @RequestParam(name = CREATED_AT_START, required = false) createdAtStart: String?,
+        @RequestParam(name = CREATED_AT_END, required = false) createdAtEnd: String?,
+        @RequestParam(name = PAYMENT_METHOD_TYPE, required = false) paymentMethodType: String?,
         @RequestHeader(name = "q", required = false) q: String?,
     ): PaymentListResponse =
         paymentService.list(
@@ -56,7 +62,7 @@ class PagBankSamplePaymentController(
     @GetMapping("/{id}/refunds")
     fun listPaymentRefunds(
         @PathVariable id: String,
-        @RequestParam(required = false) offset: Int = 0,
-        @RequestParam(required = false) limit: Int = 100,
+        @RequestParam(name = OFFSET, required = false) offset: Int = 0,
+        @RequestParam(name = LIMIT, required = false) limit: Int = 100,
     ): RefundListResponse = paymentService.listRefunds(id, offset, limit)
 }

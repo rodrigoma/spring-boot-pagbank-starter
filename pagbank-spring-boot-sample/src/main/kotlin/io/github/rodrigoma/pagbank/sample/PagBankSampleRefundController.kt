@@ -3,6 +3,8 @@ package io.github.rodrigoma.pagbank.sample
 import io.github.rodrigoma.pagbank.model.refund.RefundListResponse
 import io.github.rodrigoma.pagbank.model.refund.RefundResponse
 import io.github.rodrigoma.pagbank.service.PagBankRefundService
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -21,7 +23,7 @@ class PagBankSampleRefundController(
 
     @GetMapping
     fun listRefunds(
-        @RequestParam(required = false) offset: Int = 0,
-        @RequestParam(required = false) limit: Int = 100,
+        @RequestParam(name = OFFSET, required = false) offset: Int = 0,
+        @RequestParam(name = LIMIT, required = false) limit: Int = 100,
     ): RefundListResponse = refundService.list(offset, limit)
 }

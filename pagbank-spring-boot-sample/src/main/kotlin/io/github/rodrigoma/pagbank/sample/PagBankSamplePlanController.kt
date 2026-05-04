@@ -9,6 +9,10 @@ import io.github.rodrigoma.pagbank.model.plan.PlanResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanStatus
 import io.github.rodrigoma.pagbank.model.plan.UpdatePlanRequest
 import io.github.rodrigoma.pagbank.service.PagBankPlanService
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.REFERENCE_ID
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.STATUS
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -27,10 +31,10 @@ class PagBankSamplePlanController(
 ) {
     @GetMapping
     fun listPlans(
-        @RequestParam(required = false) offset: Int = 0,
-        @RequestParam(required = false) limit: Int = 100,
-        @RequestParam(name = "reference_id", required = false) referenceId: String?,
-        @RequestParam(required = false) status: PlanStatus?,
+        @RequestParam(name = OFFSET, required = false) offset: Int = 0,
+        @RequestParam(name = LIMIT, required = false) limit: Int = 100,
+        @RequestParam(name = REFERENCE_ID, required = false) referenceId: String?,
+        @RequestParam(name = STATUS, required = false) status: PlanStatus?,
     ): PlanListResponse = planService.list(offset, limit, referenceId, status)
 
     @GetMapping("/{id}")

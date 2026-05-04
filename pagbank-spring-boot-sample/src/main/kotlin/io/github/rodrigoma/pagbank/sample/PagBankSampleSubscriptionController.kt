@@ -13,6 +13,10 @@ import io.github.rodrigoma.pagbank.model.subscription.SubscriptionResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionStatus
 import io.github.rodrigoma.pagbank.model.subscription.UpdateSubscriptionRequest
 import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.REFERENCE_ID
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.STATUS
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -59,10 +63,10 @@ class PagBankSampleSubscriptionController(
 
     @GetMapping
     fun listSubscriptions(
-        @RequestParam(required = false) offset: Int = 0,
-        @RequestParam(required = false) limit: Int = 100,
-        @RequestParam(name = "reference_id", required = false) referenceId: String?,
-        @RequestParam(required = false) status: SubscriptionStatus?,
+        @RequestParam(name = OFFSET, required = false) offset: Int = 0,
+        @RequestParam(name = LIMIT, required = false) limit: Int = 100,
+        @RequestParam(name = REFERENCE_ID, required = false) referenceId: String?,
+        @RequestParam(name = STATUS, required = false) status: SubscriptionStatus?,
     ): SubscriptionListResponse = subscriptionService.list(offset, limit, referenceId, status)
 
     @GetMapping("/{id}")
@@ -109,8 +113,8 @@ class PagBankSampleSubscriptionController(
     @GetMapping("/{id}/invoices")
     fun listSubscriptionInvoices(
         @PathVariable id: String,
-        @RequestParam(required = false) offset: Int = 0,
-        @RequestParam(required = false) limit: Int = 100,
-        @RequestParam(required = false) status: InvoiceStatus?,
+        @RequestParam(name = OFFSET, required = false) offset: Int = 0,
+        @RequestParam(name = LIMIT, required = false) limit: Int = 100,
+        @RequestParam(name = STATUS, required = false) status: InvoiceStatus?,
     ): SubscriptionInvoiceListResponse = subscriptionService.listInvoices(id, offset, limit, status)
 }
