@@ -1,5 +1,5 @@
 pagbank:
-  token: 19612E2F787E4E0E8A32ED6E4F3BDDA8  # Set your PagBank sandbox API token here before running
+  token: your-sandbox-token-here  # Set your PagBank sandbox API token here before running
   environment: SANDBOX
   log-requests: true
 
