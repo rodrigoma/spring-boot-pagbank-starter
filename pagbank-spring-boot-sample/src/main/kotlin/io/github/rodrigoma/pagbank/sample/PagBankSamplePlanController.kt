@@ -9,6 +9,7 @@ import io.github.rodrigoma.pagbank.model.plan.PlanResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanStatus
 import io.github.rodrigoma.pagbank.model.plan.UpdatePlanRequest
 import io.github.rodrigoma.pagbank.service.PagBankPlanService
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -53,13 +55,15 @@ class PagBankSamplePlanController(
             ),
         )
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}/activate")
     fun activatePlan(
         @PathVariable id: String,
     ) = planService.activate(id)
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}/inactivate")
-    fun deactivatePlan(
+    fun inactivatePlan(
         @PathVariable id: String,
     ) = planService.deactivate(id)
 }

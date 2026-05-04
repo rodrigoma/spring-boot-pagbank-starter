@@ -7,6 +7,7 @@ import io.github.rodrigoma.pagbank.model.subscription.SubscriptionResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionStatus
 import io.github.rodrigoma.pagbank.model.subscription.UpdateSubscriptionRequest
 import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -40,26 +42,31 @@ class PagBankSampleSubscriptionController(
         @RequestBody request: UpdateSubscriptionRequest,
     ): SubscriptionResponse = subscriptionService.update(id, request)
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}/cancel")
     fun cancelSubscription(
         @PathVariable id: String,
     ) = subscriptionService.cancel(id)
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}/suspend")
     fun suspendSubscription(
         @PathVariable id: String,
     ) = subscriptionService.suspend(id)
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}/activate")
     fun activateSubscription(
         @PathVariable id: String,
     ) = subscriptionService.activate(id)
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}/retry")
     fun retrySubscription(
         @PathVariable id: String,
     ) = subscriptionService.retry(id)
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}/coupons")
     fun removeSubscriptionCoupon(
         @PathVariable id: String,

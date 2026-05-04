@@ -9,6 +9,7 @@ import io.github.rodrigoma.pagbank.model.coupon.DiscountType
 import io.github.rodrigoma.pagbank.model.coupon.Duration
 import io.github.rodrigoma.pagbank.model.coupon.DurationType
 import io.github.rodrigoma.pagbank.service.PagBankCouponService
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -52,11 +54,13 @@ class PagBankSampleCouponController(
         @PathVariable id: String,
     ): CouponResponse = couponService.get(id)
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}/inactivate")
     fun inactivateCoupon(
         @PathVariable id: String,
     ) = couponService.inactivate(id)
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}/activate")
     fun activateCoupon(
         @PathVariable id: String,
