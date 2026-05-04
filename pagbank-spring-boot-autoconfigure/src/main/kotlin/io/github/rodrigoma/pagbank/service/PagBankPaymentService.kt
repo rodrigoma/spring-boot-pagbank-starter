@@ -21,29 +21,29 @@ class PagBankPaymentService(
             .body<PaymentResponse>()!!
 
     fun createRefund(
-        paymentId: String,
+        id: String,
         request: RefundRequest,
     ): RefundResponse =
         restClient
             .post()
-            .uri("/payments/{paymentId}/refunds", paymentId)
+            .uri("/payments/{id}/refunds", id)
             .body(request)
             .retrieve()
             .body<RefundResponse>()!!
 
     fun listRefunds(
-        paymentId: String,
+        id: String,
         offset: Int? = null,
         limit: Int? = null,
     ): RefundListResponse {
         val uri =
             UriComponentsBuilder
-                .fromPath("/payments/{paymentId}/refunds")
+                .fromPath("/payments/{id}/refunds")
                 .apply {
                     offset?.let { queryParam("offset", it) }
                     limit?.let { queryParam("limit", it) }
                 }.build()
-                .expand(paymentId)
+                .expand(id)
                 .toUriString()
         return restClient
             .get()
