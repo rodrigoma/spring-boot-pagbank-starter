@@ -57,9 +57,10 @@ class PagBankPaymentService(
         offset: Int? = null,
         limit: Int? = null,
         status: PaymentStatus? = null,
-        paidAtStart: String? = null,
-        paidAtEnd: String? = null,
+        createdAtStart: String? = null,
+        createdAtEnd: String? = null,
         paymentMethodType: String? = null,
+        q: String? = null,
     ): PaymentListResponse {
         val uri =
             UriComponentsBuilder
@@ -68,14 +69,15 @@ class PagBankPaymentService(
                     offset?.let { queryParam("offset", it) }
                     limit?.let { queryParam("limit", it) }
                     status?.let { queryParam("status", it.name) }
-                    paidAtStart?.let { queryParam("paid_at_start", it) }
-                    paidAtEnd?.let { queryParam("paid_at_end", it) }
+                    createdAtStart?.let { queryParam("created_at_start", it) }
+                    createdAtEnd?.let { queryParam("created_at_end", it) }
                     paymentMethodType?.let { queryParam("payment_method_type", it) }
                 }.build()
                 .toUriString()
         return restClient
             .get()
             .uri(uri)
+            .apply { q?.let { header("q", it) } }
             .retrieve()
             .body<PaymentListResponse>()!!
     }

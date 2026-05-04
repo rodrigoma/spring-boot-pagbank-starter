@@ -30,6 +30,7 @@ class PagBankPaymentServiceTest {
             var nextStatus: HttpStatus = HttpStatus.OK
             var nextContentType: MediaType = MediaType.APPLICATION_JSON
             var lastUri: java.net.URI? = null
+            var lastRequest: MockClientHttpRequest? = null
 
             override fun createRequest(
                 uri: java.net.URI,
@@ -38,7 +39,10 @@ class PagBankPaymentServiceTest {
                 lastUri = uri
                 val response = MockClientHttpResponse(nextBody, nextStatus)
                 response.headers.contentType = nextContentType
-                return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
+                return MockClientHttpRequest(httpMethod, uri).also {
+                    it.setResponse(response)
+                    lastRequest = it
+                }
             }
         }
 
@@ -95,30 +99,53 @@ class PagBankPaymentServiceTest {
         assertThat(response.provider?.transactionId).isEqualTo("CHAR_123")
     }
 
+    private fun resultSetMap() =
+        mapOf(
+            "total" to 1,
+            "offset" to 0,
+            "limit" to 100,
+            "status" to listOf("APPROVED"),
+            "payment_method_type" to listOf("CREDIT_CARD"),
+            "q" to "email@teste.com",
+            "created_at_start" to "2026-01-01",
+            "created_at_end" to "2026-02-01",
+        )
+
     @Test
-    fun `list should return PaymentListResponse with default params`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("payments" to listOf(paymentMap())))
+    fun `list should return PaymentListResponse with result_set`() {
+        mockFactory.nextBody =
+            mapper.writeValueAsBytes(mapOf("result_set" to resultSetMap(), "payments" to listOf(paymentMap())))
         val response = service.list()
         assertThat(response.payments).hasSize(1)
         assertThat(response.payments[0].id).isEqualTo("PAYM_123")
+        assertThat(response.resultSet?.total).isEqualTo(1)
     }
 
     @Test
     fun `list with filters should encode query params in URI`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("payments" to emptyList<Any>()))
+        mockFactory.nextBody =
+            mapper.writeValueAsBytes(mapOf("result_set" to resultSetMap(), "payments" to emptyList<Any>()))
         service.list(
             offset = 10,
             limit = 25,
             status = PaymentStatus.APPROVED,
-            paidAtStart = "2026-01-01",
-            paidAtEnd = "2026-01-31",
+            createdAtStart = "2026-01-01",
+            createdAtEnd = "2026-01-31",
             paymentMethodType = "CREDIT_CARD",
         )
         val query = mockFactory.lastUri!!.query
         assertThat(query).contains("offset=10").contains("limit=25")
         assertThat(query).contains("status=APPROVED")
-        assertThat(query).contains("paid_at_start=2026-01-01").contains("paid_at_end=2026-01-31")
+        assertThat(query).contains("created_at_start=2026-01-01").contains("created_at_end=2026-01-31")
         assertThat(query).contains("payment_method_type=CREDIT_CARD")
+    }
+
+    @Test
+    fun `list with q should send it as header`() {
+        mockFactory.nextBody =
+            mapper.writeValueAsBytes(mapOf("result_set" to resultSetMap(), "payments" to emptyList<Any>()))
+        service.list(q = "email@teste.com")
+        assertThat(mockFactory.lastRequest!!.headers.getFirst("q")).isEqualTo("email@teste.com")
     }
 
     @Test
