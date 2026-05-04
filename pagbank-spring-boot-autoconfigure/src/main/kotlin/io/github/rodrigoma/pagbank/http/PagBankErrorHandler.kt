@@ -5,16 +5,11 @@ import io.github.rodrigoma.pagbank.exception.PagBankException
 import io.github.rodrigoma.pagbank.exception.PagBankException.NotFound
 import io.github.rodrigoma.pagbank.exception.PagBankException.ServerError
 import io.github.rodrigoma.pagbank.exception.PagBankException.Unauthorized
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.client.ClientHttpResponse
 import tools.jackson.core.JacksonException
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule
 
-// PagBankErrorHandler is registered on the RestClient builder via:
-//   .defaultStatusHandler({ it.isError }, handler::handle)
-// It does NOT implement ResponseErrorHandler (a RestTemplate interface).
-// The handle() method is called by RestClient for any 4xx/5xx response.
 class PagBankErrorHandler(
     objectMapper: JsonMapper,
 ) {
@@ -32,14 +27,6 @@ class PagBankErrorHandler(
         private const val HTTP_BAD_REQUEST = 400
         private const val HTTP_UNPROCESSABLE = 422
         private const val HTTP_CONFLICT = 409
-    }
-
-    @Suppress("UnusedParameter")
-    fun handle(
-        statusCode: HttpStatusCode,
-        response: ClientHttpResponse,
-    ) {
-        handle(response)
     }
 
     fun handle(response: ClientHttpResponse) {

@@ -4,7 +4,6 @@ import io.github.rodrigoma.pagbank.model.common.Currency
 import io.github.rodrigoma.pagbank.model.common.Currency.BRL
 import io.github.rodrigoma.pagbank.model.common.PagBankLink
 import io.github.rodrigoma.pagbank.model.invoice.InvoiceResponse
-import io.github.rodrigoma.pagbank.model.invoice.InvoiceStatus
 import io.github.rodrigoma.pagbank.model.plan.IntervalUnit
 import io.github.rodrigoma.pagbank.model.plan.PaymentMethod
 
@@ -196,6 +195,3 @@ data class SubscriptionInvoiceListResponse(
     val resultSet: SubscriptionInvoiceResultSet,
     val invoices: List<InvoiceResponse>,
 )
-
-// Re-export InvoiceStatus so callers don't need a separate import
-typealias SubscriptionInvoiceStatus = InvoiceStatus

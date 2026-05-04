@@ -54,7 +54,3 @@ data class InvoiceResponse(
     val updatedAt: String? = null,
     val links: List<PagBankLink>? = null,
 )
-
-data class InvoiceListResponse(
-    val invoices: List<InvoiceResponse>,
-)
