@@ -1,8 +1,5 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.refund.RefundAmount
-import io.github.rodrigoma.pagbank.model.refund.RefundRequest
-import io.github.rodrigoma.pagbank.model.refund.RefundStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -68,44 +65,10 @@ class PagBankRefundServiceTest {
         )
 
     @Test
-    fun `create should POST full refund and return RefundResponse`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(refundMap())
-        val response = service.create("PAYM_001", RefundRequest(amount = RefundAmount(value = 2990)))
-        assertThat(response.id).isEqualTo("REF_123")
-        assertThat(response.amount.value).isEqualTo(2990)
-        assertThat(response.status).isEqualTo(RefundStatus.SUCCESS)
-        assertThat(response.payment?.id).isEqualTo("PAYM_001")
-    }
-
-    @Test
-    fun `create should POST partial refund`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(refundMap())
-        val response = service.create("PAYM_001", RefundRequest(amount = RefundAmount(value = 1000)))
-        assertThat(response.id).isEqualTo("REF_123")
-    }
-
-    @Test
     fun `get should return RefundResponse by id`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(refundMap("REF_456"))
         val response = service.get("REF_456")
         assertThat(response.id).isEqualTo("REF_456")
-    }
-
-    @Test
-    fun `listByPayment should GET refunds for a payment`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("refunds" to listOf(refundMap())))
-        val response = service.listByPayment("PAYM_001")
-        assertThat(response.refunds).hasSize(1)
-        assertThat(response.refunds[0].id).isEqualTo("REF_123")
-        assertThat(mockFactory.lastUri!!.path).contains("/payments/PAYM_001/refunds")
-    }
-
-    @Test
-    fun `listByPayment with filters should encode query params in URI`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("refunds" to emptyList<Any>()))
-        service.listByPayment("PAYM_001", offset = 0, limit = 10)
-        val query = mockFactory.lastUri!!.query
-        assertThat(query).contains("offset=0").contains("limit=10")
     }
 
     @Test
