@@ -40,16 +40,19 @@ class PagBankAutoConfiguration(
     fun pagBankRestClient(
         @Qualifier("pagBankObjectMapper")
         objectMapper: JsonMapper,
-    ): RestClient =
-        RestClient
+    ): RestClient {
+        val errorHandler = PagBankErrorHandler(objectMapper)
+
+        return RestClient
             .builder()
             .baseUrl(properties.environment.baseUrl())
             .defaultHeader(AUTHORIZATION, "Bearer ${properties.token}")
             .configureMessageConverters {
                 it.registerDefaults().withJsonConverter(JacksonJsonHttpMessageConverter(objectMapper))
             }.also { if (properties.logRequests) it.requestInterceptor(PagBankLoggingInterceptor()) }
-            .defaultStatusHandler({ it.isError }) { _, response -> PagBankErrorHandler(objectMapper).handle(response) }
+            .defaultStatusHandler({ it.isError }) { _, response -> errorHandler.handle(response) }
             .build()
+    }
 
     @Bean
     fun pagBankPlanService(
