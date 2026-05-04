@@ -88,7 +88,7 @@ class PagBankSampleController(
         @PathVariable id: String,
     ) = planService.activate(id)
 
-    @PutMapping("/plans/{id}/deactivate")
+    @PutMapping("/plans/{id}/inactivate")
     fun deactivatePlan(
         @PathVariable id: String,
     ) = planService.deactivate(id)
