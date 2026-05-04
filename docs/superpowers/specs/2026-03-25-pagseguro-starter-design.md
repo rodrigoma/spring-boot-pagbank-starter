@@ -133,7 +133,7 @@ All service beans follow the same pattern: constructor-injected `RestClient`, me
 
 | Bean | Key Operations |
 |------|---------------|
-| `PagSeguroPlanService` | `create`, `list`, `get`, `activate`, `deactivate` |
+| `PagSeguroPlanService` | `create`, `list`, `get`, `activate`, `inactivate` |
 | `PagSeguroCustomerService` | `create`, `get`, `update`, `list` |
 | `PagSeguroSubscriptionService` | `create`, `get`, `cancel`, `suspend`, `reactivate`, `list` |
 | `PagSeguroCouponService` | `create`, `apply`, `get`, `delete` |

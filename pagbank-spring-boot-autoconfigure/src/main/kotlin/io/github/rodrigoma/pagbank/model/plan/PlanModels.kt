@@ -1,7 +1,9 @@
 package io.github.rodrigoma.pagbank.model.plan
 
 import io.github.rodrigoma.pagbank.model.common.Currency
+import io.github.rodrigoma.pagbank.model.common.Currency.BRL
 import io.github.rodrigoma.pagbank.model.common.PagBankLink
+import io.github.rodrigoma.pagbank.model.plan.PaymentMethod.CREDIT_CARD
 
 enum class PlanStatus { ACTIVE, INACTIVE }
 
@@ -11,7 +13,7 @@ enum class PaymentMethod { CREDIT_CARD, BOLETO }
 
 data class Money(
     val value: Int,
-    val currency: Currency = Currency.BRL,
+    val currency: Currency = BRL,
 )
 
 data class PlanInterval(
@@ -29,7 +31,7 @@ data class CreatePlanRequest(
     val name: String,
     val amount: Money,
     val interval: PlanInterval,
-    val paymentMethod: List<PaymentMethod> = listOf(PaymentMethod.CREDIT_CARD),
+    val paymentMethod: List<PaymentMethod> = listOf(CREDIT_CARD),
     val referenceId: String? = null,
     val description: String? = null,
     val setupFee: Int? = null,

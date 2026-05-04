@@ -4,7 +4,6 @@ import io.github.rodrigoma.pagbank.model.invoice.InvoiceResponse
 import io.github.rodrigoma.pagbank.model.payment.PaymentListResponse
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
-import org.springframework.web.util.UriComponentsBuilder
 
 class PagBankInvoiceService(
     private val restClient: RestClient,
@@ -18,22 +17,16 @@ class PagBankInvoiceService(
 
     fun listPayments(
         id: String,
-        offset: Int? = null,
-        limit: Int? = null,
-    ): PaymentListResponse {
-        val uri =
-            UriComponentsBuilder
-                .fromPath("/invoices/{id}/payments")
-                .apply {
-                    offset?.let { queryParam("offset", it) }
-                    limit?.let { queryParam("limit", it) }
-                }.build()
-                .expand(id)
-                .toUriString()
-        return restClient
+        offset: Int = 0,
+        limit: Int = 100,
+    ): PaymentListResponse =
+        restClient
             .get()
-            .uri(uri)
-            .retrieve()
+            .uri { builder ->
+                builder.path("/invoices/{id}/payments")
+                offset.let { builder.queryParam("offset", it) }
+                limit.let { builder.queryParam("limit", it) }
+                builder.build(id)
+            }.retrieve()
             .body<PaymentListResponse>()!!
-    }
 }

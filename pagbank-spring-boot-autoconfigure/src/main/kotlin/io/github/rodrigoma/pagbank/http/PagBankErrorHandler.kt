@@ -2,6 +2,9 @@ package io.github.rodrigoma.pagbank.http
 
 import io.github.rodrigoma.pagbank.exception.ApiErrorResponse
 import io.github.rodrigoma.pagbank.exception.PagBankException
+import io.github.rodrigoma.pagbank.exception.PagBankException.NotFound
+import io.github.rodrigoma.pagbank.exception.PagBankException.ServerError
+import io.github.rodrigoma.pagbank.exception.PagBankException.Unauthorized
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.client.ClientHttpResponse
 import tools.jackson.core.JacksonException
@@ -44,10 +47,10 @@ class PagBankErrorHandler(
         val body = runCatching { response.body.readBytes() }.getOrDefault(ByteArray(0))
 
         throw when (statusCode) {
-            HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> PagBankException.Unauthorized(bodyAsString(body), statusCode)
-            HTTP_NOT_FOUND -> PagBankException.NotFound("Resource not found")
+            HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> Unauthorized(bodyAsString(body), statusCode)
+            HTTP_NOT_FOUND -> NotFound("Resource not found")
             HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE, HTTP_CONFLICT -> parseValidationError(body, statusCode)
-            else -> PagBankException.ServerError(statusCode)
+            else -> ServerError(statusCode)
         }
     }
 
@@ -60,7 +63,7 @@ class PagBankErrorHandler(
             val response = objectMapper.readValue(body, ApiErrorResponse::class.java)
             PagBankException.ValidationError(response.errorMessages, statusCode)
         } catch (e: JacksonException) {
-            PagBankException.ServerError(statusCode)
+            ServerError(statusCode)
         }
 
     private fun bodyAsString(body: ByteArray): String = if (body.isEmpty()) "Unauthorized" else body.decodeToString()

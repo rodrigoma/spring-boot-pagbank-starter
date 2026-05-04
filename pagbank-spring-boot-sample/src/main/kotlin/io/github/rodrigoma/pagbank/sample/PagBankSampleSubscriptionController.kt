@@ -59,8 +59,8 @@ class PagBankSampleSubscriptionController(
 
     @GetMapping
     fun listSubscriptions(
-        @RequestParam(required = false) offset: Int?,
-        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) offset: Int = 0,
+        @RequestParam(required = false) limit: Int = 100,
         @RequestParam(name = "reference_id", required = false) referenceId: String?,
         @RequestParam(required = false) status: SubscriptionStatus?,
     ): SubscriptionListResponse = subscriptionService.list(offset, limit, referenceId, status)
@@ -109,8 +109,8 @@ class PagBankSampleSubscriptionController(
     @GetMapping("/{id}/invoices")
     fun listSubscriptionInvoices(
         @PathVariable id: String,
-        @RequestParam(required = false) offset: Int?,
-        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) offset: Int = 0,
+        @RequestParam(required = false) limit: Int = 100,
         @RequestParam(required = false) status: InvoiceStatus?,
     ): SubscriptionInvoiceListResponse = subscriptionService.listInvoices(id, offset, limit, status)
 }

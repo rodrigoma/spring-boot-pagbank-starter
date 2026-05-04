@@ -8,7 +8,6 @@ import io.github.rodrigoma.pagbank.model.refund.RefundRequest
 import io.github.rodrigoma.pagbank.model.refund.RefundResponse
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
-import org.springframework.web.util.UriComponentsBuilder
 
 class PagBankPaymentService(
     private val restClient: RestClient,
@@ -33,52 +32,41 @@ class PagBankPaymentService(
 
     fun listRefunds(
         id: String,
-        offset: Int? = null,
-        limit: Int? = null,
-    ): RefundListResponse {
-        val uri =
-            UriComponentsBuilder
-                .fromPath("/payments/{id}/refunds")
-                .apply {
-                    offset?.let { queryParam("offset", it) }
-                    limit?.let { queryParam("limit", it) }
-                }.build()
-                .expand(id)
-                .toUriString()
-        return restClient
+        offset: Int = 0,
+        limit: Int = 100,
+    ): RefundListResponse =
+        restClient
             .get()
-            .uri(uri)
-            .retrieve()
+            .uri { builder ->
+                builder.path("/payments/{id}/refunds")
+                offset.let { builder.queryParam("offset", it) }
+                limit.let { builder.queryParam("limit", it) }
+                builder.build(id)
+            }.retrieve()
             .body<RefundListResponse>()!!
-    }
 
     @Suppress("LongParameterList")
     fun list(
-        offset: Int? = null,
-        limit: Int? = null,
+        offset: Int = 0,
+        limit: Int = 100,
         status: PaymentStatus? = null,
         createdAtStart: String? = null,
         createdAtEnd: String? = null,
         paymentMethodType: String? = null,
         q: String? = null,
-    ): PaymentListResponse {
-        val uri =
-            UriComponentsBuilder
-                .fromPath("/payments")
-                .apply {
-                    offset?.let { queryParam("offset", it) }
-                    limit?.let { queryParam("limit", it) }
-                    status?.let { queryParam("status", it.name) }
-                    createdAtStart?.let { queryParam("created_at_start", it) }
-                    createdAtEnd?.let { queryParam("created_at_end", it) }
-                    paymentMethodType?.let { queryParam("payment_method_type", it) }
-                }.build()
-                .toUriString()
-        return restClient
+    ): PaymentListResponse =
+        restClient
             .get()
-            .uri(uri)
-            .apply { q?.let { header("q", it) } }
+            .uri { builder ->
+                builder.path("/payments")
+                offset.let { builder.queryParam("offset", it) }
+                limit.let { builder.queryParam("limit", it) }
+                status?.let { builder.queryParam("status", it.name) }
+                createdAtStart?.let { builder.queryParam("created_at_start", it) }
+                createdAtEnd?.let { builder.queryParam("created_at_end", it) }
+                paymentMethodType?.let { builder.queryParam("payment_method_type", it) }
+                builder.build()
+            }.apply { q?.let { header("q", it) } }
             .retrieve()
             .body<PaymentListResponse>()!!
-    }
 }

@@ -1,6 +1,7 @@
 package io.github.rodrigoma.pagbank.model.payment
 
 import io.github.rodrigoma.pagbank.model.common.Currency
+import io.github.rodrigoma.pagbank.model.common.Currency.BRL
 import io.github.rodrigoma.pagbank.model.common.PagBankLink
 import io.github.rodrigoma.pagbank.model.plan.PaymentMethod
 
@@ -8,7 +9,7 @@ enum class PaymentStatus { APPROVED, PENDING, DENIED, REFUNDED, UNPAID, IN_ANALY
 
 data class PaymentAmount(
     val value: Int,
-    val currency: Currency = Currency.BRL,
+    val currency: Currency = BRL,
 )
 
 data class PaymentInvoice(

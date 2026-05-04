@@ -1,6 +1,7 @@
 package io.github.rodrigoma.pagbank.model.invoice
 
 import io.github.rodrigoma.pagbank.model.common.Currency
+import io.github.rodrigoma.pagbank.model.common.Currency.BRL
 import io.github.rodrigoma.pagbank.model.common.PagBankLink
 
 enum class InvoiceStatus { OPEN, PAID, WAITING, UNPAID, OVERDUE, CLOSED, PENDING_ACTION }
@@ -9,7 +10,7 @@ enum class InvoiceItemType { SUBSCRIPTION_AMOUNT, SETUP_FEE, TRIAL, COUPON }
 
 data class InvoiceAmount(
     val value: Int,
-    val currency: Currency = Currency.BRL,
+    val currency: Currency = BRL,
 )
 
 data class InvoicePlan(

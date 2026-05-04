@@ -22,7 +22,7 @@ class PagBankSampleInvoiceController(
     @GetMapping("/{id}/payments")
     fun listInvoicePayments(
         @PathVariable id: String,
-        @RequestParam(required = false) offset: Int?,
-        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) offset: Int = 0,
+        @RequestParam(required = false) limit: Int = 100,
     ): PaymentListResponse = invoiceService.listPayments(id, offset, limit)
 }

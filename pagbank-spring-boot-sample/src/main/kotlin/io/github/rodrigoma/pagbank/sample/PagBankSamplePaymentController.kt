@@ -29,8 +29,8 @@ class PagBankSamplePaymentController(
     @Suppress("LongParameterList")
     @GetMapping
     fun listPayments(
-        @RequestParam(required = false) offset: Int?,
-        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) offset: Int = 0,
+        @RequestParam(required = false) limit: Int = 100,
         @RequestParam(required = false) status: PaymentStatus?,
         @RequestParam(name = "created_at_start", required = false) createdAtStart: String?,
         @RequestParam(name = "created_at_end", required = false) createdAtEnd: String?,
@@ -56,7 +56,7 @@ class PagBankSamplePaymentController(
     @GetMapping("/{id}/refunds")
     fun listPaymentRefunds(
         @PathVariable id: String,
-        @RequestParam(required = false) offset: Int?,
-        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) offset: Int = 0,
+        @RequestParam(required = false) limit: Int = 100,
     ): RefundListResponse = paymentService.listRefunds(id, offset, limit)
 }

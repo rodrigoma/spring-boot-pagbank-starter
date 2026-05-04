@@ -43,8 +43,8 @@ class PagBankSampleCouponController(
 
     @GetMapping
     fun listCoupons(
-        @RequestParam(required = false) offset: Int?,
-        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) offset: Int = 0,
+        @RequestParam(required = false) limit: Int = 100,
         @RequestParam(name = "reference_id", required = false) referenceId: String?,
         @RequestParam(required = false) status: CouponStatus?,
     ): CouponListResponse = couponService.list(offset, limit, referenceId, status)

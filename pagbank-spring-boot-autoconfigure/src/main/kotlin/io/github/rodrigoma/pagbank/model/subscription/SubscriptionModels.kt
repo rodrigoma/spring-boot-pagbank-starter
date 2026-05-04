@@ -1,6 +1,7 @@
 package io.github.rodrigoma.pagbank.model.subscription
 
 import io.github.rodrigoma.pagbank.model.common.Currency
+import io.github.rodrigoma.pagbank.model.common.Currency.BRL
 import io.github.rodrigoma.pagbank.model.common.PagBankLink
 import io.github.rodrigoma.pagbank.model.invoice.InvoiceResponse
 import io.github.rodrigoma.pagbank.model.invoice.InvoiceStatus
@@ -13,6 +14,8 @@ enum class RetryAttempt { FIRST, SECOND, THIRD }
 
 enum class RetryStatus { SCHEDULED, EXECUTING, MANUALLY_EXECUTED, AUTOMATICALLY_EXECUTED, CANCELED }
 
+enum class SplitMethod { FIXED, PERCENTAGE }
+
 data class SubscriptionPlanRef(
     val id: String,
 )
@@ -23,7 +26,7 @@ data class SubscriptionCustomerRef(
 
 data class SubscriptionAmount(
     val value: Int,
-    val currency: Currency = Currency.BRL,
+    val currency: Currency = BRL,
 )
 
 data class SubscriptionCardHolder(
@@ -123,11 +126,6 @@ data class SplitReceiver(
     val account: SplitAccount,
     val amount: SplitReceiverAmount,
 )
-
-enum class SplitMethod {
-    FIXED,
-    PERCENTAGE,
-}
 
 data class Splits(
     val method: SplitMethod,

@@ -110,7 +110,7 @@ class PagBankPreferenceServiceTest {
         assertThat(response.firstTry).isEqualTo(1)
         assertThat(response.secondTry).isEqualTo(3)
         assertThat(response.thirdTry).isEqualTo(5)
-        assertThat(response.finalAction).isEqualTo(io.github.rodrigoma.pagbank.model.preference.FinalAction.CANCEL)
+        assertThat(response.finally).isEqualTo(io.github.rodrigoma.pagbank.model.preference.Finally.CANCEL)
     }
 
     @Test
@@ -122,7 +122,7 @@ class PagBankPreferenceServiceTest {
                     firstTry = 1,
                     secondTry = 3,
                     thirdTry = 5,
-                    finalAction = io.github.rodrigoma.pagbank.model.preference.FinalAction.CANCEL,
+                    finally = io.github.rodrigoma.pagbank.model.preference.Finally.CANCEL,
                 ),
             )
         assertThat(response.firstTry).isEqualTo(1)

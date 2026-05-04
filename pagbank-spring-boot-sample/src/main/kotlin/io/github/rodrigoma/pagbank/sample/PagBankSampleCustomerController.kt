@@ -52,8 +52,8 @@ class PagBankSampleCustomerController(
 
     @GetMapping
     fun listCustomers(
-        @RequestParam(required = false) offset: Int?,
-        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) offset: Int = 0,
+        @RequestParam(required = false) limit: Int = 100,
         @RequestParam(name = "reference_id", required = false) referenceId: String?,
     ): CustomerListResponse = customerService.list(offset, limit, referenceId)
 }

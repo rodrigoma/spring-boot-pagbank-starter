@@ -38,8 +38,8 @@ class PagBankPlanService(
             .body<PlanResponse>()!!
 
     fun list(
-        offset: Int? = null,
-        limit: Int? = null,
+        offset: Int = 0,
+        limit: Int = 100,
         referenceId: String? = null,
         status: PlanStatus? = null,
     ): PlanListResponse =
@@ -47,8 +47,8 @@ class PagBankPlanService(
             .get()
             .uri { builder ->
                 builder.path("/plans")
-                offset?.let { builder.queryParam("offset", it) }
-                limit?.let { builder.queryParam("limit", it) }
+                offset.let { builder.queryParam("offset", it) }
+                limit.let { builder.queryParam("limit", it) }
                 referenceId?.let { builder.queryParam("reference_id", it) }
                 status?.let { builder.queryParam("status", it.name) }
                 builder.build()
@@ -63,7 +63,7 @@ class PagBankPlanService(
             .toBodilessEntity()
     }
 
-    fun deactivate(id: String) {
+    fun inactivate(id: String) {
         restClient
             .put()
             .uri("/plans/{id}/inactivate", id)

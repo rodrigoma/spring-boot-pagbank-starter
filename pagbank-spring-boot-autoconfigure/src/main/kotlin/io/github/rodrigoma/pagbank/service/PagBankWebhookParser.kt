@@ -2,8 +2,8 @@ package io.github.rodrigoma.pagbank.service
 
 import io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties
 import io.github.rodrigoma.pagbank.model.webhook.WebhookPayload
-import tools.jackson.databind.DeserializationFeature
-import tools.jackson.databind.PropertyNamingStrategies
+import tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
+import tools.jackson.databind.PropertyNamingStrategies.SNAKE_CASE
 import tools.jackson.module.kotlin.jacksonMapperBuilder
 import tools.jackson.module.kotlin.readValue
 import javax.crypto.Mac
@@ -14,8 +14,8 @@ class PagBankWebhookParser(
 ) {
     private val mapper =
         jacksonMapperBuilder()
-            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .propertyNamingStrategy(SNAKE_CASE)
+            .disable(FAIL_ON_UNKNOWN_PROPERTIES)
             .build()
 
     fun parse(rawBody: String): WebhookPayload = mapper.readValue(rawBody)

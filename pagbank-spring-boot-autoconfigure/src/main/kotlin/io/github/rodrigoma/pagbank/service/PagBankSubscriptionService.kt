@@ -9,7 +9,6 @@ import io.github.rodrigoma.pagbank.model.subscription.SubscriptionStatus
 import io.github.rodrigoma.pagbank.model.subscription.UpdateSubscriptionRequest
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
-import org.springframework.web.util.UriComponentsBuilder
 
 class PagBankSubscriptionService(
     private val restClient: RestClient,
@@ -81,48 +80,37 @@ class PagBankSubscriptionService(
     }
 
     fun list(
-        offset: Int? = null,
-        limit: Int? = null,
+        offset: Int = 0,
+        limit: Int = 100,
         referenceId: String? = null,
         status: SubscriptionStatus? = null,
-    ): SubscriptionListResponse {
-        val uri =
-            UriComponentsBuilder
-                .fromPath("/subscriptions")
-                .apply {
-                    offset?.let { queryParam("offset", it) }
-                    limit?.let { queryParam("limit", it) }
-                    referenceId?.let { queryParam("reference_id", it) }
-                    status?.let { queryParam("status", it.name) }
-                }.build()
-                .toUriString()
-        return restClient
+    ): SubscriptionListResponse =
+        restClient
             .get()
-            .uri(uri)
-            .retrieve()
+            .uri { builder ->
+                builder.path("/subscriptions")
+                offset.let { builder.queryParam("offset", it) }
+                limit.let { builder.queryParam("limit", it) }
+                referenceId?.let { builder.queryParam("reference_id", it) }
+                status?.let { builder.queryParam("status", it.name) }
+                builder.build()
+            }.retrieve()
             .body<SubscriptionListResponse>()!!
-    }
 
     fun listInvoices(
         id: String,
-        offset: Int? = null,
-        limit: Int? = null,
+        offset: Int = 0,
+        limit: Int = 100,
         status: InvoiceStatus? = null,
-    ): SubscriptionInvoiceListResponse {
-        val uri =
-            UriComponentsBuilder
-                .fromPath("/subscriptions/{id}/invoices")
-                .apply {
-                    offset?.let { queryParam("offset", it) }
-                    limit?.let { queryParam("limit", it) }
-                    status?.let { queryParam("status", it.name) }
-                }.build()
-                .expand(id)
-                .toUriString()
-        return restClient
+    ): SubscriptionInvoiceListResponse =
+        restClient
             .get()
-            .uri(uri)
-            .retrieve()
+            .uri { builder ->
+                builder.path("/subscriptions/{id}/invoices")
+                offset.let { builder.queryParam("offset", it) }
+                limit.let { builder.queryParam("limit", it) }
+                status?.let { builder.queryParam("status", it.name) }
+                builder.build(id)
+            }.retrieve()
             .body<SubscriptionInvoiceListResponse>()!!
-    }
 }

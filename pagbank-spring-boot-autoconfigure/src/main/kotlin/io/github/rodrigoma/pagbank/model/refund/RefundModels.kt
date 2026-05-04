@@ -1,6 +1,7 @@
 package io.github.rodrigoma.pagbank.model.refund
 
 import io.github.rodrigoma.pagbank.model.common.Currency
+import io.github.rodrigoma.pagbank.model.common.Currency.BRL
 import io.github.rodrigoma.pagbank.model.common.PagBankLink
 
 enum class RefundType { FULL, PARTIAL }
@@ -9,7 +10,7 @@ enum class RefundStatus { SUCCESS, FAILED }
 
 data class RefundAmount(
     val value: Int,
-    val currency: Currency = Currency.BRL,
+    val currency: Currency = BRL,
 )
 
 data class RefundPayment(

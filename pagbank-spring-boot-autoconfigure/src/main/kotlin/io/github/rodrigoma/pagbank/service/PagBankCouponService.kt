@@ -26,8 +26,8 @@ class PagBankCouponService(
             .body<CouponResponse>()!!
 
     fun list(
-        offset: Int? = null,
-        limit: Int? = null,
+        offset: Int = 0,
+        limit: Int = 100,
         referenceId: String? = null,
         status: CouponStatus? = null,
     ): CouponListResponse =
@@ -35,8 +35,8 @@ class PagBankCouponService(
             .get()
             .uri { builder ->
                 builder.path("/coupons")
-                offset?.let { builder.queryParam("offset", it) }
-                limit?.let { builder.queryParam("limit", it) }
+                offset.let { builder.queryParam("offset", it) }
+                limit.let { builder.queryParam("limit", it) }
                 referenceId?.let { builder.queryParam("reference_id", it) }
                 status?.let { builder.queryParam("status", it.name) }
                 builder.build()

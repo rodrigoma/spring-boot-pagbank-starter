@@ -1,9 +1,6 @@
 package io.github.rodrigoma.pagbank.model.preference
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.github.rodrigoma.pagbank.model.common.PagBankLink
-
-// --- Notifications (GET/PUT /preferences/notifications) ---
 
 data class NotificationChannel(
     val enabled: Boolean,
@@ -19,19 +16,14 @@ data class NotificationPreferences(
     val urls: List<String>? = null,
 )
 
-// --- Retries (GET/PUT /preferences/retries) ---
-
-enum class FinalAction { SUSPEND, CANCEL }
+enum class Finally { SUSPEND, CANCEL }
 
 data class RetryPreferences(
     val firstTry: Int,
     val secondTry: Int? = null,
     val thirdTry: Int? = null,
-    @JsonProperty("finally")
-    val finalAction: FinalAction? = null,
+    val finally: Finally? = null,
 )
-
-// --- Public Keys (GET/PUT /public-keys) ---
 
 data class PublicKeyResponse(
     val publicKey: String,

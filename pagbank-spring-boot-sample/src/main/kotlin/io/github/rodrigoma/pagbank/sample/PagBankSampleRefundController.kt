@@ -21,7 +21,7 @@ class PagBankSampleRefundController(
 
     @GetMapping
     fun listRefunds(
-        @RequestParam(required = false) offset: Int?,
-        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) offset: Int = 0,
+        @RequestParam(required = false) limit: Int = 100,
     ): RefundListResponse = refundService.list(offset, limit)
 }

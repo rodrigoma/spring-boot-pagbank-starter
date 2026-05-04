@@ -165,9 +165,9 @@ class PagBankPlanServiceTest {
     }
 
     @Test
-    fun `deactivate should PUT without a response body`() {
+    fun `inactivate should PUT without a response body`() {
         mockFactory.nextBody = ByteArray(0)
         mockFactory.nextStatus = HttpStatus.OK
-        service.deactivate("PLAN_123")
+        service.inactivate("PLAN_123")
     }
 }

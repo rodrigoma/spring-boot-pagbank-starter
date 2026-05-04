@@ -49,16 +49,16 @@ class PagBankCustomerService(
             .body<CustomerResponse>()!!
 
     fun list(
-        offset: Int? = null,
-        limit: Int? = null,
+        offset: Int = 0,
+        limit: Int = 100,
         referenceId: String? = null,
     ): CustomerListResponse =
         restClient
             .get()
             .uri { builder ->
                 builder.path("/customers")
-                offset?.let { builder.queryParam("offset", it) }
-                limit?.let { builder.queryParam("limit", it) }
+                offset.let { builder.queryParam("offset", it) }
+                limit.let { builder.queryParam("limit", it) }
                 referenceId?.let { builder.queryParam("reference_id", it) }
                 builder.build()
             }.retrieve()

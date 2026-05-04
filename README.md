@@ -125,8 +125,8 @@ class MyPlanSetupService(private val planService: PagBankPlanService) {
         return planService.list()
     }
 
-    fun deactivatePlan(planId: String) {
-        planService.deactivate(planId)
+    fun inactivatePlan(planId: String) {
+        planService.inactivate(planId)
     }
 }
 ```

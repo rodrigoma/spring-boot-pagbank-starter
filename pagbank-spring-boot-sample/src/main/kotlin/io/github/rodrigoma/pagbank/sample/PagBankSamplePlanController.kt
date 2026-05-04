@@ -27,8 +27,8 @@ class PagBankSamplePlanController(
 ) {
     @GetMapping
     fun listPlans(
-        @RequestParam(required = false) offset: Int?,
-        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) offset: Int = 0,
+        @RequestParam(required = false) limit: Int = 100,
         @RequestParam(name = "reference_id", required = false) referenceId: String?,
         @RequestParam(required = false) status: PlanStatus?,
     ): PlanListResponse = planService.list(offset, limit, referenceId, status)
@@ -65,5 +65,5 @@ class PagBankSamplePlanController(
     @PutMapping("/{id}/inactivate")
     fun inactivatePlan(
         @PathVariable id: String,
-    ) = planService.deactivate(id)
+    ) = planService.inactivate(id)
 }
