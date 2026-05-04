@@ -1,11 +1,11 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.common.ListParams
 import io.github.rodrigoma.pagbank.model.refund.RefundListResponse
 import io.github.rodrigoma.pagbank.model.refund.RefundRequest
 import io.github.rodrigoma.pagbank.model.refund.RefundResponse
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
+import org.springframework.web.util.UriComponentsBuilder
 
 class PagBankRefundService(
     private val restClient: RestClient,
@@ -30,18 +30,41 @@ class PagBankRefundService(
 
     fun listByPayment(
         paymentId: String,
-        params: ListParams = ListParams(),
-    ): RefundListResponse =
-        restClient
+        offset: Int? = null,
+        limit: Int? = null,
+    ): RefundListResponse {
+        val uri =
+            UriComponentsBuilder
+                .fromPath("/payments/{paymentId}/refunds")
+                .apply {
+                    offset?.let { queryParam("offset", it) }
+                    limit?.let { queryParam("limit", it) }
+                }.build()
+                .expand(paymentId)
+                .toUriString()
+        return restClient
             .get()
-            .uri("/payments/{paymentId}/refunds?limit={limit}&offset={offset}", paymentId, params.limit, params.offset)
+            .uri(uri)
             .retrieve()
             .body<RefundListResponse>()!!
+    }
 
-    fun list(params: ListParams = ListParams()): RefundListResponse =
-        restClient
+    fun list(
+        offset: Int? = null,
+        limit: Int? = null,
+    ): RefundListResponse {
+        val uri =
+            UriComponentsBuilder
+                .fromPath("/refunds")
+                .apply {
+                    offset?.let { queryParam("offset", it) }
+                    limit?.let { queryParam("limit", it) }
+                }.build()
+                .toUriString()
+        return restClient
             .get()
-            .uri("/refunds?limit={limit}&offset={offset}", params.limit, params.offset)
+            .uri(uri)
             .retrieve()
             .body<RefundListResponse>()!!
+    }
 }

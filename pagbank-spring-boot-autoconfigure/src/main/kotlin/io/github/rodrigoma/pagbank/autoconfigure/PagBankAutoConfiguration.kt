@@ -3,7 +3,6 @@ package io.github.rodrigoma.pagbank.autoconfigure
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.github.rodrigoma.pagbank.http.PagBankErrorHandler
 import io.github.rodrigoma.pagbank.http.PagBankLoggingInterceptor
-import io.github.rodrigoma.pagbank.service.PagBankChargeService
 import io.github.rodrigoma.pagbank.service.PagBankCouponService
 import io.github.rodrigoma.pagbank.service.PagBankCustomerService
 import io.github.rodrigoma.pagbank.service.PagBankInvoiceService
@@ -79,10 +78,6 @@ class PagBankAutoConfiguration(
     @Bean fun pagBankPaymentService(
         @Qualifier("pagBankRestClient") rc: RestClient,
     ) = PagBankPaymentService(rc)
-
-    @Bean fun pagBankChargeService(
-        @Qualifier("pagBankRestClient") rc: RestClient,
-    ) = PagBankChargeService(rc)
 
     @Bean fun pagBankRefundService(
         @Qualifier("pagBankRestClient") rc: RestClient,

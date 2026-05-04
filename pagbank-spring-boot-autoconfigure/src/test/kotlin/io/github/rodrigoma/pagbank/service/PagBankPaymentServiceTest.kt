@@ -1,6 +1,6 @@
 package io.github.rodrigoma.pagbank.service
 
-import io.github.rodrigoma.pagbank.model.common.ListParams
+import io.github.rodrigoma.pagbank.model.payment.PaymentStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -26,11 +26,13 @@ class PagBankPaymentServiceTest {
             var nextBody: ByteArray = ByteArray(0)
             var nextStatus: HttpStatus = HttpStatus.OK
             var nextContentType: MediaType = MediaType.APPLICATION_JSON
+            var lastUri: java.net.URI? = null
 
             override fun createRequest(
                 uri: java.net.URI,
                 httpMethod: HttpMethod,
             ): org.springframework.http.client.ClientHttpRequest {
+                lastUri = uri
                 val response = MockClientHttpResponse(nextBody, nextStatus)
                 response.headers.contentType = nextContentType
                 return MockClientHttpRequest(httpMethod, uri).also { it.setResponse(response) }
@@ -75,26 +77,34 @@ class PagBankPaymentServiceTest {
         mockFactory.nextBody = mapper.writeValueAsBytes(paymentMap())
         val response = service.get("PAYM_123")
         assertThat(response.id).isEqualTo("PAYM_123")
-        assertThat(response.status).isEqualTo(io.github.rodrigoma.pagbank.model.payment.PaymentStatus.APPROVED)
+        assertThat(response.status).isEqualTo(PaymentStatus.APPROVED)
         assertThat(response.invoice?.id).isEqualTo("INVO_001")
         assertThat(response.provider?.transactionId).isEqualTo("CHAR_123")
     }
 
     @Test
     fun `list should return PaymentListResponse with default params`() {
-        mockFactory.nextBody =
-            mapper.writeValueAsBytes(
-                mapOf("payments" to listOf(paymentMap())),
-            )
+        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("payments" to listOf(paymentMap())))
         val response = service.list()
         assertThat(response.payments).hasSize(1)
         assertThat(response.payments[0].id).isEqualTo("PAYM_123")
     }
 
     @Test
-    fun `list with custom params should return empty response`() {
+    fun `list with filters should encode query params in URI`() {
         mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("payments" to emptyList<Any>()))
-        val response = service.list(ListParams(limit = 20, offset = 40))
-        assertThat(response.payments).isEmpty()
+        service.list(
+            offset = 10,
+            limit = 25,
+            status = PaymentStatus.APPROVED,
+            paidAtStart = "2026-01-01",
+            paidAtEnd = "2026-01-31",
+            paymentMethodType = "CREDIT_CARD",
+        )
+        val query = mockFactory.lastUri!!.query
+        assertThat(query).contains("offset=10").contains("limit=25")
+        assertThat(query).contains("status=APPROVED")
+        assertThat(query).contains("paid_at_start=2026-01-01").contains("paid_at_end=2026-01-31")
+        assertThat(query).contains("payment_method_type=CREDIT_CARD")
     }
 }
