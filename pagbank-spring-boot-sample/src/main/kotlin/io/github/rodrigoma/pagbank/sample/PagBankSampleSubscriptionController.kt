@@ -31,22 +31,28 @@ class PagBankSampleSubscriptionController(
     private val subscriptionService: PagBankSubscriptionService,
 ) {
     @PostMapping("/demo")
-    fun createDemoSubscription(): SubscriptionResponse =
+    fun createDemoSubscription(
+        @RequestParam planId: String,
+        @RequestParam customerId: String,
+        @RequestParam cardToken: String,
+        @RequestParam securityCode: String,
+        @RequestParam(required = false) referenceId: String?,
+    ): SubscriptionResponse =
         subscriptionService.create(
             CreateSubscriptionRequest(
-                plan = SubscriptionPlanRef(id = "PLAN_D0468208-3528-4FC9-B640-3C38C12F58AA"),
-                customer = SubscriptionCustomerRef(id = "CUST_DB860896-D21D-43F0-B299-60E912BE353C"),
+                plan = SubscriptionPlanRef(id = planId),
+                customer = SubscriptionCustomerRef(id = customerId),
                 paymentMethod =
                     listOf(
                         SubscriptionPaymentMethod(
                             type = PaymentMethod.CREDIT_CARD,
                             card = SubscriptionCard(
-                                token = "CARD_F07EF61F-4425-4FCA-87DE-EDF1F33B912C",
-                                securityCode = "123",
+                                token = cardToken,
+                                securityCode = securityCode,
                             ),
                         ),
                     ),
-                referenceId = "demo-subscription-001",
+                referenceId = referenceId,
             ),
         )
 
