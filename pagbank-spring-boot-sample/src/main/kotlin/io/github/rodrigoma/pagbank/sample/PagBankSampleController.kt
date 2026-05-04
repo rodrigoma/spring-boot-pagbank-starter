@@ -13,7 +13,11 @@ import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
 import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
 import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
 import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
+import io.github.rodrigoma.pagbank.model.invoice.InvoiceResponse
 import io.github.rodrigoma.pagbank.model.invoice.InvoiceStatus
+import io.github.rodrigoma.pagbank.model.payment.PaymentListResponse
+import io.github.rodrigoma.pagbank.model.payment.PaymentResponse
+import io.github.rodrigoma.pagbank.model.payment.PaymentStatus
 import io.github.rodrigoma.pagbank.model.plan.CreatePlanRequest
 import io.github.rodrigoma.pagbank.model.plan.IntervalUnit
 import io.github.rodrigoma.pagbank.model.plan.Money
@@ -25,6 +29,9 @@ import io.github.rodrigoma.pagbank.model.plan.UpdatePlanRequest
 import io.github.rodrigoma.pagbank.model.preference.NotificationPreferences
 import io.github.rodrigoma.pagbank.model.preference.PublicKeyResponse
 import io.github.rodrigoma.pagbank.model.preference.RetryPreferences
+import io.github.rodrigoma.pagbank.model.refund.RefundListResponse
+import io.github.rodrigoma.pagbank.model.refund.RefundRequest
+import io.github.rodrigoma.pagbank.model.refund.RefundResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionInvoiceListResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionListResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionResponse
@@ -32,8 +39,11 @@ import io.github.rodrigoma.pagbank.model.subscription.SubscriptionStatus
 import io.github.rodrigoma.pagbank.model.subscription.UpdateSubscriptionRequest
 import io.github.rodrigoma.pagbank.service.PagBankCouponService
 import io.github.rodrigoma.pagbank.service.PagBankCustomerService
+import io.github.rodrigoma.pagbank.service.PagBankInvoiceService
+import io.github.rodrigoma.pagbank.service.PagBankPaymentService
 import io.github.rodrigoma.pagbank.service.PagBankPlanService
 import io.github.rodrigoma.pagbank.service.PagBankPreferenceService
+import io.github.rodrigoma.pagbank.service.PagBankRefundService
 import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -41,16 +51,20 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LongParameterList")
 @RestController
 @RequestMapping("/sample")
 class PagBankSampleController(
     private val planService: PagBankPlanService,
     private val subscriptionService: PagBankSubscriptionService,
+    private val invoiceService: PagBankInvoiceService,
+    private val paymentService: PagBankPaymentService,
+    private val refundService: PagBankRefundService,
     private val couponService: PagBankCouponService,
     private val customerService: PagBankCustomerService,
     private val preferenceService: PagBankPreferenceService,
@@ -252,4 +266,71 @@ class PagBankSampleController(
     fun activateCoupon(
         @PathVariable id: String,
     ) = couponService.activate(id)
+
+    // --- Invoices ---
+
+    @GetMapping("/invoices/{id}")
+    fun getInvoice(
+        @PathVariable id: String,
+    ): InvoiceResponse = invoiceService.get(id)
+
+    @GetMapping("/invoices/{id}/payments")
+    fun listInvoicePayments(
+        @PathVariable id: String,
+        @RequestParam(required = false) offset: Int?,
+        @RequestParam(required = false) limit: Int?,
+    ): PaymentListResponse = invoiceService.listPayments(id, offset, limit)
+
+    // --- Payments ---
+
+    @GetMapping("/payments/{id}")
+    fun getPayment(
+        @PathVariable id: String,
+    ): PaymentResponse = paymentService.get(id)
+
+    @GetMapping("/payments")
+    fun listPayments(
+        @RequestParam(required = false) offset: Int?,
+        @RequestParam(required = false) limit: Int?,
+        @RequestParam(required = false) status: PaymentStatus?,
+        @RequestParam(name = "created_at_start", required = false) createdAtStart: String?,
+        @RequestParam(name = "created_at_end", required = false) createdAtEnd: String?,
+        @RequestParam(name = "payment_method_type", required = false) paymentMethodType: String?,
+        @RequestHeader(required = false) q: String?,
+    ): PaymentListResponse =
+        paymentService.list(
+            offset = offset,
+            limit = limit,
+            status = status,
+            createdAtStart = createdAtStart,
+            createdAtEnd = createdAtEnd,
+            paymentMethodType = paymentMethodType,
+            q = q,
+        )
+
+    @PostMapping("/payments/{id}/refunds")
+    fun createPaymentRefund(
+        @PathVariable id: String,
+        @RequestBody request: RefundRequest,
+    ): RefundResponse = paymentService.createRefund(id, request)
+
+    @GetMapping("/payments/{id}/refunds")
+    fun listPaymentRefunds(
+        @PathVariable id: String,
+        @RequestParam(required = false) offset: Int?,
+        @RequestParam(required = false) limit: Int?,
+    ): RefundListResponse = paymentService.listRefunds(id, offset, limit)
+
+    // --- Refunds ---
+
+    @GetMapping("/refunds/{id}")
+    fun getRefund(
+        @PathVariable id: String,
+    ): RefundResponse = refundService.get(id)
+
+    @GetMapping("/refunds")
+    fun listRefunds(
+        @RequestParam(required = false) offset: Int?,
+        @RequestParam(required = false) limit: Int?,
+    ): RefundListResponse = refundService.list(offset, limit)
 }
