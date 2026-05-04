@@ -22,7 +22,7 @@ data class RetryPreferences(
     val firstTry: Int,
     val secondTry: Int? = null,
     val thirdTry: Int? = null,
-    val finally: Finally? = null,
+    val `finally`: Finally? = null,
 )
 
 data class PublicKeyResponse(
