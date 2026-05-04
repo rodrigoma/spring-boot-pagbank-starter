@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 class PagBankExceptionHandler {
     @ExceptionHandler(PagBankException.ValidationError::class)
     fun handleValidationError(ex: PagBankException.ValidationError): ResponseEntity<Map<String, List<ApiError>>> =
-        ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(mapOf("error_messages" to ex.errors))
+        ResponseEntity.status(ex.httpStatus).body(mapOf("error_messages" to ex.errors))
 
     @ExceptionHandler(PagBankException.NotFound::class)
     fun handleNotFound(ex: PagBankException.NotFound): ResponseEntity<Map<String, String>> =

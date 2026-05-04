@@ -58,7 +58,7 @@ class PagBankErrorHandler(
     ): PagBankException =
         try {
             val response = objectMapper.readValue(body, ApiErrorResponse::class.java)
-            PagBankException.ValidationError(response.errorMessages)
+            PagBankException.ValidationError(response.errorMessages, statusCode)
         } catch (e: JacksonException) {
             PagBankException.ServerError(statusCode)
         }

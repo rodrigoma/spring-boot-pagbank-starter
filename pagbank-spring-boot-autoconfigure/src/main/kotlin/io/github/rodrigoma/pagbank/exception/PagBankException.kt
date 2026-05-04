@@ -24,6 +24,7 @@ sealed class PagBankException(
 
     class ValidationError(
         val errors: List<ApiError>,
+        val httpStatus: Int = 422,
     ) : PagBankException("Validation failed")
 
     class ServerError(

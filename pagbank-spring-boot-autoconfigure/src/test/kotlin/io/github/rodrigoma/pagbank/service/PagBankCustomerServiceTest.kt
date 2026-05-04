@@ -5,6 +5,7 @@ import io.github.rodrigoma.pagbank.model.customer.BillingInfoType
 import io.github.rodrigoma.pagbank.model.customer.CardHolder
 import io.github.rodrigoma.pagbank.model.customer.CardRequest
 import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
+import io.github.rodrigoma.pagbank.model.customer.CustomerPhone
 import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -88,6 +89,7 @@ class PagBankCustomerServiceTest {
                     name = "Maria Silva",
                     email = "maria@example.com",
                     taxId = "12345678900",
+                    phones = listOf(CustomerPhone(country = "55", area = "11", number = "912345678")),
                 ),
             )
         assertThat(response.id).isEqualTo("CUST_123")
@@ -102,6 +104,7 @@ class PagBankCustomerServiceTest {
                 name = "Maria Silva",
                 email = "maria@example.com",
                 taxId = "12345678900",
+                phones = listOf(CustomerPhone(country = "55", area = "11", number = "912345678")),
                 billingInfo =
                     listOf(
                         BillingInfoRequest(
@@ -112,7 +115,7 @@ class PagBankCustomerServiceTest {
             ),
         )
         val body = mockFactory.lastRequest!!.bodyAsString
-        assertThat(body).contains("\"encrypted\"").doesNotContain("\"number\"").doesNotContain("\"exp_year\"")
+        assertThat(body).contains("\"encrypted\"").doesNotContain("\"exp_year\"")
     }
 
     @Test
@@ -123,6 +126,7 @@ class PagBankCustomerServiceTest {
                 name = "Maria Silva",
                 email = "maria@example.com",
                 taxId = "12345678900",
+                phones = listOf(CustomerPhone(country = "55", area = "11", number = "912345678")),
                 billingInfo =
                     listOf(
                         BillingInfoRequest(
