@@ -44,7 +44,7 @@ class PagBankErrorHandler(
         val body = runCatching { response.body.readBytes() }.getOrDefault(ByteArray(0))
 
         throw when (statusCode) {
-            HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> PagBankException.Unauthorized(bodyAsString(body))
+            HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> PagBankException.Unauthorized(bodyAsString(body), statusCode)
             HTTP_NOT_FOUND -> PagBankException.NotFound("Resource not found")
             HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE, HTTP_CONFLICT -> parseValidationError(body, statusCode)
             else -> PagBankException.ServerError(statusCode)

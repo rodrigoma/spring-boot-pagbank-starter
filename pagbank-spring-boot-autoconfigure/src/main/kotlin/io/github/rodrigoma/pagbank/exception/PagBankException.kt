@@ -16,6 +16,7 @@ sealed class PagBankException(
 ) : RuntimeException(message) {
     class Unauthorized(
         message: String,
+        val httpStatus: Int = 401,
     ) : PagBankException(message)
 
     class NotFound(

@@ -115,7 +115,10 @@ class PagBankCustomerServiceTest {
             ),
         )
         val body = mockFactory.lastRequest!!.bodyAsString
-        assertThat(body).contains("\"encrypted\"").doesNotContain("\"exp_year\"")
+        val cardNode = mapper.readTree(body).path("billing_info").get(0).path("card")
+        assertThat(cardNode.has("encrypted")).isTrue()
+        assertThat(cardNode.has("number")).isFalse()
+        assertThat(cardNode.has("exp_year")).isFalse()
     }
 
     @Test

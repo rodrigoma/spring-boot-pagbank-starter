@@ -19,7 +19,7 @@ class PagBankExceptionHandler {
 
     @ExceptionHandler(PagBankException.Unauthorized::class)
     fun handleUnauthorized(ex: PagBankException.Unauthorized): ResponseEntity<Map<String, String>> =
-        ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("error" to ex.message.orEmpty()))
+        ResponseEntity.status(ex.httpStatus).body(mapOf("error" to ex.message.orEmpty()))
 
     @ExceptionHandler(PagBankException.ServerError::class)
     fun handleServerError(ex: PagBankException.ServerError): ResponseEntity<Map<String, String>> =
