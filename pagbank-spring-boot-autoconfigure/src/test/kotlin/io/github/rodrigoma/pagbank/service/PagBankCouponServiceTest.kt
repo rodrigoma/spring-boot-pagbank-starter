@@ -125,6 +125,7 @@ class PagBankCouponServiceTest {
         val response = service.list(status = CouponStatus.ACTIVE)
         assertThat(response.coupons).hasSize(1)
         assertThat(response.resultSet.status).containsExactly("ACTIVE")
+        assertThat(mockFactory.lastUri!!.query).contains("status=ACTIVE")
     }
 
     @Test

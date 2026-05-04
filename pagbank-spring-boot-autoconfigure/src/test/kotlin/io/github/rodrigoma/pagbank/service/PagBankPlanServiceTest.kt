@@ -140,6 +140,7 @@ class PagBankPlanServiceTest {
             mapper.writeValueAsBytes(listResponseMap(statusFilter = listOf("ACTIVE", "INACTIVE")))
         val response = service.list(status = PlanStatus.ACTIVE)
         assertThat(response.resultSet.status).containsExactly("ACTIVE", "INACTIVE")
+        assertThat(mockFactory.lastUri!!.query).contains("status=ACTIVE")
     }
 
     @Test

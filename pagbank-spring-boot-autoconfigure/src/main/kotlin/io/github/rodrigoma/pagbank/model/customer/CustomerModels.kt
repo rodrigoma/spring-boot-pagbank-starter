@@ -78,17 +78,27 @@ class CardRequestDeserializer : StdDeserializer<CardRequest>(CardRequest::class.
     ): CardRequest {
         val node = p.readValueAsTree<JsonNode>()
         return if (node.has("encrypted")) {
-            CardRequest.Encrypted(encrypted = node.get("encrypted").asText())
+            CardRequest.Encrypted(
+                encrypted = node.require("encrypted", ctxt).asText(),
+            )
         } else {
+            val holderNode = node.require("holder", ctxt)
             CardRequest.Plain(
-                number = node.get("number").asText(),
-                expYear = node.get("exp_year").asText(),
-                expMonth = node.get("exp_month").asText(),
-                securityCode = node.get("security_code").asText(),
-                holder = CardHolder(name = node.get("holder").get("name").asText()),
+                number = node.require("number", ctxt).asText(),
+                expYear = node.require("exp_year", ctxt).asText(),
+                expMonth = node.require("exp_month", ctxt).asText(),
+                securityCode = node.require("security_code", ctxt).asText(),
+                holder = CardHolder(name = holderNode.require("name", ctxt).asText()),
             )
         }
     }
+
+    private fun JsonNode.require(
+        field: String,
+        ctxt: DeserializationContext,
+    ): JsonNode =
+        get(field)
+            ?: ctxt.reportInputMismatch(CardRequest::class.java, "Missing required field: $field")
 }
 
 data class CardInfo(
