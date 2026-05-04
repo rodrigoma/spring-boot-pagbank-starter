@@ -40,7 +40,10 @@ class PagBankSampleSubscriptionController(
                     listOf(
                         SubscriptionPaymentMethod(
                             type = PaymentMethod.CREDIT_CARD,
-                            card = SubscriptionCard(token = "CARD_F07EF61F-4425-4FCA-87DE-EDF1F33B912C", securityCode = "123"),
+                            card = SubscriptionCard(
+                                token = "CARD_F07EF61F-4425-4FCA-87DE-EDF1F33B912C",
+                                securityCode = "123",
+                            ),
                         ),
                     ),
                 referenceId = "demo-subscription-001",
