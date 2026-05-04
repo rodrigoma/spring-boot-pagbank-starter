@@ -2,9 +2,9 @@ package io.github.rodrigoma.pagbank.sample
 
 import io.github.rodrigoma.pagbank.model.refund.RefundListResponse
 import io.github.rodrigoma.pagbank.model.refund.RefundResponse
-import io.github.rodrigoma.pagbank.service.PagBankRefundService
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
+import io.github.rodrigoma.pagbank.service.PagBankRefundService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping

@@ -12,11 +12,11 @@ import io.github.rodrigoma.pagbank.model.subscription.SubscriptionPlanRef
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionStatus
 import io.github.rodrigoma.pagbank.model.subscription.UpdateSubscriptionRequest
-import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.REFERENCE_ID
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.STATUS
+import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
