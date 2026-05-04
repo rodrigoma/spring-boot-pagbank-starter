@@ -5,6 +5,7 @@ import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
 import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
 import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
 import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
+import io.github.rodrigoma.pagbank.service.PagBankHeaders.IDEMPOTENCY_KEY
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.REFERENCE_ID
@@ -14,11 +15,15 @@ import org.springframework.web.client.body
 class PagBankCustomerService(
     private val restClient: RestClient,
 ) {
-    fun create(request: CreateCustomerRequest): CustomerResponse =
+    fun create(
+        request: CreateCustomerRequest,
+        idempotencyKey: String? = null,
+    ): CustomerResponse =
         restClient
             .post()
             .uri("/customers")
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<CustomerResponse>()!!
 
@@ -32,22 +37,26 @@ class PagBankCustomerService(
     fun update(
         id: String,
         request: UpdateCustomerRequest,
+        idempotencyKey: String? = null,
     ): CustomerResponse =
         restClient
             .put()
             .uri("/customers/{id}", id)
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<CustomerResponse>()!!
 
     fun updateBillingInfo(
         id: String,
         billingInfo: List<BillingInfoRequest>,
+        idempotencyKey: String? = null,
     ): CustomerResponse =
         restClient
             .put()
             .uri("/customers/{id}/billing_info", id)
             .body(billingInfo)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<CustomerResponse>()!!
 

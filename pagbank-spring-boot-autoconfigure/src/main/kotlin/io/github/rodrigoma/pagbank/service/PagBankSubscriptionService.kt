@@ -7,6 +7,7 @@ import io.github.rodrigoma.pagbank.model.subscription.SubscriptionListResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionStatus
 import io.github.rodrigoma.pagbank.model.subscription.UpdateSubscriptionRequest
+import io.github.rodrigoma.pagbank.service.PagBankHeaders.IDEMPOTENCY_KEY
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.REFERENCE_ID
@@ -17,11 +18,15 @@ import org.springframework.web.client.body
 class PagBankSubscriptionService(
     private val restClient: RestClient,
 ) {
-    fun create(request: CreateSubscriptionRequest): SubscriptionResponse =
+    fun create(
+        request: CreateSubscriptionRequest,
+        idempotencyKey: String? = null,
+    ): SubscriptionResponse =
         restClient
             .post()
             .uri("/subscriptions")
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<SubscriptionResponse>()!!
 
@@ -35,50 +40,72 @@ class PagBankSubscriptionService(
     fun update(
         id: String,
         request: UpdateSubscriptionRequest,
+        idempotencyKey: String? = null,
     ): SubscriptionResponse =
         restClient
             .put()
             .uri("/subscriptions/{id}", id)
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<SubscriptionResponse>()!!
 
-    fun cancel(id: String) {
+    fun cancel(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/subscriptions/{id}/cancel", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
 
-    fun suspend(id: String) {
+    fun suspend(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/subscriptions/{id}/suspend", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
 
-    fun activate(id: String) {
+    fun activate(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/subscriptions/{id}/activate", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
 
-    fun retry(id: String) {
+    fun retry(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/subscriptions/{id}/retry", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
 
-    fun removeCoupon(id: String) {
+    fun removeCoupon(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .delete()
             .uri("/subscriptions/{id}/coupons", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }

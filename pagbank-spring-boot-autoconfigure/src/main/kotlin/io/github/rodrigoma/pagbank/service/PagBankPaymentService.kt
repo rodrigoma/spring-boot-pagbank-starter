@@ -6,6 +6,7 @@ import io.github.rodrigoma.pagbank.model.payment.PaymentStatus
 import io.github.rodrigoma.pagbank.model.refund.RefundListResponse
 import io.github.rodrigoma.pagbank.model.refund.RefundRequest
 import io.github.rodrigoma.pagbank.model.refund.RefundResponse
+import io.github.rodrigoma.pagbank.service.PagBankHeaders.IDEMPOTENCY_KEY
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.CREATED_AT_END
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.CREATED_AT_START
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
@@ -28,11 +29,13 @@ class PagBankPaymentService(
     fun createRefund(
         id: String,
         request: RefundRequest,
+        idempotencyKey: String? = null,
     ): RefundResponse =
         restClient
             .post()
             .uri("/payments/{id}/refunds", id)
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<RefundResponse>()!!
 

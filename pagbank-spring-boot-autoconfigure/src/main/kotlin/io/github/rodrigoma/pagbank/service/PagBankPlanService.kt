@@ -5,6 +5,7 @@ import io.github.rodrigoma.pagbank.model.plan.PlanListResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanResponse
 import io.github.rodrigoma.pagbank.model.plan.PlanStatus
 import io.github.rodrigoma.pagbank.model.plan.UpdatePlanRequest
+import io.github.rodrigoma.pagbank.service.PagBankHeaders.IDEMPOTENCY_KEY
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
 import io.github.rodrigoma.pagbank.service.PagBankQueryParams.REFERENCE_ID
@@ -15,11 +16,15 @@ import org.springframework.web.client.body
 class PagBankPlanService(
     private val restClient: RestClient,
 ) {
-    fun create(request: CreatePlanRequest): PlanResponse =
+    fun create(
+        request: CreatePlanRequest,
+        idempotencyKey: String? = null,
+    ): PlanResponse =
         restClient
             .post()
             .uri("/plans")
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<PlanResponse>()!!
 
@@ -33,11 +38,13 @@ class PagBankPlanService(
     fun update(
         id: String,
         request: UpdatePlanRequest,
+        idempotencyKey: String? = null,
     ): PlanResponse =
         restClient
             .put()
             .uri("/plans/{id}", id)
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<PlanResponse>()!!
 
@@ -59,18 +66,26 @@ class PagBankPlanService(
             }.retrieve()
             .body<PlanListResponse>()!!
 
-    fun activate(id: String) {
+    fun activate(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/plans/{id}/activate", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
 
-    fun inactivate(id: String) {
+    fun inactivate(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/plans/{id}/inactivate", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
