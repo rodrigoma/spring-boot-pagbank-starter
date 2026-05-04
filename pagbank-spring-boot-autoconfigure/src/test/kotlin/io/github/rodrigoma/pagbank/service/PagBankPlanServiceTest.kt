@@ -77,17 +77,17 @@ class PagBankPlanServiceTest {
         limit: Int = 100,
         referenceId: String? = null,
         statusFilter: List<String> = emptyList(),
-    ) = mapOf(
-        "result_set" to
-            mapOf(
+    ): Map<String, Any?> {
+        val resultSet =
+            mutableMapOf<String, Any?>(
                 "total" to total,
                 "offset" to offset,
                 "limit" to limit,
                 "reference_id" to referenceId,
-                "status" to statusFilter,
-            ),
-        "plans" to plans,
-    )
+            )
+        if (statusFilter.isNotEmpty()) resultSet["status"] = statusFilter
+        return mapOf("result_set" to resultSet, "plans" to plans)
+    }
 
     @Test
     fun `create should POST and return PlanResponse`() {
@@ -123,7 +123,7 @@ class PagBankPlanServiceTest {
         assertThat(response.resultSet.total).isEqualTo(36)
         assertThat(response.resultSet.offset).isEqualTo(0)
         assertThat(response.resultSet.limit).isEqualTo(100)
-        assertThat(response.resultSet.status).isEmpty()
+        assertThat(response.resultSet.status).isNull()
     }
 
     @Test
@@ -141,6 +141,7 @@ class PagBankPlanServiceTest {
             mapper.writeValueAsBytes(listResponseMap(statusFilter = listOf("ACTIVE", "INACTIVE")))
         val response = service.list(status = PlanStatus.ACTIVE)
         assertThat(response.resultSet.status).containsExactly("ACTIVE", "INACTIVE")
+        assertThat(response.resultSet.status).isNotNull
         assertThat(mockFactory.lastUri!!.query).contains("status=ACTIVE")
     }
 

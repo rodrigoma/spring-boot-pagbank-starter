@@ -74,7 +74,7 @@ data class PlanResultSet(
     val offset: Int,
     val limit: Int,
     val referenceId: String? = null,
-    val status: List<String> = emptyList(),
+    val status: List<String>? = null,
 )
 
 data class PlanListResponse(
