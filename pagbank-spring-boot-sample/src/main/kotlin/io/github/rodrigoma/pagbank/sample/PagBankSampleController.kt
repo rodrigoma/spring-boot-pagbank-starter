@@ -95,10 +95,16 @@ class PagBankSampleController(
 
     // --- Customers ---
 
-    @PostMapping("/customers")
-    fun createCustomer(
-        @RequestBody request: CreateCustomerRequest,
-    ): CustomerResponse = customerService.create(request)
+    @PostMapping("/customers/demo")
+    fun createDemoCustomer(): CustomerResponse =
+        customerService.create(
+            CreateCustomerRequest(
+                name = "Maria Silva",
+                email = "maria@example.com",
+                taxId = "12345678909",
+                referenceId = "demo-customer-001",
+            ),
+        )
 
     @GetMapping("/customers/{id}")
     fun getCustomer(
