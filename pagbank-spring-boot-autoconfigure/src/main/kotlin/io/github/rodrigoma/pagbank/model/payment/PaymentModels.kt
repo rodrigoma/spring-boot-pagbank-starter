@@ -66,8 +66,8 @@ data class PaymentResponse(
 
 data class PaymentResultSet(
     val total: Int,
-    val offset: Int,
-    val limit: Int,
+    val offset: Int? = null,
+    val limit: Int? = null,
     val status: List<String>? = null,
     val paymentMethodType: List<String>? = null,
     val q: String? = null,
@@ -76,6 +76,6 @@ data class PaymentResultSet(
 )
 
 data class PaymentListResponse(
-    val resultSet: PaymentResultSet? = null,
+    val resultSet: PaymentResultSet,
     val payments: List<PaymentResponse>,
 )

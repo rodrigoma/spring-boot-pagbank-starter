@@ -86,16 +86,23 @@ class PagBankInvoiceServiceTest {
 
     @Test
     fun `listPayments should GET payments for invoice`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("payments" to listOf(paymentMap())))
+        mockFactory.nextBody =
+            mapper.writeValueAsBytes(
+                mapOf("result_set" to mapOf("total" to 1), "payments" to listOf(paymentMap())),
+            )
         val response = service.listPayments("INVO_123")
         assertThat(response.payments).hasSize(1)
         assertThat(response.payments[0].id).isEqualTo("PAYM_001")
+        assertThat(response.resultSet.total).isEqualTo(1)
         assertThat(mockFactory.lastUri!!.path).contains("/invoices/INVO_123/payments")
     }
 
     @Test
     fun `listPayments with filters should encode query params in URI`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("payments" to emptyList<Any>()))
+        mockFactory.nextBody =
+            mapper.writeValueAsBytes(
+                mapOf("result_set" to mapOf("total" to 0), "payments" to emptyList<Any>()),
+            )
         service.listPayments("INVO_123", offset = 5, limit = 20)
         val query = mockFactory.lastUri!!.query
         assertThat(query).contains("offset=5").contains("limit=20")

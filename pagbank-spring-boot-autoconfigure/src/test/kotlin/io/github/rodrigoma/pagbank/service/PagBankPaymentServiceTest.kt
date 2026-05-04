@@ -118,7 +118,7 @@ class PagBankPaymentServiceTest {
         val response = service.list()
         assertThat(response.payments).hasSize(1)
         assertThat(response.payments[0].id).isEqualTo("PAYM_123")
-        assertThat(response.resultSet?.total).isEqualTo(1)
+        assertThat(response.resultSet.total).isEqualTo(1)
     }
 
     @Test
