@@ -79,16 +79,16 @@ class CardRequestDeserializer : StdDeserializer<CardRequest>(CardRequest::class.
         val node = p.readValueAsTree<JsonNode>()
         return if (node.has("encrypted")) {
             CardRequest.Encrypted(
-                encrypted = node.require("encrypted", ctxt).asText(),
+                encrypted = node.require("encrypted", ctxt).asString(),
             )
         } else {
             val holderNode = node.require("holder", ctxt)
             CardRequest.Plain(
-                number = node.require("number", ctxt).asText(),
-                expYear = node.require("exp_year", ctxt).asText(),
-                expMonth = node.require("exp_month", ctxt).asText(),
-                securityCode = node.require("security_code", ctxt).asText(),
-                holder = CardHolder(name = holderNode.require("name", ctxt).asText()),
+                number = node.require("number", ctxt).asString(),
+                expYear = node.require("exp_year", ctxt).asString(),
+                expMonth = node.require("exp_month", ctxt).asString(),
+                securityCode = node.require("security_code", ctxt).asString(),
+                holder = CardHolder(name = holderNode.require("name", ctxt).asString()),
             )
         }
     }
