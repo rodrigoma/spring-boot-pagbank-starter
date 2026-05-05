@@ -3,8 +3,9 @@ package io.github.rodrigoma.pagbank.exception
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class ApiError(
-    @field:JsonProperty("error") val code: String,
-    @field:JsonProperty("description") val message: String,
+    val error: String,
+    val description: String,
+    @field:JsonProperty("parameter_name") val parameterName: String? = null,
 )
 
 data class ApiErrorResponse(

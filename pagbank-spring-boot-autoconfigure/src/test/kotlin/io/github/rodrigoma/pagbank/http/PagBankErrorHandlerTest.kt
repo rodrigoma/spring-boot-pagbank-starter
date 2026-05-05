@@ -35,7 +35,7 @@ class PagBankErrorHandlerTest {
         val response = MockClientHttpResponse(body, HttpStatus.BAD_REQUEST)
         val ex = assertThrows<PagBankException.ValidationError> { handler.handle(response) }
         assertThat(ex.errors).hasSize(1)
-        assertThat(ex.errors[0].code).isEqualTo("40001")
+        assertThat(ex.errors[0].error).isEqualTo("40001")
         assertThat(ex.httpStatus).isEqualTo(400)
     }
 
@@ -62,7 +62,7 @@ class PagBankErrorHandlerTest {
         val response = MockClientHttpResponse(body, HttpStatus.BAD_REQUEST)
         val ex = assertThrows<PagBankException.ValidationError> { bareHandler.handle(response) }
         assertThat(ex.errors).hasSize(1)
-        assertThat(ex.errors[0].code).isEqualTo("40001")
+        assertThat(ex.errors[0].error).isEqualTo("40001")
     }
 
     @Test

@@ -13,10 +13,10 @@ class PagBankExceptionTest {
 
     @Test
     fun `ValidationError carries error list`() {
-        val errors = listOf(ApiError("40001", "amount is required"))
+        val errors = listOf(ApiError(error = "40001", description = "amount is required"))
         val ex = PagBankException.ValidationError(errors)
         assertThat(ex.errors).hasSize(1)
-        assertThat(ex.errors[0].code).isEqualTo("40001")
+        assertThat(ex.errors[0].error).isEqualTo("40001")
         assertThat(ex.message).isEqualTo("Validation failed")
     }
 
