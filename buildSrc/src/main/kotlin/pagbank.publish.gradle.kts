@@ -35,6 +35,13 @@ publishing {
             }
         }
     }
+
+    repositories {
+        maven {
+            name = "local"
+            url = uri(rootProject.layout.buildDirectory.dir("local-repo"))
+        }
+    }
 }
 
 signing {

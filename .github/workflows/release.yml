@@ -24,13 +24,26 @@ jobs:
       - name: Build and test
         run: ./gradlew build
 
-      - name: Publish to Maven Central
-        run: ./gradlew publishAggregationToCentralPortal
+      - name: Assemble and sign artifacts
+        run: >-
+          ./gradlew
+          :pagbank-spring-boot-autoconfigure:publishMavenJavaPublicationToLocalRepository
+          :pagbank-spring-boot-starter:publishMavenJavaPublicationToLocalRepository
+        env:
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+
+      - name: Upload bundle to Maven Central
+        run: |
+          cd build/local-repo && zip -r ../../bundle.zip . && cd ../..
+          TOKEN=$(printf '%s:%s' "$OSSRH_USERNAME" "$OSSRH_PASSWORD" | base64 -w 0)
+          curl --fail-with-body -X POST \
+            "https://central.sonatype.com/api/v1/publisher/upload?name=pagbank-${GITHUB_REF_NAME}&publicationType=AUTOMATIC" \
+            -H "Authorization: Bearer $TOKEN" \
+            --form "bundle=@bundle.zip"
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
