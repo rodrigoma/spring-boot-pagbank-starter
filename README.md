@@ -26,7 +26,7 @@ A Spring Boot auto-configuration library for the **PagBank Subscriptions API** (
 
 ```kotlin
 dependencies {
-    implementation("io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0")
+    implementation("io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC1")
 }
 ```
 
@@ -34,7 +34,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0'
+    implementation 'io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC1'
 }
 ```
 
@@ -44,7 +44,7 @@ dependencies {
 <dependency>
     <groupId>io.github.rodrigoma</groupId>
     <artifactId>pagbank-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-RC1</version>
 </dependency>
 ```
 
