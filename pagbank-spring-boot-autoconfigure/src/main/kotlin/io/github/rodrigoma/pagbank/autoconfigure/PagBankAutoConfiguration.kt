@@ -95,5 +95,5 @@ class PagBankAutoConfiguration(
     ) = PagBankPreferenceService(rc)
 
     @Bean
-    fun pagBankWebhookParser() = PagBankWebhookParser(properties)
+    fun pagBankWebhookParser() = PagBankWebhookParser()
 }

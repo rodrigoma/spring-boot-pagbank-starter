@@ -20,7 +20,6 @@ enum class PagBankEnvironment {
 data class PagBankProperties(
     val token: String = "",
     val environment: PagBankEnvironment = SANDBOX,
-    val webhookSecret: String? = null,
     val healthIndicatorEnabled: Boolean = false,
     val logRequests: Boolean = false,
 ) : InitializingBean {
