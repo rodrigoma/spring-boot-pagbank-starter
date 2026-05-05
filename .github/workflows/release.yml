@@ -39,10 +39,27 @@ jobs:
         run: |
           cd build/local-repo && zip -r ../../bundle.zip . && cd ../..
           TOKEN=$(printf '%s:%s' "$OSSRH_USERNAME" "$OSSRH_PASSWORD" | base64 -w 0)
-          curl --fail-with-body -X POST \
-            "https://central.sonatype.com/api/v1/publisher/upload?name=pagbank-${GITHUB_REF_NAME}&publicationType=AUTOMATIC" \
+          DEPLOYMENT_ID=$(curl --fail-with-body -s -X POST \
+            "https://central.sonatype.com/api/v1/publisher/upload?name=pagbank-${GITHUB_REF_NAME}&publicationType=USER_MANAGED" \
             -H "Authorization: Bearer $TOKEN" \
-            --form "bundle=@bundle.zip"
+            --form "bundle=@bundle.zip")
+          echo "Deployment ID: $DEPLOYMENT_ID"
+
+          echo "Aguardando validação..."
+          for i in $(seq 1 20); do
+            sleep 15
+            STATUS=$(curl -s -X POST \
+              "https://central.sonatype.com/api/v1/publisher/status?id=${DEPLOYMENT_ID}" \
+              -H "Authorization: Bearer $TOKEN" | python3 -c "import sys,json; print(json.load(sys.stdin).get('deploymentState',''))")
+            echo "Status: $STATUS"
+            if [ "$STATUS" = "VALIDATED" ]; then break; fi
+            if [ "$STATUS" = "FAILED" ]; then echo "Validação falhou"; exit 1; fi
+          done
+
+          echo "Publicando..."
+          curl --fail-with-body -s -X POST \
+            "https://central.sonatype.com/api/v1/publisher/deployment/${DEPLOYMENT_ID}" \
+            -H "Authorization: Bearer $TOKEN"
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
