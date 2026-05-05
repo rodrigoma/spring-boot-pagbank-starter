@@ -1,18 +1,15 @@
 package io.github.rodrigoma.pagbank.http
 
-import io.github.rodrigoma.pagbank.exception.ApiError
+import io.github.rodrigoma.pagbank.exception.ApiErrorResponse
 import io.github.rodrigoma.pagbank.exception.PagBankException
-import org.springframework.http.HttpStatusCode
+import io.github.rodrigoma.pagbank.exception.PagBankException.NotFound
+import io.github.rodrigoma.pagbank.exception.PagBankException.ServerError
+import io.github.rodrigoma.pagbank.exception.PagBankException.Unauthorized
 import org.springframework.http.client.ClientHttpResponse
 import tools.jackson.core.JacksonException
-import tools.jackson.core.type.TypeReference
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule
 
-// PagBankErrorHandler is registered on the RestClient builder via:
-//   .defaultStatusHandler({ it.isError }, handler::handle)
-// It does NOT implement ResponseErrorHandler (a RestTemplate interface).
-// The handle() method is called by RestClient for any 4xx/5xx response.
 class PagBankErrorHandler(
     objectMapper: JsonMapper,
 ) {
@@ -29,14 +26,7 @@ class PagBankErrorHandler(
         private const val HTTP_NOT_FOUND = 404
         private const val HTTP_BAD_REQUEST = 400
         private const val HTTP_UNPROCESSABLE = 422
-    }
-
-    @Suppress("UnusedParameter")
-    fun handle(
-        statusCode: HttpStatusCode,
-        response: ClientHttpResponse,
-    ) {
-        handle(response)
+        private const val HTTP_CONFLICT = 409
     }
 
     fun handle(response: ClientHttpResponse) {
@@ -44,10 +34,10 @@ class PagBankErrorHandler(
         val body = runCatching { response.body.readBytes() }.getOrDefault(ByteArray(0))
 
         throw when (statusCode) {
-            HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> PagBankException.Unauthorized(bodyAsString(body))
-            HTTP_NOT_FOUND -> PagBankException.NotFound("Resource not found")
-            HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE -> parseValidationError(body, statusCode)
-            else -> PagBankException.ServerError(statusCode)
+            HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> Unauthorized(bodyAsString(body, statusCode), statusCode)
+            HTTP_NOT_FOUND -> NotFound("Resource not found")
+            HTTP_BAD_REQUEST, HTTP_UNPROCESSABLE, HTTP_CONFLICT -> parseValidationError(body, statusCode)
+            else -> ServerError(statusCode)
         }
     }
 
@@ -57,11 +47,19 @@ class PagBankErrorHandler(
         statusCode: Int,
     ): PagBankException =
         try {
-            val errors: List<ApiError> = objectMapper.readValue(body, object : TypeReference<List<ApiError>>() {})
-            PagBankException.ValidationError(errors)
+            val response = objectMapper.readValue(body, ApiErrorResponse::class.java)
+            PagBankException.ValidationError(response.errorMessages, statusCode)
         } catch (e: JacksonException) {
-            PagBankException.ServerError(statusCode)
+            ServerError(statusCode)
         }
 
-    private fun bodyAsString(body: ByteArray): String = if (body.isEmpty()) "Unauthorized" else body.decodeToString()
+    private fun bodyAsString(
+        body: ByteArray,
+        statusCode: Int,
+    ): String =
+        if (body.isEmpty()) {
+            if (statusCode == HTTP_FORBIDDEN) "Forbidden" else "Unauthorized"
+        } else {
+            body.decodeToString()
+        }
 }

@@ -4,17 +4,27 @@ import io.github.rodrigoma.pagbank.model.coupon.CouponListResponse
 import io.github.rodrigoma.pagbank.model.coupon.CouponResponse
 import io.github.rodrigoma.pagbank.model.coupon.CouponStatus
 import io.github.rodrigoma.pagbank.model.coupon.CreateCouponRequest
+import io.github.rodrigoma.pagbank.service.PagBankHeaders.IDEMPOTENCY_KEY
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.REFERENCE_ID
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.STATUS
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 
 class PagBankCouponService(
     private val restClient: RestClient,
 ) {
-    fun create(request: CreateCouponRequest): CouponResponse =
+    @JvmOverloads
+    fun create(
+        request: CreateCouponRequest,
+        idempotencyKey: String? = null,
+    ): CouponResponse =
         restClient
             .post()
             .uri("/coupons")
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<CouponResponse>()!!
 
@@ -25,9 +35,10 @@ class PagBankCouponService(
             .retrieve()
             .body<CouponResponse>()!!
 
+    @JvmOverloads
     fun list(
-        offset: Int? = null,
-        limit: Int? = null,
+        offset: Int = 0,
+        limit: Int = 100,
         referenceId: String? = null,
         status: CouponStatus? = null,
     ): CouponListResponse =
@@ -35,26 +46,36 @@ class PagBankCouponService(
             .get()
             .uri { builder ->
                 builder.path("/coupons")
-                offset?.let { builder.queryParam("offset", it) }
-                limit?.let { builder.queryParam("limit", it) }
-                referenceId?.let { builder.queryParam("reference_id", it) }
-                status?.let { builder.queryParam("status", it.name) }
+                offset.let { builder.queryParam(OFFSET, it) }
+                limit.let { builder.queryParam(LIMIT, it) }
+                referenceId?.let { builder.queryParam(REFERENCE_ID, it) }
+                status?.let { builder.queryParam(STATUS, it.name) }
                 builder.build()
             }.retrieve()
             .body<CouponListResponse>()!!
 
-    fun inactivate(id: String) {
+    @JvmOverloads
+    fun inactivate(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/coupons/{id}/inactivate", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
 
-    fun activate(id: String) {
+    @JvmOverloads
+    fun activate(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/coupons/{id}/activate", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }

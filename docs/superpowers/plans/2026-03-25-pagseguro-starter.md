@@ -1006,7 +1006,7 @@ class PagSeguroPlanService(private val restClient: RestClient) {
             .toBodilessEntity()
     }
 
-    fun deactivate(id: String) {
+    fun inactivate(id: String) {
         restClient.put()
             .uri("/plans/{id}/inactivate", id)
             .retrieve()

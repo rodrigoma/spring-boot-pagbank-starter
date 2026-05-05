@@ -1,14 +1,19 @@
 package io.github.rodrigoma.pagbank.model.subscription
 
+import io.github.rodrigoma.pagbank.model.common.Currency
+import io.github.rodrigoma.pagbank.model.common.Currency.BRL
+import io.github.rodrigoma.pagbank.model.common.PagBankLink
 import io.github.rodrigoma.pagbank.model.invoice.InvoiceResponse
-import io.github.rodrigoma.pagbank.model.invoice.InvoiceStatus
 import io.github.rodrigoma.pagbank.model.plan.IntervalUnit
+import io.github.rodrigoma.pagbank.model.plan.PaymentMethod
 
 enum class SubscriptionStatus { ACTIVE, EXPIRED, CANCELED, SUSPENDED, OVERDUE, TRIAL, PENDING, PENDING_ACTION }
 
 enum class RetryAttempt { FIRST, SECOND, THIRD }
 
 enum class RetryStatus { SCHEDULED, EXECUTING, MANUALLY_EXECUTED, AUTOMATICALLY_EXECUTED, CANCELED }
+
+enum class SplitMethod { FIXED, PERCENTAGE }
 
 data class SubscriptionPlanRef(
     val id: String,
@@ -20,7 +25,7 @@ data class SubscriptionCustomerRef(
 
 data class SubscriptionAmount(
     val value: Int,
-    val currency: String = "BRL",
+    val currency: Currency = BRL,
 )
 
 data class SubscriptionCardHolder(
@@ -48,7 +53,7 @@ data class Boleto(
 )
 
 data class SubscriptionPaymentMethod(
-    val type: String,
+    val type: PaymentMethod,
     val card: SubscriptionCard? = null,
     val boleto: Boleto? = null,
 )
@@ -89,6 +94,7 @@ data class SubscriptionTrial(
 
 data class BillingCycle(
     val occurrence: Int,
+    val total: Int? = null,
 )
 
 data class BestInvoiceDate(
@@ -121,15 +127,8 @@ data class SplitReceiver(
 )
 
 data class Splits(
-    val method: String,
+    val method: SplitMethod,
     val receivers: List<SplitReceiver>,
-)
-
-data class SubscriptionLink(
-    val rel: String? = null,
-    val href: String? = null,
-    val media: String? = null,
-    val type: String? = null,
 )
 
 data class CreateSubscriptionRequest(
@@ -163,10 +162,19 @@ data class SubscriptionResponse(
     val splits: Splits? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
-    val links: List<SubscriptionLink>? = null,
+    val links: List<PagBankLink>? = null,
+)
+
+data class SubscriptionResultSet(
+    val total: Int,
+    val offset: Int? = null,
+    val limit: Int? = null,
+    val status: List<String>? = null,
+    val referenceId: String? = null,
 )
 
 data class SubscriptionListResponse(
+    val resultSet: SubscriptionResultSet,
     val subscriptions: List<SubscriptionResponse>,
 )
 
@@ -187,6 +195,3 @@ data class SubscriptionInvoiceListResponse(
     val resultSet: SubscriptionInvoiceResultSet,
     val invoices: List<InvoiceResponse>,
 )
-
-// Re-export InvoiceStatus so callers don't need a separate import
-typealias SubscriptionInvoiceStatus = InvoiceStatus

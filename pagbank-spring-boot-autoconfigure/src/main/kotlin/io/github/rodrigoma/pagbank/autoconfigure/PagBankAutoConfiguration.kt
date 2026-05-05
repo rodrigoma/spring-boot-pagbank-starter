@@ -1,6 +1,7 @@
 package io.github.rodrigoma.pagbank.autoconfigure
 
-import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL
+import com.fasterxml.jackson.annotation.JsonInclude.Value.construct
 import io.github.rodrigoma.pagbank.http.PagBankErrorHandler
 import io.github.rodrigoma.pagbank.http.PagBankLoggingInterceptor
 import io.github.rodrigoma.pagbank.service.PagBankCouponService
@@ -16,9 +17,10 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.RestClient
-import tools.jackson.databind.PropertyNamingStrategies
+import tools.jackson.databind.PropertyNamingStrategies.SNAKE_CASE
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.jacksonMapperBuilder
 
@@ -30,10 +32,9 @@ class PagBankAutoConfiguration(
     @Bean(name = ["pagBankObjectMapper"])
     fun pagBankObjectMapper(): JsonMapper =
         jacksonMapperBuilder()
-            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .changeDefaultPropertyInclusion {
-                JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL)
-            }.build()
+            .propertyNamingStrategy(SNAKE_CASE)
+            .changeDefaultPropertyInclusion { construct(NON_NULL, NON_NULL) }
+            .build()
 
     @Bean(name = ["pagBankRestClient"])
     fun pagBankRestClient(
@@ -41,51 +42,58 @@ class PagBankAutoConfiguration(
         objectMapper: JsonMapper,
     ): RestClient {
         val errorHandler = PagBankErrorHandler(objectMapper)
-        val builder =
-            RestClient
-                .builder()
-                .baseUrl(properties.environment.baseUrl())
-                .defaultHeader("Authorization", "Bearer ${properties.token}")
-                .configureMessageConverters { converters ->
-                    converters.registerDefaults().withJsonConverter(JacksonJsonHttpMessageConverter(objectMapper))
-                }.defaultStatusHandler({ it.isError }) { _, response -> errorHandler.handle(response) }
-        if (properties.logRequests) {
-            builder.requestInterceptor(PagBankLoggingInterceptor())
-        }
-        return builder.build()
+
+        return RestClient
+            .builder()
+            .baseUrl(properties.environment.baseUrl())
+            .defaultHeader(AUTHORIZATION, "Bearer ${properties.token}")
+            .configureMessageConverters {
+                it.registerDefaults().withJsonConverter(JacksonJsonHttpMessageConverter(objectMapper))
+            }.also { if (properties.logRequests) it.requestInterceptor(PagBankLoggingInterceptor()) }
+            .defaultStatusHandler({ it.isError }) { _, response -> errorHandler.handle(response) }
+            .build()
     }
 
-    @Bean fun pagBankPlanService(
+    @Bean
+    fun pagBankPlanService(
         @Qualifier("pagBankRestClient") rc: RestClient,
     ) = PagBankPlanService(rc)
 
-    @Bean fun pagBankCustomerService(
+    @Bean
+    fun pagBankCustomerService(
         @Qualifier("pagBankRestClient") rc: RestClient,
     ) = PagBankCustomerService(rc)
 
-    @Bean fun pagBankSubscriptionService(
+    @Bean
+    fun pagBankSubscriptionService(
         @Qualifier("pagBankRestClient") rc: RestClient,
     ) = PagBankSubscriptionService(rc)
 
-    @Bean fun pagBankCouponService(
+    @Bean
+    fun pagBankCouponService(
         @Qualifier("pagBankRestClient") rc: RestClient,
     ) = PagBankCouponService(rc)
 
-    @Bean fun pagBankInvoiceService(
+    @Bean
+    fun pagBankInvoiceService(
         @Qualifier("pagBankRestClient") rc: RestClient,
     ) = PagBankInvoiceService(rc)
 
-    @Bean fun pagBankPaymentService(
+    @Bean
+    fun pagBankPaymentService(
         @Qualifier("pagBankRestClient") rc: RestClient,
     ) = PagBankPaymentService(rc)
 
-    @Bean fun pagBankRefundService(
+    @Bean
+    fun pagBankRefundService(
         @Qualifier("pagBankRestClient") rc: RestClient,
     ) = PagBankRefundService(rc)
 
-    @Bean fun pagBankPreferenceService(
+    @Bean
+    fun pagBankPreferenceService(
         @Qualifier("pagBankRestClient") rc: RestClient,
     ) = PagBankPreferenceService(rc)
 
-    @Bean fun pagBankWebhookParser() = PagBankWebhookParser(properties)
+    @Bean
+    fun pagBankWebhookParser() = PagBankWebhookParser()
 }

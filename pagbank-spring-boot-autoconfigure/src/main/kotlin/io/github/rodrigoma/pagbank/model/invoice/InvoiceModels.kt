@@ -1,12 +1,16 @@
 package io.github.rodrigoma.pagbank.model.invoice
 
+import io.github.rodrigoma.pagbank.model.common.Currency
+import io.github.rodrigoma.pagbank.model.common.Currency.BRL
+import io.github.rodrigoma.pagbank.model.common.PagBankLink
+
 enum class InvoiceStatus { OPEN, PAID, WAITING, UNPAID, OVERDUE, CLOSED, PENDING_ACTION }
 
 enum class InvoiceItemType { SUBSCRIPTION_AMOUNT, SETUP_FEE, TRIAL, COUPON }
 
 data class InvoiceAmount(
     val value: Int,
-    val currency: String = "BRL",
+    val currency: Currency = BRL,
 )
 
 data class InvoicePlan(
@@ -36,13 +40,6 @@ data class InvoiceBoleto(
     val dueAt: String,
 )
 
-data class InvoiceLink(
-    val rel: String? = null,
-    val href: String? = null,
-    val media: String? = null,
-    val type: String? = null,
-)
-
 data class InvoiceResponse(
     val id: String,
     val status: InvoiceStatus,
@@ -55,9 +52,5 @@ data class InvoiceResponse(
     val boleto: InvoiceBoleto? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
-    val links: List<InvoiceLink>? = null,
-)
-
-data class InvoiceListResponse(
-    val invoices: List<InvoiceResponse>,
+    val links: List<PagBankLink>? = null,
 )

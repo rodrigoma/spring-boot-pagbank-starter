@@ -1,10 +1,15 @@
 package io.github.rodrigoma.pagbank.model.payment
 
+import io.github.rodrigoma.pagbank.model.common.Currency
+import io.github.rodrigoma.pagbank.model.common.Currency.BRL
+import io.github.rodrigoma.pagbank.model.common.PagBankLink
+import io.github.rodrigoma.pagbank.model.plan.PaymentMethod
+
 enum class PaymentStatus { APPROVED, PENDING, DENIED, REFUNDED, UNPAID, IN_ANALYSIS }
 
 data class PaymentAmount(
     val value: Int,
-    val currency: String = "BRL",
+    val currency: Currency = BRL,
 )
 
 data class PaymentInvoice(
@@ -33,7 +38,7 @@ data class PaymentCard(
 )
 
 data class PaymentMethodDetails(
-    val type: String,
+    val type: PaymentMethod,
     val card: PaymentCard? = null,
 )
 
@@ -45,13 +50,6 @@ data class PaymentProvider(
     val reference: String? = null,
 )
 
-data class PaymentLink(
-    val rel: String? = null,
-    val href: String? = null,
-    val media: String? = null,
-    val type: String? = null,
-)
-
 data class PaymentResponse(
     val id: String,
     val status: PaymentStatus,
@@ -61,7 +59,7 @@ data class PaymentResponse(
     val provider: PaymentProvider? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
-    val links: List<PaymentLink>? = null,
+    val links: List<PagBankLink>? = null,
 )
 
 data class PaymentResultSet(

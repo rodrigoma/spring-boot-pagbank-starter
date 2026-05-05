@@ -1,6 +1,7 @@
 package io.github.rodrigoma.pagbank.service
 
 import io.github.rodrigoma.pagbank.model.invoice.InvoiceStatus
+import io.github.rodrigoma.pagbank.model.plan.PaymentMethod
 import io.github.rodrigoma.pagbank.model.subscription.BestInvoiceDate
 import io.github.rodrigoma.pagbank.model.subscription.CreateSubscriptionRequest
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionCard
@@ -98,7 +99,7 @@ class PagBankSubscriptionServiceTest {
                     paymentMethod =
                         listOf(
                             SubscriptionPaymentMethod(
-                                type = "CREDIT_CARD",
+                                type = PaymentMethod.CREDIT_CARD,
                                 card = SubscriptionCard(token = "CARD_123", securityCode = "123"),
                             ),
                         ),
@@ -175,15 +176,28 @@ class PagBankSubscriptionServiceTest {
 
     @Test
     fun `list should return SubscriptionListResponse with default params`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("subscriptions" to listOf(subscriptionMap())))
+        mockFactory.nextBody =
+            mapper.writeValueAsBytes(
+                mapOf(
+                    "result_set" to mapOf("total" to 1),
+                    "subscriptions" to listOf(subscriptionMap()),
+                ),
+            )
         val response = service.list()
         assertThat(response.subscriptions).hasSize(1)
         assertThat(response.subscriptions[0].id).isEqualTo("SUBS_123")
+        assertThat(response.resultSet.total).isEqualTo(1)
     }
 
     @Test
     fun `list with filters should encode query params in URI`() {
-        mockFactory.nextBody = mapper.writeValueAsBytes(mapOf("subscriptions" to emptyList<Any>()))
+        mockFactory.nextBody =
+            mapper.writeValueAsBytes(
+                mapOf(
+                    "result_set" to mapOf("total" to 0),
+                    "subscriptions" to emptyList<Any>(),
+                ),
+            )
         service.list(offset = 10, limit = 25, referenceId = "ref-abc", status = SubscriptionStatus.ACTIVE)
         val query = mockFactory.lastUri!!.query
         assertThat(query).contains("offset=10").contains("limit=25")

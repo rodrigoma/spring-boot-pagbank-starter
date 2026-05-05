@@ -7,18 +7,27 @@ import io.github.rodrigoma.pagbank.model.subscription.SubscriptionListResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionResponse
 import io.github.rodrigoma.pagbank.model.subscription.SubscriptionStatus
 import io.github.rodrigoma.pagbank.model.subscription.UpdateSubscriptionRequest
+import io.github.rodrigoma.pagbank.service.PagBankHeaders.IDEMPOTENCY_KEY
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.REFERENCE_ID
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.STATUS
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
-import org.springframework.web.util.UriComponentsBuilder
 
 class PagBankSubscriptionService(
     private val restClient: RestClient,
 ) {
-    fun create(request: CreateSubscriptionRequest): SubscriptionResponse =
+    @JvmOverloads
+    fun create(
+        request: CreateSubscriptionRequest,
+        idempotencyKey: String? = null,
+    ): SubscriptionResponse =
         restClient
             .post()
             .uri("/subscriptions")
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<SubscriptionResponse>()!!
 
@@ -29,100 +38,119 @@ class PagBankSubscriptionService(
             .retrieve()
             .body<SubscriptionResponse>()!!
 
+    @JvmOverloads
     fun update(
         id: String,
         request: UpdateSubscriptionRequest,
+        idempotencyKey: String? = null,
     ): SubscriptionResponse =
         restClient
             .put()
             .uri("/subscriptions/{id}", id)
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<SubscriptionResponse>()!!
 
-    fun cancel(id: String) {
+    @JvmOverloads
+    fun cancel(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/subscriptions/{id}/cancel", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
 
-    fun suspend(id: String) {
+    @JvmOverloads
+    fun suspend(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/subscriptions/{id}/suspend", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
 
-    fun activate(id: String) {
+    @JvmOverloads
+    fun activate(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/subscriptions/{id}/activate", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
 
-    fun retry(id: String) {
+    @JvmOverloads
+    fun retry(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .put()
             .uri("/subscriptions/{id}/retry", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
 
-    fun removeCoupon(id: String) {
+    @JvmOverloads
+    fun removeCoupon(
+        id: String,
+        idempotencyKey: String? = null,
+    ) {
         restClient
             .delete()
             .uri("/subscriptions/{id}/coupons", id)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .toBodilessEntity()
     }
 
+    @JvmOverloads
     fun list(
-        offset: Int? = null,
-        limit: Int? = null,
+        offset: Int = 0,
+        limit: Int = 100,
         referenceId: String? = null,
         status: SubscriptionStatus? = null,
-    ): SubscriptionListResponse {
-        val uri =
-            UriComponentsBuilder
-                .fromPath("/subscriptions")
-                .apply {
-                    offset?.let { queryParam("offset", it) }
-                    limit?.let { queryParam("limit", it) }
-                    referenceId?.let { queryParam("reference_id", it) }
-                    status?.let { queryParam("status", it.name) }
-                }.build()
-                .toUriString()
-        return restClient
+    ): SubscriptionListResponse =
+        restClient
             .get()
-            .uri(uri)
-            .retrieve()
+            .uri { builder ->
+                builder.path("/subscriptions")
+                offset.let { builder.queryParam(OFFSET, it) }
+                limit.let { builder.queryParam(LIMIT, it) }
+                referenceId?.let { builder.queryParam(REFERENCE_ID, it) }
+                status?.let { builder.queryParam(STATUS, it.name) }
+                builder.build()
+            }.retrieve()
             .body<SubscriptionListResponse>()!!
-    }
 
+    @JvmOverloads
     fun listInvoices(
         id: String,
-        offset: Int? = null,
-        limit: Int? = null,
+        offset: Int = 0,
+        limit: Int = 100,
         status: InvoiceStatus? = null,
-    ): SubscriptionInvoiceListResponse {
-        val uri =
-            UriComponentsBuilder
-                .fromPath("/subscriptions/{id}/invoices")
-                .apply {
-                    offset?.let { queryParam("offset", it) }
-                    limit?.let { queryParam("limit", it) }
-                    status?.let { queryParam("status", it.name) }
-                }.build()
-                .expand(id)
-                .toUriString()
-        return restClient
+    ): SubscriptionInvoiceListResponse =
+        restClient
             .get()
-            .uri(uri)
-            .retrieve()
+            .uri { builder ->
+                builder.path("/subscriptions/{id}/invoices")
+                offset.let { builder.queryParam(OFFSET, it) }
+                limit.let { builder.queryParam(LIMIT, it) }
+                status?.let { builder.queryParam(STATUS, it.name) }
+                builder.build(id)
+            }.retrieve()
             .body<SubscriptionInvoiceListResponse>()!!
-    }
 }

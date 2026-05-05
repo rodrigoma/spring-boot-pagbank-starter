@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.autoconfigure
 
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
@@ -17,8 +18,7 @@ import org.springframework.web.client.RestClient
 class PagBankHealthIndicatorAutoConfiguration {
     @Bean("pagBankHealthIndicator")
     fun pagBankHealthIndicator(
-        @org.springframework.beans.factory.annotation.Qualifier("pagBankRestClient")
-        restClient: RestClient,
+        @Qualifier("pagBankRestClient") restClient: RestClient,
     ): HealthIndicator = PagBankHealthIndicator(restClient)
 }
 

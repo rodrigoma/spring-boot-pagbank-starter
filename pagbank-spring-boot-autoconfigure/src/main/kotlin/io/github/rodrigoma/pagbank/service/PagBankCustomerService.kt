@@ -5,17 +5,26 @@ import io.github.rodrigoma.pagbank.model.customer.CreateCustomerRequest
 import io.github.rodrigoma.pagbank.model.customer.CustomerListResponse
 import io.github.rodrigoma.pagbank.model.customer.CustomerResponse
 import io.github.rodrigoma.pagbank.model.customer.UpdateCustomerRequest
+import io.github.rodrigoma.pagbank.service.PagBankHeaders.IDEMPOTENCY_KEY
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.LIMIT
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.OFFSET
+import io.github.rodrigoma.pagbank.service.PagBankQueryParams.REFERENCE_ID
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 
 class PagBankCustomerService(
     private val restClient: RestClient,
 ) {
-    fun create(request: CreateCustomerRequest): CustomerResponse =
+    @JvmOverloads
+    fun create(
+        request: CreateCustomerRequest,
+        idempotencyKey: String? = null,
+    ): CustomerResponse =
         restClient
             .post()
             .uri("/customers")
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<CustomerResponse>()!!
 
@@ -26,40 +35,47 @@ class PagBankCustomerService(
             .retrieve()
             .body<CustomerResponse>()!!
 
+    @JvmOverloads
     fun update(
         id: String,
         request: UpdateCustomerRequest,
+        idempotencyKey: String? = null,
     ): CustomerResponse =
         restClient
             .put()
             .uri("/customers/{id}", id)
             .body(request)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<CustomerResponse>()!!
 
+    @JvmOverloads
     fun updateBillingInfo(
         id: String,
         billingInfo: List<BillingInfoRequest>,
+        idempotencyKey: String? = null,
     ): CustomerResponse =
         restClient
             .put()
             .uri("/customers/{id}/billing_info", id)
             .body(billingInfo)
+            .apply { idempotencyKey?.let { header(IDEMPOTENCY_KEY, it) } }
             .retrieve()
             .body<CustomerResponse>()!!
 
+    @JvmOverloads
     fun list(
-        offset: Int? = null,
-        limit: Int? = null,
+        offset: Int = 0,
+        limit: Int = 100,
         referenceId: String? = null,
     ): CustomerListResponse =
         restClient
             .get()
             .uri { builder ->
                 builder.path("/customers")
-                offset?.let { builder.queryParam("offset", it) }
-                limit?.let { builder.queryParam("limit", it) }
-                referenceId?.let { builder.queryParam("reference_id", it) }
+                offset.let { builder.queryParam(OFFSET, it) }
+                limit.let { builder.queryParam(LIMIT, it) }
+                referenceId?.let { builder.queryParam(REFERENCE_ID, it) }
                 builder.build()
             }.retrieve()
             .body<CustomerListResponse>()!!

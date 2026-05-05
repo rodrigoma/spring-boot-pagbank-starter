@@ -1,5 +1,7 @@
 package io.github.rodrigoma.pagbank.model.coupon
 
+import io.github.rodrigoma.pagbank.model.common.PagBankLink
+
 enum class DiscountType { PERCENT, AMOUNT }
 
 enum class CouponStatus { ACTIVE, INACTIVE }
@@ -14,13 +16,6 @@ data class Discount(
 data class Duration(
     val type: DurationType,
     val occurrences: Int? = null,
-)
-
-data class CouponLink(
-    val rel: String,
-    val href: String,
-    val media: String? = null,
-    val type: String? = null,
 )
 
 data class CreateCouponRequest(
@@ -47,7 +42,7 @@ data class CouponResponse(
     val inUse: Boolean? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
-    val links: List<CouponLink>? = null,
+    val links: List<PagBankLink>? = null,
 )
 
 data class CouponResultSet(

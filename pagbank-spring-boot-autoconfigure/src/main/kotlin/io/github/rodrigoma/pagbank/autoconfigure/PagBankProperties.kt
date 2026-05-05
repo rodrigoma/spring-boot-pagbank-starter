@@ -1,5 +1,6 @@
 package io.github.rodrigoma.pagbank.autoconfigure
 
+import io.github.rodrigoma.pagbank.autoconfigure.PagBankEnvironment.SANDBOX
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.context.properties.ConfigurationProperties
 
@@ -18,8 +19,7 @@ enum class PagBankEnvironment {
 @ConfigurationProperties(prefix = "pagbank")
 data class PagBankProperties(
     val token: String = "",
-    val environment: PagBankEnvironment = PagBankEnvironment.SANDBOX,
-    val webhookSecret: String? = null,
+    val environment: PagBankEnvironment = SANDBOX,
     val healthIndicatorEnabled: Boolean = false,
     val logRequests: Boolean = false,
 ) : InitializingBean {
