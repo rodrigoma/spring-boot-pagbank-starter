@@ -15,6 +15,7 @@ import org.springframework.web.client.body
 class PagBankCouponService(
     private val restClient: RestClient,
 ) {
+    @JvmOverloads
     fun create(
         request: CreateCouponRequest,
         idempotencyKey: String? = null,
@@ -34,6 +35,7 @@ class PagBankCouponService(
             .retrieve()
             .body<CouponResponse>()!!
 
+    @JvmOverloads
     fun list(
         offset: Int = 0,
         limit: Int = 100,
@@ -52,6 +54,7 @@ class PagBankCouponService(
             }.retrieve()
             .body<CouponListResponse>()!!
 
+    @JvmOverloads
     fun inactivate(
         id: String,
         idempotencyKey: String? = null,
@@ -64,6 +67,7 @@ class PagBankCouponService(
             .toBodilessEntity()
     }
 
+    @JvmOverloads
     fun activate(
         id: String,
         idempotencyKey: String? = null,

@@ -15,6 +15,7 @@ import org.springframework.web.client.body
 class PagBankCustomerService(
     private val restClient: RestClient,
 ) {
+    @JvmOverloads
     fun create(
         request: CreateCustomerRequest,
         idempotencyKey: String? = null,
@@ -34,6 +35,7 @@ class PagBankCustomerService(
             .retrieve()
             .body<CustomerResponse>()!!
 
+    @JvmOverloads
     fun update(
         id: String,
         request: UpdateCustomerRequest,
@@ -47,6 +49,7 @@ class PagBankCustomerService(
             .retrieve()
             .body<CustomerResponse>()!!
 
+    @JvmOverloads
     fun updateBillingInfo(
         id: String,
         billingInfo: List<BillingInfoRequest>,
@@ -60,6 +63,7 @@ class PagBankCustomerService(
             .retrieve()
             .body<CustomerResponse>()!!
 
+    @JvmOverloads
     fun list(
         offset: Int = 0,
         limit: Int = 100,

@@ -18,6 +18,7 @@ import org.springframework.web.client.body
 class PagBankSubscriptionService(
     private val restClient: RestClient,
 ) {
+    @JvmOverloads
     fun create(
         request: CreateSubscriptionRequest,
         idempotencyKey: String? = null,
@@ -37,6 +38,7 @@ class PagBankSubscriptionService(
             .retrieve()
             .body<SubscriptionResponse>()!!
 
+    @JvmOverloads
     fun update(
         id: String,
         request: UpdateSubscriptionRequest,
@@ -50,6 +52,7 @@ class PagBankSubscriptionService(
             .retrieve()
             .body<SubscriptionResponse>()!!
 
+    @JvmOverloads
     fun cancel(
         id: String,
         idempotencyKey: String? = null,
@@ -62,6 +65,7 @@ class PagBankSubscriptionService(
             .toBodilessEntity()
     }
 
+    @JvmOverloads
     fun suspend(
         id: String,
         idempotencyKey: String? = null,
@@ -74,6 +78,7 @@ class PagBankSubscriptionService(
             .toBodilessEntity()
     }
 
+    @JvmOverloads
     fun activate(
         id: String,
         idempotencyKey: String? = null,
@@ -86,6 +91,7 @@ class PagBankSubscriptionService(
             .toBodilessEntity()
     }
 
+    @JvmOverloads
     fun retry(
         id: String,
         idempotencyKey: String? = null,
@@ -98,6 +104,7 @@ class PagBankSubscriptionService(
             .toBodilessEntity()
     }
 
+    @JvmOverloads
     fun removeCoupon(
         id: String,
         idempotencyKey: String? = null,
@@ -110,6 +117,7 @@ class PagBankSubscriptionService(
             .toBodilessEntity()
     }
 
+    @JvmOverloads
     fun list(
         offset: Int = 0,
         limit: Int = 100,
@@ -128,6 +136,7 @@ class PagBankSubscriptionService(
             }.retrieve()
             .body<SubscriptionListResponse>()!!
 
+    @JvmOverloads
     fun listInvoices(
         id: String,
         offset: Int = 0,

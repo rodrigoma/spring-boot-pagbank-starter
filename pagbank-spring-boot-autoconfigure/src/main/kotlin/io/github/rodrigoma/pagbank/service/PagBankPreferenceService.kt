@@ -17,6 +17,7 @@ class PagBankPreferenceService(
             .retrieve()
             .body<NotificationPreferences>()!!
 
+    @JvmOverloads
     fun updateNotifications(
         request: NotificationPreferences,
         idempotencyKey: String? = null,
@@ -36,6 +37,7 @@ class PagBankPreferenceService(
             .retrieve()
             .body<RetryPreferences>()!!
 
+    @JvmOverloads
     fun updateRetries(
         request: RetryPreferences,
         idempotencyKey: String? = null,
@@ -55,6 +57,7 @@ class PagBankPreferenceService(
             .retrieve()
             .body<PublicKeyResponse>()!!
 
+    @JvmOverloads
     fun rotatePublicKey(idempotencyKey: String? = null): PublicKeyResponse =
         restClient
             .put()

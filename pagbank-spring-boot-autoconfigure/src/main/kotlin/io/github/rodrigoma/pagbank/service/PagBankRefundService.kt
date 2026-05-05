@@ -17,6 +17,7 @@ class PagBankRefundService(
             .retrieve()
             .body<RefundResponse>()!!
 
+    @JvmOverloads
     fun list(
         offset: Int = 0,
         limit: Int = 100,

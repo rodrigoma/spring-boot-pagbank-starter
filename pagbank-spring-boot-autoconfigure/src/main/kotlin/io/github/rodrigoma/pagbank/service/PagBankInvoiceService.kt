@@ -17,6 +17,7 @@ class PagBankInvoiceService(
             .retrieve()
             .body<InvoiceResponse>()!!
 
+    @JvmOverloads
     fun listPayments(
         id: String,
         offset: Int = 0,

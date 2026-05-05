@@ -16,6 +16,7 @@ import org.springframework.web.client.body
 class PagBankPlanService(
     private val restClient: RestClient,
 ) {
+    @JvmOverloads
     fun create(
         request: CreatePlanRequest,
         idempotencyKey: String? = null,
@@ -35,6 +36,7 @@ class PagBankPlanService(
             .retrieve()
             .body<PlanResponse>()!!
 
+    @JvmOverloads
     fun update(
         id: String,
         request: UpdatePlanRequest,
@@ -48,6 +50,7 @@ class PagBankPlanService(
             .retrieve()
             .body<PlanResponse>()!!
 
+    @JvmOverloads
     fun list(
         offset: Int = 0,
         limit: Int = 100,
@@ -66,6 +69,7 @@ class PagBankPlanService(
             }.retrieve()
             .body<PlanListResponse>()!!
 
+    @JvmOverloads
     fun activate(
         id: String,
         idempotencyKey: String? = null,
@@ -78,6 +82,7 @@ class PagBankPlanService(
             .toBodilessEntity()
     }
 
+    @JvmOverloads
     fun inactivate(
         id: String,
         idempotencyKey: String? = null,

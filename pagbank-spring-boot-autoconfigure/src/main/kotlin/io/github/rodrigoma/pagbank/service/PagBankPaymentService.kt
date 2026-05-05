@@ -27,6 +27,7 @@ class PagBankPaymentService(
             .retrieve()
             .body<PaymentResponse>()!!
 
+    @JvmOverloads
     fun createRefund(
         id: String,
         request: RefundRequest,
@@ -40,6 +41,7 @@ class PagBankPaymentService(
             .retrieve()
             .body<RefundResponse>()!!
 
+    @JvmOverloads
     fun listRefunds(
         id: String,
         offset: Int = 0,
@@ -55,6 +57,7 @@ class PagBankPaymentService(
             }.retrieve()
             .body<RefundListResponse>()!!
 
+    @JvmOverloads
     @Suppress("LongParameterList")
     fun list(
         offset: Int = 0,
