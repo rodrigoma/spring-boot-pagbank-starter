@@ -60,9 +60,6 @@ pagbank:
   # Optional — SANDBOX (default) or PRODUCTION
   environment: SANDBOX
 
-  # Optional — secret key for verifying incoming webhook signatures (HMAC-SHA256)
-  webhook-secret: your-webhook-secret-here
-
   # Optional — expose a /actuator/health/pagBank endpoint (default: false)
   health-indicator-enabled: false
 ```
@@ -71,7 +68,6 @@ pagbank:
 |------------------------------------|-----------|-----------|----------|-------------------------------------------------------|
 | `pagbank.token`                    | `String`  | —         | Yes      | API token from your PagBank dashboard                 |
 | `pagbank.environment`              | `Enum`    | `SANDBOX` | No       | Target environment: `SANDBOX` or `PRODUCTION`         |
-| `pagbank.webhook-secret`           | `String`  | `null`    | No       | Secret for HMAC-SHA256 webhook signature verification |
 | `pagbank.health-indicator-enabled` | `Boolean` | `false`   | No       | Enables Spring Boot Actuator health check for PagBank |
 
 ### Environments
@@ -93,7 +89,6 @@ Once the starter is on the classpath and `pagbank.token` is set, the following b
 | `pagBankCouponService`       | `PagBankCouponService`       |
 | `pagBankInvoiceService`      | `PagBankInvoiceService`      |
 | `pagBankPaymentService`      | `PagBankPaymentService`      |
-| `pagBankChargeService`       | `PagBankChargeService`       |
 | `pagBankRefundService`       | `PagBankRefundService`       |
 | `pagBankPreferenceService`   | `PagBankPreferenceService`   |
 | `pagBankWebhookParser`       | `PagBankWebhookParser`       |
@@ -155,9 +150,9 @@ class MySubscriptionService(private val subscriptionService: PagBankSubscription
 }
 ```
 
-### Webhook Verification and Parsing
+### Webhook Parsing
 
-Verify the HMAC-SHA256 signature that PagBank sends in the `x-pagbank-signature` header before processing the event:
+Parse incoming webhook events with `PagBankWebhookParser`:
 
 ```kotlin
 @RestController
@@ -165,14 +160,7 @@ Verify the HMAC-SHA256 signature that PagBank sends in the `x-pagbank-signature`
 class WebhookController(private val webhookParser: PagBankWebhookParser) {
 
     @PostMapping("/pagbank")
-    fun handleWebhook(
-        @RequestBody rawBody: String,
-        @RequestHeader("x-pagbank-signature") signature: String
-    ): ResponseEntity<Void> {
-        if (!webhookParser.verify(rawBody, signature)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
-
+    fun handleWebhook(@RequestBody rawBody: String): ResponseEntity<Void> {
         val payload = webhookParser.parse(rawBody)
 
         when (payload.event) {
@@ -182,7 +170,7 @@ class WebhookController(private val webhookParser: PagBankWebhookParser) {
             WebhookEventType.SUBSCRIPTION_CANCELED -> {
                 // handle cancellation
             }
-            WebhookEventType.REFUND_CREATED -> {
+            WebhookEventType.PAYMENT_REFUND_ACTIVATED -> {
                 // handle refund
             }
             else -> { /* log and ignore */ }
@@ -193,8 +181,6 @@ class WebhookController(private val webhookParser: PagBankWebhookParser) {
 }
 ```
 
-> **Note:** `pagbank.webhook-secret` must be configured in `application.yml` for signature verification to work. If you call `verify()` without a secret configured, an `IllegalStateException` is thrown.
-
 ### Error Handling
 
 Service calls throw `PagBankException` on API errors. You can catch it to inspect the HTTP status and error details:
@@ -202,8 +188,12 @@ Service calls throw `PagBankException` on API errors. You can catch it to inspec
 ```kotlin
 try {
     val plan = planService.get("nonexistent-plan-id")
-} catch (e: PagBankException) {
-    println("HTTP ${e.status}: ${e.message}")
+} catch (e: PagBankException.NotFound) {
+    println("Plan not found")
+} catch (e: PagBankException.ValidationError) {
+    println("HTTP ${e.httpStatus}: ${e.errors.joinToString { it.description }}")
+} catch (e: PagBankException.ServerError) {
+    println("Server error: ${e.statusCode}")
 }
 ```
 
