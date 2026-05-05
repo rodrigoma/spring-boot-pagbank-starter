@@ -1,7 +1,6 @@
 plugins {
     `maven-publish`
     signing
-    id("com.gradleup.nmcp")
 }
 
 publishing {
@@ -44,13 +43,5 @@ signing {
     if (signingKey != null && signingPassword != null) {
         useInMemoryPgpKeys(signingKey, signingPassword)
         sign(publishing.publications["mavenJava"])
-    }
-}
-
-nmcp {
-    publishAllPublicationsToCentralPortal {
-        username = findProperty("ossrhUsername") as String? ?: System.getenv("OSSRH_USERNAME") ?: ""
-        password = findProperty("ossrhPassword") as String? ?: System.getenv("OSSRH_PASSWORD") ?: ""
-        publicationType = "AUTOMATIC"
     }
 }

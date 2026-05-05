@@ -14,5 +14,4 @@ dependencies {
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.8")
     implementation("org.springframework.boot:spring-boot-gradle-plugin:4.0.4")
     implementation("org.owasp:dependency-check-gradle:12.1.1")
-    implementation("com.gradleup.nmcp:nmcp:0.1.4")
 }

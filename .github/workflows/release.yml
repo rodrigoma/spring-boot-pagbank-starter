@@ -25,10 +25,7 @@ jobs:
         run: ./gradlew build
 
       - name: Publish to Maven Central
-        run: >-
-          ./gradlew
-          :pagbank-spring-boot-autoconfigure:publishAllPublicationsToCentralPortal
-          :pagbank-spring-boot-starter:publishAllPublicationsToCentralPortal
+        run: ./gradlew publishAggregationToCentralPortal
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
