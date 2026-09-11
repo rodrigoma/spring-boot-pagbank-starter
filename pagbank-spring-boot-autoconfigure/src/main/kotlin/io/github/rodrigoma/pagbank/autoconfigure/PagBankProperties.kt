@@ -41,6 +41,11 @@ data class PagBankProperties(
     /** The base URL the client actually uses: [baseUrl] when set, otherwise the one implied by [environment]. */
     fun resolvedBaseUrl(): String = baseUrl ?: environment.baseUrl()
 
+    /** Never prints the token — property objects end up in logs and exception messages more often than expected. */
+    override fun toString(): String =
+        "PagBankProperties(token=<hidden>, environment=$environment, baseUrl=$baseUrl, " +
+            "healthIndicatorEnabled=$healthIndicatorEnabled, logRequests=$logRequests, webhook=$webhook)"
+
     override fun afterPropertiesSet() {
         require(token.isNotBlank()) {
             "pagbank.token must be configured — set it as an environment variable or in application.properties/.yml"

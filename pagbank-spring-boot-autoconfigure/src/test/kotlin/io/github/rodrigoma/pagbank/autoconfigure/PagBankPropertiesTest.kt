@@ -80,6 +80,15 @@ class PagBankPropertiesTest {
             }
     }
 
+    @Test
+    fun `toString should not expose the token`() {
+        val props = PagBankProperties(token = "SUPER_SECRET", environment = PagBankEnvironment.PRODUCTION)
+        assertThat(props.toString())
+            .doesNotContain("SUPER_SECRET")
+            .contains("token=<hidden>")
+            .contains("environment=PRODUCTION")
+    }
+
     @EnableConfigurationProperties(PagBankProperties::class)
     class PropertiesTestConfig
 }
