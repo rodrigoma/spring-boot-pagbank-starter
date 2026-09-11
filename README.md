@@ -10,18 +10,19 @@ A Spring Boot auto-configuration library for the **PagBank Subscriptions API** (
 
 | Library version | Spring Boot | Java | Kotlin |
 |---|---|---|---|
-| 1.x | 4.0+ | 21+ | 2.1+ |
+| 1.x | 4.1+ | 21+ | 2.2+ |
 
-Built and tested against Spring Boot 4.0.4 / Java 21; also verified in a consumer running Spring Boot 4.1.1,
-Java 25 and Kotlin 2.4.
+Built and tested against Spring Boot 4.1.1 / Kotlin 2.3 / Java 21; also verified in a consumer running
+Spring Boot 4.1.1, Kotlin 2.4 and Java 25. The library is compiled with Kotlin 2.3, so a Kotlin consumer
+needs a compiler that can read that metadata (2.2 or newer).
 
 ## Requirements
 
 | Dependency   | Minimum version |
 |--------------|-----------------|
 | Java         | 21              |
-| Spring Boot  | 4.0.0           |
-| Kotlin       | 2.1 (optional)  |
+| Spring Boot  | 4.1.0           |
+| Kotlin       | 2.2 (optional)  |
 
 ## Installation
 
@@ -29,7 +30,7 @@ Java 25 and Kotlin 2.4.
 
 ```kotlin
 dependencies {
-    implementation("io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC2")
+    implementation("io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC3")
 }
 ```
 
@@ -37,7 +38,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC2'
+    implementation 'io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC3'
 }
 ```
 
@@ -47,7 +48,7 @@ dependencies {
 <dependency>
     <groupId>io.github.rodrigoma</groupId>
     <artifactId>pagbank-spring-boot-starter</artifactId>
-    <version>1.0.0-RC2</version>
+    <version>1.0.0-RC3</version>
 </dependency>
 ```
 
@@ -351,20 +352,20 @@ pushing a tag named `v<version>`. The [Release workflow](.github/workflows/relea
 tests, signs the artifacts, uploads the bundle to the Maven Central Portal (auto-published once validated)
 and creates a GitHub Release with generated notes.
 
-### Release candidate (e.g. `1.0.0-RC3`)
+### Release candidate (e.g. `1.0.0-RC4`)
 
 1. On `main`, open a branch and set the version:
    ```bash
-   git checkout -b chore/bump-1.0.0-rc3
-   sed -i '' 's/^version=.*/version=1.0.0-RC3/' gradle.properties
+   git checkout -b chore/bump-1.0.0-rc4
+   sed -i '' 's/^version=.*/version=1.0.0-RC4/' gradle.properties
    ```
 2. Update the three install snippets under [Installation](#installation) to the same version.
 3. Open a PR, get CI green, merge it.
 4. Tag the merge commit and push the tag — this is what publishes:
    ```bash
    git checkout main && git pull
-   git tag v1.0.0-RC3
-   git push origin v1.0.0-RC3
+   git tag v1.0.0-RC4
+   git push origin v1.0.0-RC4
    ```
 5. Watch the *Release* workflow on GitHub Actions. It refuses to run if the tag does not match
    `gradle.properties`, so a typo fails fast instead of publishing the wrong version.
@@ -385,7 +386,7 @@ The GitHub Release is created as a normal (non pre-release) release because the 
 ### If something goes wrong
 
 - **Workflow failed before "Upload bundle"** — nothing was published. Fix, delete the tag
-  (`git push --delete origin v1.0.0-RC3 && git tag -d v1.0.0-RC3`), re-tag and push again.
+  (`git push --delete origin v1.0.0-RC4 && git tag -d v1.0.0-RC4`), re-tag and push again.
 - **Upload succeeded but validation failed** — the deployment is dropped by Central; same recovery as above.
 - **Published by mistake** — Maven Central is immutable. Ship a new version; never reuse a tag.
 

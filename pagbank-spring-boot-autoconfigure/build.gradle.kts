@@ -9,7 +9,7 @@ group = "io.github.rodrigoma"
 dependencies {
     compileOnly("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.springframework.boot:spring-boot-starter-actuator")
-    kapt(platform("org.springframework.boot:spring-boot-dependencies:4.0.4"))
+    kapt(platform("org.springframework.boot:spring-boot-dependencies:4.1.1"))
     kapt("org.springframework.boot:spring-boot-configuration-processor")
     kapt("org.springframework.boot:spring-boot-health")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

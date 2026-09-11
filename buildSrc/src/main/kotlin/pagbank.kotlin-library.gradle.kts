@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:4.0.4"))
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:4.1.1"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.boot:spring-boot-autoconfigure")
