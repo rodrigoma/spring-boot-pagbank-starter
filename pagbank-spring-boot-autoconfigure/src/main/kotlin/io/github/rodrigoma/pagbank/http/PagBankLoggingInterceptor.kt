@@ -8,6 +8,12 @@ import org.springframework.http.client.ClientHttpResponse
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
+/**
+ * Logs outgoing PagBank requests and responses at `DEBUG` when `pagbank.log-requests=true`.
+ *
+ * Headers are never logged (so the `Authorization` token stays out of logs) and bodies go through
+ * [PagBankBodyMasker], which hides card data, CPF/CNPJ, e-mail and phone numbers.
+ */
 class PagBankLoggingInterceptor : ClientHttpRequestInterceptor {
     private val log = LoggerFactory.getLogger(PagBankLoggingInterceptor::class.java)
 
@@ -21,7 +27,7 @@ class PagBankLoggingInterceptor : ClientHttpRequestInterceptor {
                 "--> {} {}{}",
                 request.method,
                 request.uri,
-                if (body.isNotEmpty()) "\n${body.decodeToString()}" else "",
+                if (body.isNotEmpty()) "\n${PagBankBodyMasker.mask(body)}" else "",
             )
         }
 
@@ -33,7 +39,7 @@ class PagBankLoggingInterceptor : ClientHttpRequestInterceptor {
                 "<-- {} {}\n{}",
                 response.statusCode.value(),
                 request.uri,
-                responseBody.decodeToString(),
+                PagBankBodyMasker.mask(responseBody),
             )
             return BufferedClientHttpResponse(response, responseBody)
         }
