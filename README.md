@@ -29,7 +29,7 @@ Java 25 and Kotlin 2.4.
 
 ```kotlin
 dependencies {
-    implementation("io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC1")
+    implementation("io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC2")
 }
 ```
 
@@ -37,7 +37,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC1'
+    implementation 'io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC2'
 }
 ```
 
@@ -47,7 +47,7 @@ dependencies {
 <dependency>
     <groupId>io.github.rodrigoma</groupId>
     <artifactId>pagbank-spring-boot-starter</artifactId>
-    <version>1.0.0-RC1</version>
+    <version>1.0.0-RC2</version>
 </dependency>
 ```
 
@@ -343,6 +343,55 @@ management:
       exposure:
         include: health
 ```
+
+## Releasing (maintainers)
+
+The version lives in one place — [`gradle.properties`](gradle.properties) — and a release is triggered by
+pushing a tag named `v<version>`. The [Release workflow](.github/workflows/release.yml) then builds and
+tests, signs the artifacts, uploads the bundle to the Maven Central Portal (auto-published once validated)
+and creates a GitHub Release with generated notes.
+
+### Release candidate (e.g. `1.0.0-RC3`)
+
+1. On `main`, open a branch and set the version:
+   ```bash
+   git checkout -b chore/bump-1.0.0-rc3
+   sed -i '' 's/^version=.*/version=1.0.0-RC3/' gradle.properties
+   ```
+2. Update the three install snippets under [Installation](#installation) to the same version.
+3. Open a PR, get CI green, merge it.
+4. Tag the merge commit and push the tag — this is what publishes:
+   ```bash
+   git checkout main && git pull
+   git tag v1.0.0-RC3
+   git push origin v1.0.0-RC3
+   ```
+5. Watch the *Release* workflow on GitHub Actions. It refuses to run if the tag does not match
+   `gradle.properties`, so a typo fails fast instead of publishing the wrong version.
+6. When it finishes, the artifact appears on
+   [central.sonatype.com](https://central.sonatype.com/artifact/io.github.rodrigoma/pagbank-spring-boot-starter)
+   within a few minutes and the GitHub Release is marked as a *pre-release*.
+
+### Final version (e.g. `1.0.0`)
+
+Same steps with `version=1.0.0` and tag `v1.0.0`. Two extra things to check before merging the bump:
+
+- The README has no *Migrating from …-RCx* notes that only make sense between release candidates;
+  fold them into a single *Migrating from 0.x / previous RC* note or drop them.
+- Any `PagBankException` subclass or property added since the last RC is documented in the tables above.
+
+The GitHub Release is created as a normal (non pre-release) release because the tag has no `-` suffix.
+
+### If something goes wrong
+
+- **Workflow failed before "Upload bundle"** — nothing was published. Fix, delete the tag
+  (`git push --delete origin v1.0.0-RC3 && git tag -d v1.0.0-RC3`), re-tag and push again.
+- **Upload succeeded but validation failed** — the deployment is dropped by Central; same recovery as above.
+- **Published by mistake** — Maven Central is immutable. Ship a new version; never reuse a tag.
+
+Secrets used by the workflow (`SIGNING_KEY`, `SIGNING_PASSWORD`, `OSSRH_USERNAME`, `OSSRH_PASSWORD`) are
+configured in the repository settings; `OSSRH_*` are the Central Portal user token, not the account
+password.
 
 ## License
 
