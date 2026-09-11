@@ -7,7 +7,39 @@ import io.github.rodrigoma.pagbank.model.invoice.InvoiceResponse
 import io.github.rodrigoma.pagbank.model.plan.IntervalUnit
 import io.github.rodrigoma.pagbank.model.plan.PaymentMethod
 
-enum class SubscriptionStatus { ACTIVE, EXPIRED, CANCELED, SUSPENDED, OVERDUE, TRIAL, PENDING, PENDING_ACTION }
+/**
+ * Lifecycle states of a subscription as reported by PagBank.
+ *
+ * "Entitled" below means the subscriber should be granted access to whatever the plan sells.
+ */
+enum class SubscriptionStatus {
+    /** Paid and current. Entitled. */
+    ACTIVE,
+
+    /** Reached the plan's end (fixed-term plans) or its final billing cycle. Not entitled; no further charges. */
+    EXPIRED,
+
+    /** Cancelled by the merchant or the customer. Not entitled; terminal. */
+    CANCELED,
+
+    /** Paused by the merchant (`suspend`); charges stop until it is re-activated. Not entitled. */
+    SUSPENDED,
+
+    /**
+     * A recurring charge failed and PagBank is retrying. Treat as a grace period: usually still entitled,
+     * warn the customer.
+     */
+    OVERDUE,
+
+    /** Inside the plan's free trial window; no charge has happened yet. Entitled. */
+    TRIAL,
+
+    /** Created, first charge not yet confirmed (e.g. boleto/PIX awaiting payment). Not entitled until [ACTIVE]. */
+    PENDING,
+
+    /** Waiting for the customer to act — typically supplying or updating a payment method. Not entitled. */
+    PENDING_ACTION,
+}
 
 enum class RetryAttempt { FIRST, SECOND, THIRD }
 

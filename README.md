@@ -12,6 +12,9 @@ A Spring Boot auto-configuration library for the **PagBank Subscriptions API** (
 |---|---|---|---|
 | 1.x | 4.0+ | 21+ | 2.1+ |
 
+Built and tested against Spring Boot 4.0.4 / Java 21; also verified in a consumer running Spring Boot 4.1.1,
+Java 25 and Kotlin 2.4.
+
 ## Requirements
 
 | Dependency   | Minimum version |
@@ -280,10 +283,34 @@ try {
     println("Plan not found")
 } catch (e: PagBankException.ValidationError) {
     println("HTTP ${e.httpStatus}: ${e.errors.joinToString { it.description }}")
+} catch (e: PagBankException.RateLimited) {
+    println("Slow down — retry after ${e.retryAfter ?: "a while"}")
 } catch (e: PagBankException.ServerError) {
     println("Server error: ${e.statusCode}")
 }
 ```
+
+| Exception | When | Notes |
+|---|---|---|
+| `Unauthorized` | 401 / 403 | Check `pagbank.token` and the environment |
+| `NotFound` | 404 | |
+| `ValidationError` | 400 / 409 / 422 with a PagBank error body | `errors` carries the parsed `error_messages` |
+| `RateLimited` | 429 | `retryAfter` holds `Retry-After` (seconds or HTTP-date) when present — back off, do not treat as an outage |
+| `ServerError` | 5xx or any unmapped status | PagBank itself is failing |
+| `InvalidSignature` | webhook header check failed | Only with `pagbank.webhook.verify-signature=true` |
+
+### Idempotency
+
+Every write operation accepts an optional `idempotencyKey`, sent as `x-idempotency-key`. Use it whenever a
+request may be retried — a double-clicked "Subscribe" button, a job re-run after a timeout — so PagBank
+returns the original result instead of creating a second subscription or charge:
+
+```kotlin
+subscriptionService.create(request, idempotencyKey = "sub:${customerId}:${planId}:${checkoutId}")
+```
+
+Derive the key from something stable that identifies *this* business action (your own order/checkout id),
+not from a fresh `UUID` per attempt — a new key on every retry defeats the purpose.
 
 ## Request logging
 

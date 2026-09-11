@@ -38,6 +38,11 @@ data class CardHolder(
 @JsonSerialize(using = CardRequestSerializer::class)
 @JsonDeserialize(using = CardRequestDeserializer::class)
 sealed class CardRequest {
+    /**
+     * Raw card data. Using this puts the card number and CVV on **your** server, which brings your
+     * integration into PCI DSS scope. Prefer [Encrypted]: encrypt the card in the browser with the
+     * PagBank JavaScript SDK and send only the resulting blob.
+     */
     data class Plain(
         val number: String,
         val expYear: String,
@@ -46,6 +51,7 @@ sealed class CardRequest {
         val securityCode: String,
     ) : CardRequest()
 
+    /** Card encrypted client-side with the PagBank JavaScript SDK — the recommended option. */
     data class Encrypted(
         val encrypted: String,
     ) : CardRequest()

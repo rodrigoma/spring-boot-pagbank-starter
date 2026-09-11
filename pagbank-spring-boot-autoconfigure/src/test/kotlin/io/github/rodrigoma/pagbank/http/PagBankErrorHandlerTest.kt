@@ -48,6 +48,34 @@ class PagBankErrorHandlerTest {
     }
 
     @Test
+    fun `429 throws RateLimited with Retry-After in seconds`() {
+        val response =
+            MockClientHttpResponse(ByteArray(0), HttpStatus.TOO_MANY_REQUESTS).also {
+                it.headers.set("Retry-After", "30")
+            }
+        val ex = assertThrows<PagBankException.RateLimited> { handler.handle(response) }
+        assertThat(ex.retryAfter).isEqualTo(java.time.Duration.ofSeconds(30))
+        assertThat(ex.message).contains("30s")
+    }
+
+    @Test
+    fun `429 without Retry-After throws RateLimited with null retryAfter`() {
+        val response = MockClientHttpResponse(ByteArray(0), HttpStatus.TOO_MANY_REQUESTS)
+        val ex = assertThrows<PagBankException.RateLimited> { handler.handle(response) }
+        assertThat(ex.retryAfter).isNull()
+    }
+
+    @Test
+    fun `429 with unparseable Retry-After throws RateLimited with null retryAfter`() {
+        val response =
+            MockClientHttpResponse(ByteArray(0), HttpStatus.TOO_MANY_REQUESTS).also {
+                it.headers.set("Retry-After", "soon")
+            }
+        val ex = assertThrows<PagBankException.RateLimited> { handler.handle(response) }
+        assertThat(ex.retryAfter).isNull()
+    }
+
+    @Test
     fun `500 throws ServerError with status code`() {
         val response = MockClientHttpResponse(ByteArray(0), HttpStatus.INTERNAL_SERVER_ERROR)
         val ex = assertThrows<PagBankException.ServerError> { handler.handle(response) }

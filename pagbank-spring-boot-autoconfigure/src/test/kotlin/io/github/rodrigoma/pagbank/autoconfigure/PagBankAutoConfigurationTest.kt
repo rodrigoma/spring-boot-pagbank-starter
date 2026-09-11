@@ -19,6 +19,7 @@ import org.springframework.boot.test.system.CapturedOutput
 import org.springframework.boot.test.system.OutputCaptureExtension
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.content
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
@@ -90,7 +91,7 @@ class PagBankAutoConfigurationTest {
             val server = MockRestServiceServer.bindTo(builder).build()
             server
                 .expect(requestTo("https://sandbox.api.assinaturas.pagseguro.com/plans"))
-                .andExpect(content().json("""{"name":"test"}""", true))
+                .andExpect(content().json("""{"name":"test"}""", JsonCompareMode.STRICT))
                 .andRespond(withSuccess())
 
             builder

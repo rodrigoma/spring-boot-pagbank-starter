@@ -1,6 +1,7 @@
 package io.github.rodrigoma.pagbank.exception
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import java.time.Duration
 
 data class ApiError(
     val error: String,
@@ -29,9 +30,18 @@ sealed class PagBankException(
         val httpStatus: Int = 422,
     ) : PagBankException("Validation failed")
 
+    /** 5xx or any status the starter does not map explicitly — PagBank itself is failing. */
     class ServerError(
         val statusCode: Int,
     ) : PagBankException("Server error: $statusCode")
+
+    /**
+     * HTTP 429 — you are calling too fast, not PagBank failing. Back off and retry;
+     * [retryAfter] carries the `Retry-After` header when PagBank sent one.
+     */
+    class RateLimited(
+        val retryAfter: Duration? = null,
+    ) : PagBankException("Rate limited" + (retryAfter?.let { ", retry after ${it.seconds}s" } ?: ""))
 
     /** Thrown by `PagBankWebhookParser.parseVerified` when verification is on and the header does not match. */
     class InvalidSignature : PagBankException("Webhook signature is missing or invalid")

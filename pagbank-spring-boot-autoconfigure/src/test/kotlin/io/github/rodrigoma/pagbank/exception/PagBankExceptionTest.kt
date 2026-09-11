@@ -43,6 +43,7 @@ class PagBankExceptionTest {
                 is PagBankException.ValidationError -> "validation"
                 is PagBankException.ServerError -> "server"
                 is PagBankException.InvalidSignature -> "signature"
+                is PagBankException.RateLimited -> "rate_limited"
             }
         assertThat(result).isEqualTo("not_found")
     }
