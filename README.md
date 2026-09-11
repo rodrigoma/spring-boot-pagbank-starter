@@ -75,6 +75,7 @@ pagbank:
 |------------------------------------|-----------|-----------|----------|-------------------------------------------------------|
 | `pagbank.token`                    | `String`  | —         | Yes      | API token from your PagBank dashboard                 |
 | `pagbank.environment`              | `Enum`    | `SANDBOX` | No       | Target environment: `SANDBOX` or `PRODUCTION`         |
+| `pagbank.base-url`                 | `String`  | —         | No       | Absolute URL that overrides the environment's base URL (e.g. a local stub) |
 | `pagbank.health-indicator-enabled` | `Boolean` | `false`   | No       | Enables Spring Boot Actuator health check for PagBank |
 | `pagbank.log-requests`             | `Boolean` | `false`   | No       | Logs outgoing HTTP traffic at `DEBUG` (see [Request logging](#request-logging)) |
 | `pagbank.webhook.verify-signature` | `Boolean` | `false`   | No       | Requires a valid `x-authenticity-token` on webhooks (see [Signature verification](#signature-verification)) |
@@ -85,6 +86,41 @@ pagbank:
 |--------------|----------------------------------------------------|
 | `SANDBOX`    | `https://sandbox.api.assinaturas.pagseguro.com` |
 | `PRODUCTION` | `https://api.assinaturas.pagseguro.com`         |
+
+`pagbank.base-url`, when set, takes precedence over the environment's URL. The `environment` property still
+defaults to `SANDBOX`; production is only reached with `PRODUCTION` spelled out (or an explicit `base-url`).
+
+### Customizing the RestClient
+
+To add timeouts, interceptors, a proxy-aware request factory or extra headers, register one or more
+`PagBankRestClientCustomizer` beans. They receive the `RestClient.Builder` after the starter has configured
+it and before `build()`:
+
+```kotlin
+@Configuration
+class PagBankClientConfig {
+    @Bean
+    fun pagBankTimeouts() = PagBankRestClientCustomizer { builder ->
+        builder.requestFactory(
+            JdkClientHttpRequestFactory().apply { setReadTimeout(Duration.ofSeconds(10)) }
+        )
+    }
+}
+```
+
+### Testing your integration
+
+Point the starter at a local stub instead of re-assembling the client in a `@TestConfiguration`:
+
+```yaml
+# src/test/resources/application-test.yml
+pagbank:
+  token: test-token
+  base-url: http://localhost:${wiremock.server.port}
+```
+
+The real `RestClient`, error handling and JSON mapping are exercised against your stub, so any change in
+how the starter assembles the client is picked up by your tests automatically.
 
 ## Auto-configured Beans
 
