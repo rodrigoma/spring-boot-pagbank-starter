@@ -2,6 +2,7 @@ package io.github.rodrigoma.pagbank.sample
 
 import io.github.rodrigoma.pagbank.exception.ApiError
 import io.github.rodrigoma.pagbank.exception.PagBankException
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -20,6 +21,13 @@ class PagBankExceptionHandler {
     @ExceptionHandler(PagBankException.Unauthorized::class)
     fun handleUnauthorized(ex: PagBankException.Unauthorized): ResponseEntity<Map<String, String>> =
         ResponseEntity.status(ex.httpStatus).body(mapOf("error" to ex.message.orEmpty()))
+
+    @ExceptionHandler(PagBankException.RateLimited::class)
+    fun handleRateLimited(ex: PagBankException.RateLimited): ResponseEntity<Map<String, String>> =
+        ResponseEntity
+            .status(HttpStatus.SERVICE_UNAVAILABLE)
+            .apply { ex.retryAfter?.let { header(HttpHeaders.RETRY_AFTER, it.seconds.toString()) } }
+            .body(mapOf("error" to ex.message.orEmpty()))
 
     @ExceptionHandler(PagBankException.ServerError::class)
     fun handleServerError(ex: PagBankException.ServerError): ResponseEntity<Map<String, String>> =
