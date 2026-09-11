@@ -285,6 +285,23 @@ try {
 }
 ```
 
+## Request logging
+
+With `pagbank.log-requests=true` and the logger `io.github.rodrigoma.pagbank.http` at `DEBUG`, every
+outgoing call is logged with method, URI, status and body. Headers are never logged, and bodies are
+masked before they reach the log: card `number`, `security_code`, `encrypted`, `token`, `email`,
+phone `number` and the card `holder.name` become `***`; `tax_id` keeps its last four digits
+(`***8909`). Non-JSON bodies are logged by size only.
+
+```yaml
+pagbank:
+  log-requests: true
+
+logging:
+  level:
+    io.github.rodrigoma.pagbank.http: DEBUG
+```
+
 ## Health Indicator
 
 When `pagbank.health-indicator-enabled=true` and Spring Boot Actuator is on the classpath, a `/actuator/health/pagBank` endpoint is exposed. It performs a lightweight connectivity check against the configured environment.
