@@ -28,6 +28,12 @@ class PagBankExceptionTest {
     }
 
     @Test
+    fun `InvalidSignature has a descriptive message`() {
+        val ex = PagBankException.InvalidSignature()
+        assertThat(ex.message).contains("signature")
+    }
+
+    @Test
     fun `sealed class enables exhaustive when`() {
         val ex: PagBankException = PagBankException.NotFound("plan not found")
         val result =
@@ -36,6 +42,7 @@ class PagBankExceptionTest {
                 is PagBankException.NotFound -> "not_found"
                 is PagBankException.ValidationError -> "validation"
                 is PagBankException.ServerError -> "server"
+                is PagBankException.InvalidSignature -> "signature"
             }
         assertThat(result).isEqualTo("not_found")
     }

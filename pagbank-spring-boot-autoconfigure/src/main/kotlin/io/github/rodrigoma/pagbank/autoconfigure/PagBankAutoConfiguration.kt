@@ -13,6 +13,8 @@ import io.github.rodrigoma.pagbank.service.PagBankPreferenceService
 import io.github.rodrigoma.pagbank.service.PagBankRefundService
 import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
 import io.github.rodrigoma.pagbank.service.PagBankWebhookParser
+import io.github.rodrigoma.pagbank.service.PagBankWebhookVerifier
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -98,5 +100,22 @@ class PagBankAutoConfiguration(
     ) = PagBankPreferenceService(rc)
 
     @Bean
-    fun pagBankWebhookParser() = PagBankWebhookParser()
+    fun pagBankWebhookVerifier() = PagBankWebhookVerifier(properties.token)
+
+    @Bean
+    fun pagBankWebhookParser(verifier: PagBankWebhookVerifier): PagBankWebhookParser =
+        if (properties.webhook.verifySignature) {
+            PagBankWebhookParser(verifier)
+        } else {
+            log.warn(
+                "Webhook signature verification is disabled — PagBankWebhookParser.parseVerified will accept any " +
+                    "payload. Set pagbank.webhook.verify-signature=true once PagBank sends the " +
+                    "x-authenticity-token header.",
+            )
+            PagBankWebhookParser()
+        }
+
+    private companion object {
+        private val log = LoggerFactory.getLogger(PagBankAutoConfiguration::class.java)
+    }
 }
