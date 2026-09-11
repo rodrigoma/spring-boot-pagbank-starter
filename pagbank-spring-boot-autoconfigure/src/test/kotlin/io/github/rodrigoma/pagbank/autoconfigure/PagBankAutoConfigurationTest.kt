@@ -13,6 +13,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.content
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClient
 
 class PagBankAutoConfigurationTest {
@@ -72,11 +76,23 @@ class PagBankAutoConfigurationTest {
     }
 
     @Test
-    fun `pagBankObjectMapper should omit null fields`() {
+    fun `RestClient should omit null fields when serializing requests`() {
         contextRunner.withPropertyValues("pagbank.token=TEST_TOKEN").run { context ->
-            val mapper = context.getBean("pagBankObjectMapper") as tools.jackson.databind.ObjectMapper
-            val json = mapper.writeValueAsString(mapOf("name" to "test", "absent" to null))
-            assertThat(json).contains("\"name\"").doesNotContain("\"absent\"")
+            val builder = context.getBean("pagBankRestClient", RestClient::class.java).mutate()
+            val server = MockRestServiceServer.bindTo(builder).build()
+            server
+                .expect(requestTo("https://sandbox.api.assinaturas.pagseguro.com/plans"))
+                .andExpect(content().json("""{"name":"test"}""", true))
+                .andRespond(withSuccess())
+
+            builder
+                .build()
+                .post()
+                .uri("/plans")
+                .body(mapOf("name" to "test", "absent" to null))
+                .retrieve()
+                .toBodilessEntity()
+            server.verify()
         }
     }
 }

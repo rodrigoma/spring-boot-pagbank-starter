@@ -29,18 +29,21 @@ import tools.jackson.module.kotlin.jacksonMapperBuilder
 class PagBankAutoConfiguration(
     private val properties: PagBankProperties,
 ) {
-    @Bean(name = ["pagBankObjectMapper"])
-    fun pagBankObjectMapper(): JsonMapper =
+    /**
+     * Mapper dedicated to the PagBank API (snake_case, nulls omitted).
+     *
+     * Deliberately **not** a Spring bean: Spring Boot's `JacksonAutoConfiguration` registers its
+     * `JsonMapper` with `@ConditionalOnMissingBean`, so publishing this one would silently replace
+     * the application-wide mapper and change the JSON contract of every consumer.
+     */
+    private val objectMapper: JsonMapper =
         jacksonMapperBuilder()
             .propertyNamingStrategy(SNAKE_CASE)
             .changeDefaultPropertyInclusion { construct(NON_NULL, NON_NULL) }
             .build()
 
     @Bean(name = ["pagBankRestClient"])
-    fun pagBankRestClient(
-        @Qualifier("pagBankObjectMapper")
-        objectMapper: JsonMapper,
-    ): RestClient {
+    fun pagBankRestClient(): RestClient {
         val errorHandler = PagBankErrorHandler(objectMapper)
 
         return RestClient

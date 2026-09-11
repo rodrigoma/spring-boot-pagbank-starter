@@ -95,8 +95,18 @@ Once the starter is on the classpath and `pagbank.token` is set, the following b
 
 All services use a dedicated `RestClient` bean named `pagBankRestClient`. The client is pre-configured with:
 - `Authorization: Bearer <token>` on every request
-- Snake_case JSON serialization/deserialization (no global `ObjectMapper` side effects)
+- Snake_case JSON serialization/deserialization
 - Structured error handling that throws `PagBankException` on 4xx/5xx responses
+
+### Jackson isolation
+
+The starter **does not touch your application's Jackson configuration**. Its snake_case / non-null
+`JsonMapper` is private to the PagBank `RestClient` and is never registered as a Spring bean, so Spring
+Boot's own `JsonMapper` (and therefore your REST API's JSON contract) is left untouched.
+
+> **Migrating from 1.0.0-RC1:** the bean `pagBankObjectMapper` no longer exists. It was registered as a
+> `JsonMapper` bean, which caused Spring Boot's `JacksonAutoConfiguration` to back off and made the PagBank
+> snake_case mapper the application-wide default. If you injected it, build your own mapper instead.
 
 ## Usage Examples
 
