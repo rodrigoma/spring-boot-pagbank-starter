@@ -62,6 +62,13 @@ pagbank:
 
   # Optional — expose a /actuator/health/pagBank endpoint (default: false)
   health-indicator-enabled: false
+
+  # Optional — log outgoing requests/responses at DEBUG, sensitive fields masked (default: false)
+  log-requests: false
+
+  webhook:
+    # Optional — require a valid x-authenticity-token header on webhooks (default: false)
+    verify-signature: false
 ```
 
 | Property                           | Type      | Default   | Required | Description                                           |
@@ -69,6 +76,8 @@ pagbank:
 | `pagbank.token`                    | `String`  | —         | Yes      | API token from your PagBank dashboard                 |
 | `pagbank.environment`              | `Enum`    | `SANDBOX` | No       | Target environment: `SANDBOX` or `PRODUCTION`         |
 | `pagbank.health-indicator-enabled` | `Boolean` | `false`   | No       | Enables Spring Boot Actuator health check for PagBank |
+| `pagbank.log-requests`             | `Boolean` | `false`   | No       | Logs outgoing HTTP traffic at `DEBUG` (see [Request logging](#request-logging)) |
+| `pagbank.webhook.verify-signature` | `Boolean` | `false`   | No       | Requires a valid `x-authenticity-token` on webhooks (see [Signature verification](#signature-verification)) |
 
 ### Environments
 
@@ -92,6 +101,7 @@ Once the starter is on the classpath and `pagbank.token` is set, the following b
 | `pagBankRefundService`       | `PagBankRefundService`       |
 | `pagBankPreferenceService`   | `PagBankPreferenceService`   |
 | `pagBankWebhookParser`       | `PagBankWebhookParser`       |
+| `pagBankWebhookVerifier`     | `PagBankWebhookVerifier`     |
 
 All services use a dedicated `RestClient` bean named `pagBankRestClient`. The client is pre-configured with:
 - `Authorization: Bearer <token>` on every request
@@ -107,6 +117,8 @@ Boot's own `JsonMapper` (and therefore your REST API's JSON contract) is left un
 > **Migrating from 1.0.0-RC1:** the bean `pagBankObjectMapper` no longer exists. It was registered as a
 > `JsonMapper` bean, which caused Spring Boot's `JacksonAutoConfiguration` to back off and made the PagBank
 > snake_case mapper the application-wide default. If you injected it, build your own mapper instead.
+> `PagBankException` also gained new subclasses (`InvalidSignature`, `RateLimited`); exhaustive `when`
+> expressions over it need the new branches.
 
 ## Usage Examples
 
@@ -162,7 +174,9 @@ class MySubscriptionService(private val subscriptionService: PagBankSubscription
 
 ### Webhook Parsing
 
-Parse incoming webhook events with `PagBankWebhookParser`:
+Parse incoming webhook events with `PagBankWebhookParser`. Read the body as **`ByteArray`** — the
+signature (see below) is computed over the raw bytes, and a `String` re-serialized by a proxy or
+framework may differ in whitespace and no longer match:
 
 ```kotlin
 @RestController
@@ -170,8 +184,11 @@ Parse incoming webhook events with `PagBankWebhookParser`:
 class WebhookController(private val webhookParser: PagBankWebhookParser) {
 
     @PostMapping("/pagbank")
-    fun handleWebhook(@RequestBody rawBody: String): ResponseEntity<Void> {
-        val payload = webhookParser.parse(rawBody)
+    fun handleWebhook(
+        @RequestBody rawBody: ByteArray,
+        @RequestHeader("x-authenticity-token", required = false) authenticityToken: String?,
+    ): ResponseEntity<Void> {
+        val payload = webhookParser.parseVerified(rawBody, authenticityToken)
 
         when (payload.event) {
             WebhookEventType.SUBSCRIPTION_RECURRENCE -> {
@@ -190,6 +207,31 @@ class WebhookController(private val webhookParser: PagBankWebhookParser) {
     }
 }
 ```
+
+#### Signature verification
+
+PagBank signs notifications with an `x-authenticity-token` header whose value is
+`hex(SHA-256(token + "-" + rawBody))` — see
+[Confirmar autenticidade da notificação](https://developer.pagbank.com.br/reference/confirmar-autenticidade-da-notificacao).
+That page documents the Orders/Charges API; the Subscriptions API this starter covers is **not**
+documented to send the header, and community reports indicate it is sometimes absent in sandbox.
+Verification is therefore **opt-in**:
+
+```yaml
+pagbank:
+  webhook:
+    verify-signature: true   # default: false
+```
+
+| `verify-signature` | `parseVerified(rawBody, header)` behaviour |
+|---|---|
+| `false` (default) | Parses without checking. A `WARN` is logged at startup so the choice is visible. |
+| `true` | Rejects with `PagBankException.InvalidSignature` when the header is missing, malformed or does not match — before the JSON is read. |
+
+`PagBankWebhookVerifier` is also available as a bean (`verify(rawBody: ByteArray, header: String?): Boolean`,
+constant-time comparison) if you prefer to check the header yourself. Once you confirm PagBank sends the
+header for your subscription webhooks, turn verification on — an unauthenticated webhook endpoint accepts
+events from anyone.
 
 ### Error Handling
 

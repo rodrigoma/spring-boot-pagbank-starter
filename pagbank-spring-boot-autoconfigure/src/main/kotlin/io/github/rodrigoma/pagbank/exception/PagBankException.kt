@@ -32,4 +32,7 @@ sealed class PagBankException(
     class ServerError(
         val statusCode: Int,
     ) : PagBankException("Server error: $statusCode")
+
+    /** Thrown by `PagBankWebhookParser.parseVerified` when verification is on and the header does not match. */
+    class InvalidSignature : PagBankException("Webhook signature is missing or invalid")
 }

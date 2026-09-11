@@ -9,16 +9,21 @@ import io.github.rodrigoma.pagbank.service.PagBankPreferenceService
 import io.github.rodrigoma.pagbank.service.PagBankRefundService
 import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
 import io.github.rodrigoma.pagbank.service.PagBankWebhookParser
+import io.github.rodrigoma.pagbank.service.PagBankWebhookVerifier
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
+import org.springframework.boot.test.system.CapturedOutput
+import org.springframework.boot.test.system.OutputCaptureExtension
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.content
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClient
 
+@ExtendWith(OutputCaptureExtension::class)
 class PagBankAutoConfigurationTest {
     private val contextRunner =
         ApplicationContextRunner()
@@ -94,5 +99,23 @@ class PagBankAutoConfigurationTest {
                 .toBodilessEntity()
             server.verify()
         }
+    }
+
+    @Test
+    fun `should register webhook verifier and warn when signature verification is disabled`(output: CapturedOutput) {
+        contextRunner.withPropertyValues("pagbank.token=TEST_TOKEN").run { context ->
+            assertThat(context).hasSingleBean(PagBankWebhookVerifier::class.java)
+            assertThat(output).contains("pagbank.webhook.verify-signature")
+        }
+    }
+
+    @Test
+    fun `should not warn when signature verification is enabled`(output: CapturedOutput) {
+        contextRunner
+            .withPropertyValues("pagbank.token=TEST_TOKEN", "pagbank.webhook.verify-signature=true")
+            .run { context ->
+                assertThat(context).hasNotFailed()
+                assertThat(output).doesNotContain("Webhook signature verification is disabled")
+            }
     }
 }
