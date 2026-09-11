@@ -15,6 +15,7 @@ import io.github.rodrigoma.pagbank.service.PagBankSubscriptionService
 import io.github.rodrigoma.pagbank.service.PagBankWebhookParser
 import io.github.rodrigoma.pagbank.service.PagBankWebhookVerifier
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -45,18 +46,22 @@ class PagBankAutoConfiguration(
             .build()
 
     @Bean(name = ["pagBankRestClient"])
-    fun pagBankRestClient(): RestClient {
+    fun pagBankRestClient(customizers: ObjectProvider<PagBankRestClientCustomizer>): RestClient {
         val errorHandler = PagBankErrorHandler(objectMapper)
 
-        return RestClient
-            .builder()
-            .baseUrl(properties.environment.baseUrl())
-            .defaultHeader(AUTHORIZATION, "Bearer ${properties.token}")
-            .configureMessageConverters {
-                it.registerDefaults().withJsonConverter(JacksonJsonHttpMessageConverter(objectMapper))
-            }.also { if (properties.logRequests) it.requestInterceptor(PagBankLoggingInterceptor()) }
-            .defaultStatusHandler({ it.isError }) { _, response -> errorHandler.handle(response) }
-            .build()
+        val builder =
+            RestClient
+                .builder()
+                .baseUrl(properties.resolvedBaseUrl())
+                .defaultHeader(AUTHORIZATION, "Bearer ${properties.token}")
+                .configureMessageConverters {
+                    it.registerDefaults().withJsonConverter(JacksonJsonHttpMessageConverter(objectMapper))
+                }.also { if (properties.logRequests) it.requestInterceptor(PagBankLoggingInterceptor()) }
+                .defaultStatusHandler({ it.isError }) { _, response -> errorHandler.handle(response) }
+
+        customizers.orderedStream().forEach { it.customize(builder) }
+
+        return builder.build()
     }
 
     @Bean

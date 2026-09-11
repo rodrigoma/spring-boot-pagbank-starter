@@ -17,8 +17,11 @@ import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.boot.test.system.CapturedOutput
 import org.springframework.boot.test.system.OutputCaptureExtension
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.content
+import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClient
@@ -117,5 +120,54 @@ class PagBankAutoConfigurationTest {
                 assertThat(context).hasNotFailed()
                 assertThat(output).doesNotContain("Webhook signature verification is disabled")
             }
+    }
+
+    @Test
+    fun `RestClient should target pagbank base-url when configured`() {
+        contextRunner
+            .withPropertyValues("pagbank.token=TEST_TOKEN", "pagbank.base-url=http://localhost:1234")
+            .run { context ->
+                val builder = context.getBean("pagBankRestClient", RestClient::class.java).mutate()
+                val server = MockRestServiceServer.bindTo(builder).build()
+                server.expect(requestTo("http://localhost:1234/plans")).andRespond(withSuccess())
+
+                builder
+                    .build()
+                    .get()
+                    .uri("/plans")
+                    .retrieve()
+                    .toBodilessEntity()
+                server.verify()
+            }
+    }
+
+    @Test
+    fun `RestClient should apply PagBankRestClientCustomizer beans`() {
+        contextRunner
+            .withPropertyValues("pagbank.token=TEST_TOKEN")
+            .withUserConfiguration(CustomizerConfig::class.java)
+            .run { context ->
+                val builder = context.getBean("pagBankRestClient", RestClient::class.java).mutate()
+                val server = MockRestServiceServer.bindTo(builder).build()
+                server
+                    .expect(requestTo("https://sandbox.api.assinaturas.pagseguro.com/plans"))
+                    .andExpect(header("X-Custom", "yes"))
+                    .andExpect(header("Authorization", "Bearer TEST_TOKEN"))
+                    .andRespond(withSuccess())
+
+                builder
+                    .build()
+                    .get()
+                    .uri("/plans")
+                    .retrieve()
+                    .toBodilessEntity()
+                server.verify()
+            }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    class CustomizerConfig {
+        @Bean
+        fun customHeader() = PagBankRestClientCustomizer { it.defaultHeader("X-Custom", "yes") }
     }
 }
