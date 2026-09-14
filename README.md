@@ -10,11 +10,11 @@ A Spring Boot auto-configuration library for the **PagBank Subscriptions API** (
 
 | Library version | Spring Boot | Java | Kotlin |
 |---|---|---|---|
-| 1.x | 4.1+ | 21+ | 2.2+ |
+| 1.x | 4.1+ | 21+ | 2.3+ |
 
-Built and tested against Spring Boot 4.1.1 / Kotlin 2.3 / Java 21; also verified in a consumer running
-Spring Boot 4.1.1, Kotlin 2.4 and Java 25. The library is compiled with Kotlin 2.3, so a Kotlin consumer
-needs a compiler that can read that metadata (2.2 or newer).
+Built and tested against Spring Boot 4.1.1 / Kotlin 2.4 / Java 21; also verified in a consumer running
+Spring Boot 4.1.1, Kotlin 2.4 and Java 25. The library is compiled with Kotlin 2.4, so a Kotlin consumer
+needs a compiler that can read that metadata (2.3 or newer).
 
 ## Requirements
 
@@ -22,7 +22,7 @@ needs a compiler that can read that metadata (2.2 or newer).
 |--------------|-----------------|
 | Java         | 21              |
 | Spring Boot  | 4.1.0           |
-| Kotlin       | 2.2 (optional)  |
+| Kotlin       | 2.3 (optional)  |
 
 ## Installation
 

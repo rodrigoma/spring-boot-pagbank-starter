@@ -19,6 +19,9 @@ repositories {
 
 dependencies {
     implementation(platform("org.springframework.boot:spring-boot-dependencies:4.1.1"))
+    // Keeps kotlin-stdlib, kotlin-reflect & co. on the same version as the Kotlin Gradle plugin (buildSrc),
+    // instead of the older Kotlin line managed by the Spring Boot BOM.
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:2.4.20"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.boot:spring-boot-autoconfigure")
