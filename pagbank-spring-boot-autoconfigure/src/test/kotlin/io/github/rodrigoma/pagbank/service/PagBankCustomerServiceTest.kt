@@ -109,7 +109,7 @@ class PagBankCustomerServiceTest {
                     listOf(
                         BillingInfoRequest(
                             type = BillingInfoType.CREDIT_CARD,
-                            card = CardRequest.Encrypted(encrypted = "ENC_TOKEN_ABC"),
+                            card = CardRequest.Encrypted(encrypted = "ENC_TOKEN_ABC", securityCode = "123"),
                         ),
                     ),
             ),
@@ -121,7 +121,8 @@ class PagBankCustomerServiceTest {
                 .path("billing_info")
                 .get(0)
                 .path("card")
-        assertThat(cardNode.has("encrypted")).isTrue()
+        assertThat(cardNode.path("encrypted").asString()).isEqualTo("ENC_TOKEN_ABC")
+        assertThat(cardNode.path("security_code").asString()).isEqualTo("123")
         assertThat(cardNode.has("number")).isFalse()
         assertThat(cardNode.has("exp_year")).isFalse()
     }
