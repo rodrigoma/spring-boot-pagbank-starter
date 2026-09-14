@@ -49,12 +49,27 @@ sealed class CardRequest {
         val expMonth: String,
         val holder: CardHolder,
         val securityCode: String,
-    ) : CardRequest()
+    ) : CardRequest() {
+        override fun toString(): String =
+            "Plain(number=***, expYear=$expYear, expMonth=$expMonth, " +
+                "holder=$holder, securityCode=***)"
+    }
 
-    /** Card encrypted client-side with the PagBank JavaScript SDK — the recommended option. */
+    /**
+     * Card encrypted client-side with the PagBank JavaScript SDK — the recommended option.
+     *
+     * @property securityCode The card's CVV. Although the encrypted blob already contains it, the
+     * Subscriptions API rejects `billing_info[].card` with
+     * `422 — No value was passed to the mandatory parameter 'card.security_code'` when it is absent,
+     * so send it whenever you create a customer or update billing info. Optional only to keep
+     * source compatibility; the API will not accept the card without it.
+     */
     data class Encrypted(
         val encrypted: String,
-    ) : CardRequest()
+        val securityCode: String? = null,
+    ) : CardRequest() {
+        override fun toString(): String = "Encrypted(encrypted=***, securityCode=***)"
+    }
 }
 
 class CardRequestSerializer : StdSerializer<CardRequest>(CardRequest::class.java) {
@@ -72,7 +87,10 @@ class CardRequestSerializer : StdSerializer<CardRequest>(CardRequest::class.java
                 gen.writeStringProperty("security_code", value.securityCode)
                 gen.writePOJOProperty("holder", value.holder)
             }
-            is CardRequest.Encrypted -> gen.writeStringProperty("encrypted", value.encrypted)
+            is CardRequest.Encrypted -> {
+                gen.writeStringProperty("encrypted", value.encrypted)
+                value.securityCode?.let { gen.writeStringProperty("security_code", it) }
+            }
         }
         gen.writeEndObject()
     }
@@ -87,6 +105,7 @@ class CardRequestDeserializer : StdDeserializer<CardRequest>(CardRequest::class.
         return if (node.has("encrypted")) {
             CardRequest.Encrypted(
                 encrypted = node.require("encrypted", ctxt).asString(),
+                securityCode = node.get("security_code")?.asString(),
             )
         } else {
             val holderNode = node.require("holder", ctxt)

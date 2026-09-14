@@ -1,5 +1,7 @@
 package io.github.rodrigoma.pagbank.service
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL
+import com.fasterxml.jackson.annotation.JsonInclude.Value.construct
 import io.github.rodrigoma.pagbank.model.invoice.InvoiceStatus
 import io.github.rodrigoma.pagbank.model.plan.PaymentMethod
 import io.github.rodrigoma.pagbank.model.subscription.BestInvoiceDate
@@ -26,9 +28,12 @@ import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 class PagBankSubscriptionServiceTest {
     private lateinit var service: PagBankSubscriptionService
+
+    // Mirrors the mapper assembled by PagBankAutoConfiguration (snake_case, nulls omitted)
     private val mapper =
         jacksonMapperBuilder()
             .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .changeDefaultPropertyInclusion { construct(NON_NULL, NON_NULL) }
             .build()
 
     private val mockFactory =
@@ -109,6 +114,33 @@ class PagBankSubscriptionServiceTest {
         assertThat(response.status).isEqualTo(SubscriptionStatus.ACTIVE)
         assertThat(response.plan?.id).isEqualTo("PLAN_001")
         assertThat(response.customer?.id).isEqualTo("CUST_001")
+    }
+
+    @Test
+    fun `create with tokenized card should send token and security_code only`() {
+        mockFactory.nextBody = mapper.writeValueAsBytes(subscriptionMap())
+        service.create(
+            CreateSubscriptionRequest(
+                plan = SubscriptionPlanRef("PLAN_001"),
+                customer = SubscriptionCustomerRef("CUST_001"),
+                paymentMethod =
+                    listOf(
+                        SubscriptionPaymentMethod(
+                            type = PaymentMethod.CREDIT_CARD,
+                            card = SubscriptionCard(token = "CARD_123", securityCode = "123"),
+                        ),
+                    ),
+            ),
+        )
+        val cardNode =
+            mapper
+                .readTree(mockFactory.lastRequest!!.bodyAsString)
+                .path("payment_method")
+                .get(0)
+                .path("card")
+        assertThat(cardNode.path("token").asString()).isEqualTo("CARD_123")
+        assertThat(cardNode.path("security_code").asString()).isEqualTo("123")
+        assertThat(cardNode.propertyNames().toList()).containsExactlyInAnyOrder("token", "security_code")
     }
 
     @Test
