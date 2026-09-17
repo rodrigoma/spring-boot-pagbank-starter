@@ -3,7 +3,7 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
-## [1.0.0-RC5] — unreleased
+## [1.0.0-RC5] — 2026-09-16
 
 ### Fixed
 - `WebhookPayload.resource` now accepts the three shapes the PagBank sandbox sends — a JSON object
