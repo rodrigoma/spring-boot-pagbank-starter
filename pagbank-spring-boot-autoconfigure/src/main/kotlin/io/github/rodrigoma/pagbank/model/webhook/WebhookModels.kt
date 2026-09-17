@@ -117,41 +117,47 @@ enum class WebhookEnv {
  * A PagBank webhook notification.
  *
  * Unknown top-level fields are ignored so a new field on PagBank's side never breaks parsing.
- * [resource] tolerates the three shapes the PagBank sandbox has been observed to send — see
- * [WebhookResourceDeserializer].
+ * [resource] tolerates the shapes the PagBank sandbox has been observed to send — see
+ * [WebhookResourceDeserializer]. Its values are nullable at every level (`"coupon": null`,
+ * `"holder": {"phone": null}` …); nested objects come back as `Map<String, Any?>` and arrays as
+ * `List<Any?>`.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class WebhookPayload(
     val env: WebhookEnv,
     val event: WebhookEventType,
     @JsonDeserialize(using = WebhookResourceDeserializer::class)
-    val resource: Map<String, Any> = emptyMap(),
+    val resource: Map<String, Any?> = emptyMap(),
     val date: String? = null,
 )
 
 /**
  * Reads `resource` from any of the shapes the PagBank sandbox sends:
  *
- * - a JSON object (the documented form) → the map;
+ * - a JSON object (the documented form) → the map, **null values preserved** at any depth;
  * - a JSON **string** containing a serialized object → parsed, then the map;
  * - `null` or absent → an empty map.
  *
  * Anything else (a number, an array, a boolean, or a string that does not hold a JSON object) is
  * reported as an input mismatch with a message naming the field, instead of Jackson's generic
  * "cannot deserialize LinkedHashMap" error.
+ *
+ * The map type handed to Jackson is built from Java classes on purpose: the Kotlin module applies
+ * `Nulls.FAIL` to the contents of a `Map<String, Any>` declared in Kotlin, which is what rejected
+ * `"coupon": null` with "Invalid `null` value encountered for property \"resource\"" before RC5.
  */
-class WebhookResourceDeserializer : ValueDeserializer<Map<String, Any>>() {
+class WebhookResourceDeserializer : ValueDeserializer<Map<String, Any?>>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
-    ): Map<String, Any> = toMap(ctxt.readTree(p), ctxt)
+    ): Map<String, Any?> = toMap(ctxt.readTree(p), ctxt)
 
-    override fun getNullValue(ctxt: DeserializationContext): Map<String, Any> = emptyMap()
+    override fun getNullValue(ctxt: DeserializationContext): Map<String, Any?> = emptyMap()
 
     private fun toMap(
         node: JsonNode,
         ctxt: DeserializationContext,
-    ): Map<String, Any> =
+    ): Map<String, Any?> =
         when {
             node.isNull -> emptyMap()
             node.isObject -> ctxt.readTreeAsValue(node, mapType(ctxt))
@@ -168,7 +174,7 @@ class WebhookResourceDeserializer : ValueDeserializer<Map<String, Any>>() {
     private fun fromString(
         text: String,
         ctxt: DeserializationContext,
-    ): Map<String, Any> {
+    ): Map<String, Any?> {
         val nested =
             try {
                 ctxt.tokenStreamFactory().createParser(ctxt, text).use { ctxt.readTree(it) }

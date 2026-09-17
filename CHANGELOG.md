@@ -3,6 +3,16 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.0.0-RC6] — unreleased
+
+### Changed
+- `WebhookPayload.resource` is now `Map<String, Any?>` — values are nullable at every level, which is
+  what the PagBank sandbox sends (`"coupon": null`, `"trial": null`, `"holder": {"phone": null}` …).
+  Source-compatible for consumers reading `resource["id"] as? String`. Before RC5 such payloads failed
+  with `Invalid null value encountered for property "resource"` (the Kotlin module's strict null check
+  on the map contents); RC5's dedicated deserializer already accepted them, and this release pins that
+  behaviour with a test on a real recurrence payload and makes the type honest.
+
 ## [1.0.0-RC5] — 2026-09-16
 
 ### Fixed

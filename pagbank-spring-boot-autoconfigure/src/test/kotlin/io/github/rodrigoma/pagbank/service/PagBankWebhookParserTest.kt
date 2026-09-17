@@ -44,6 +44,39 @@ class PagBankWebhookParserTest {
     }
 
     @Test
+    fun `parse should read a real recurrence payload whose resource contains null values`() {
+        val body = javaClass.getResource("/webhook/subscription-recurrence-with-nulls.json")!!.readText()
+
+        val payload = parser.parse(body)
+
+        assertThat(payload.event).isEqualTo(WebhookEventType.SUBSCRIPTION_RECURRENCE)
+        assertThat(payload.resource["id"]).isEqualTo("SUBS_AB0A9B47-5466-41BF-8FEC-5D9D65FC380B")
+        assertThat(payload.resource["status"]).isEqualTo("ACTIVE")
+        assertThat(payload.resource).containsKey("coupon")
+        assertThat(payload.resource["coupon"]).isNull()
+        assertThat(payload.resource["trial"]).isNull()
+
+        @Suppress("UNCHECKED_CAST")
+        val card =
+            ((payload.resource["payment_method"] as List<Map<String, Any?>>)[0]["card"] as Map<String, Any?>)
+        assertThat(card["last_digits"]).isEqualTo("8884")
+
+        @Suppress("UNCHECKED_CAST")
+        val holder = card["holder"] as Map<String, Any?>
+        assertThat(holder["name"]).isEqualTo("CONTA DE TESTE")
+        assertThat(holder).containsKey("phone")
+        assertThat(holder["phone"]).isNull()
+    }
+
+    @Test
+    fun `parse should keep null values inside a resource given as a string`() {
+        val payload = parser.parse(recurrenceWith(""""{\"id\":\"SUBS_X\",\"coupon\":null}""""))
+        assertThat(payload.resource["id"]).isEqualTo("SUBS_X")
+        assertThat(payload.resource).containsKey("coupon")
+        assertThat(payload.resource["coupon"]).isNull()
+    }
+
+    @Test
     fun `parse should read resource when it is a string containing a JSON object`() {
         val payload =
             parser.parse(
