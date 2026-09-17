@@ -3,7 +3,7 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
-## [1.0.0-RC6] — unreleased
+## [1.0.0-RC6] — 2026-09-17
 
 ### Changed
 - `WebhookPayload.resource` is now `Map<String, Any?>` — values are nullable at every level, which is
