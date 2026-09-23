@@ -29,6 +29,14 @@ class PagBankExceptionHandler {
             .apply { ex.retryAfter?.let { header(HttpHeaders.RETRY_AFTER, it.seconds.toString()) } }
             .body(mapOf("error" to ex.message.orEmpty()))
 
+    @ExceptionHandler(PagBankException.Timeout::class)
+    fun handleTimeout(ex: PagBankException.Timeout): ResponseEntity<Map<String, String>> =
+        // READ means the request reached PagBank and its outcome is unknown — a real application should
+        // re-read the resource here instead of reporting a plain failure.
+        ResponseEntity
+            .status(HttpStatus.GATEWAY_TIMEOUT)
+            .body(mapOf("error" to ex.message.orEmpty(), "phase" to ex.phase.name))
+
     @ExceptionHandler(PagBankException.ServerError::class)
     fun handleServerError(ex: PagBankException.ServerError): ResponseEntity<Map<String, String>> =
         ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(mapOf("error" to "PagBank error: ${ex.statusCode}"))

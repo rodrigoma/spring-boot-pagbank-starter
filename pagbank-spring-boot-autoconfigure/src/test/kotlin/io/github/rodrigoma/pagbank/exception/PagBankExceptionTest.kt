@@ -34,6 +34,27 @@ class PagBankExceptionTest {
     }
 
     @Test
+    fun `Timeout keeps the cause and spells out an unknown outcome on READ`() {
+        val cause = java.net.SocketTimeoutException("Read timed out")
+        val ex = PagBankException.Timeout(TimeoutPhase.READ, "POST", "/subscriptions", cause)
+        assertThat(ex.phase).isEqualTo(TimeoutPhase.READ)
+        assertThat(ex.cause).isSameAs(cause)
+        assertThat(ex.message).contains("POST /subscriptions").contains("outcome is unknown")
+    }
+
+    @Test
+    fun `Timeout on CONNECT does not claim the request was sent`() {
+        val ex =
+            PagBankException.Timeout(
+                TimeoutPhase.CONNECT,
+                "GET",
+                "/plans",
+                java.net.SocketTimeoutException("connect timed out"),
+            )
+        assertThat(ex.message).contains("CONNECT").doesNotContain("outcome is unknown")
+    }
+
+    @Test
     fun `sealed class enables exhaustive when`() {
         val ex: PagBankException = PagBankException.NotFound("plan not found")
         val result =
@@ -44,6 +65,7 @@ class PagBankExceptionTest {
                 is PagBankException.ServerError -> "server"
                 is PagBankException.InvalidSignature -> "signature"
                 is PagBankException.RateLimited -> "rate_limited"
+                is PagBankException.Timeout -> "timeout"
             }
         assertThat(result).isEqualTo("not_found")
     }

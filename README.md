@@ -30,7 +30,7 @@ needs a compiler that can read that metadata (2.3 or newer).
 
 ```kotlin
 dependencies {
-    implementation("io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC6")
+    implementation("io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC7")
 }
 ```
 
@@ -38,7 +38,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC6'
+    implementation 'io.github.rodrigoma:pagbank-spring-boot-starter:1.0.0-RC7'
 }
 ```
 
@@ -48,7 +48,7 @@ dependencies {
 <dependency>
     <groupId>io.github.rodrigoma</groupId>
     <artifactId>pagbank-spring-boot-starter</artifactId>
-    <version>1.0.0-RC6</version>
+    <version>1.0.0-RC7</version>
 </dependency>
 ```
 
@@ -67,6 +67,10 @@ pagbank:
   # Optional — expose a /actuator/health/pagBank endpoint (default: false)
   health-indicator-enabled: false
 
+  # Optional — HTTP timeouts (see "Timeouts" below)
+  connect-timeout: 5s
+  read-timeout: 20s
+
   # Optional — log outgoing requests/responses at DEBUG, sensitive fields masked (default: false)
   log-requests: false
 
@@ -82,6 +86,8 @@ pagbank:
 | `pagbank.base-url`                 | `String`  | —         | No       | Absolute URL that overrides the environment's base URL (e.g. a local stub) |
 | `pagbank.health-indicator-enabled` | `Boolean` | `false`   | No       | Enables Spring Boot Actuator health check for PagBank |
 | `pagbank.log-requests`             | `Boolean` | `false`   | No       | Logs outgoing HTTP traffic at `DEBUG` (see [Request logging](#request-logging)) |
+| `pagbank.connect-timeout`          | `Duration`| `5s`      | No       | Time to establish the connection (see [Timeouts](#timeouts))                   |
+| `pagbank.read-timeout`             | `Duration`| `20s`     | No       | Time to wait for PagBank's response (see [Timeouts](#timeouts))                |
 | `pagbank.webhook.verify-signature` | `Boolean` | `false`   | No       | Requires a valid `x-authenticity-token` on webhooks (see [Signature verification](#signature-verification)) |
 
 ### Environments
@@ -94,20 +100,54 @@ pagbank:
 `pagbank.base-url`, when set, takes precedence over the environment's URL. The `environment` property still
 defaults to `SANDBOX`; production is only reached with `PRODUCTION` spelled out (or an explicit `base-url`).
 
+### Timeouts
+
+The client is built with a connect timeout of **5s** and a read timeout of **20s**. Both are
+`java.time.Duration`, so `20s`, `PT20S` and `500ms` all work; `0` disables the timeout and waits forever.
+
+```properties
+pagbank.connect-timeout=5s
+pagbank.read-timeout=20s
+```
+
+**Pick a read timeout below the timeout of whatever sits in front of your application.** Heroku's router
+cuts requests at 30s and is not configurable; nginx defaults to 60s. If the proxy gives up first, your
+caller gets an opaque 5xx from the proxy while your process keeps running — and a write that PagBank
+completed looks like a failure. The Subscriptions API answers in under 2s in normal operation, so 20s is
+a wide margin that still fails before any common proxy.
+
+When the timeout fires, the call throws `PagBankException.Timeout`:
+
+```kotlin
+try {
+    subscriptionService.create(request, idempotencyKey = key)
+} catch (e: PagBankException.Timeout) {
+    when (e.phase) {
+        TimeoutPhase.CONNECT -> retry()               // never left your process
+        TimeoutPhase.READ -> reconcileWithPagBank()   // may have been created — check, do not assume
+    }
+}
+```
+
+`CONNECT` means the request never reached PagBank. `READ` means it was sent and **the outcome is
+unknown**: the subscription may exist, the card may have been charged. Re-read the resource (or retry
+with the same `idempotencyKey`) instead of reporting failure.
+
+The request factory uses whichever HTTP client is on your classpath (Apache HttpClient 5, Jetty,
+Reactor, JDK), detected by Spring Boot.
+
 ### Customizing the RestClient
 
-To add timeouts, interceptors, a proxy-aware request factory or extra headers, register one or more
+For interceptors, extra headers or a request factory of your own, register one or more
 `PagBankRestClientCustomizer` beans. They receive the `RestClient.Builder` after the starter has configured
-it and before `build()`:
+it (timeouts included) and before `build()`, so a customizer can override anything the starter set:
 
 ```kotlin
 @Configuration
 class PagBankClientConfig {
     @Bean
-    fun pagBankTimeouts() = PagBankRestClientCustomizer { builder ->
-        builder.requestFactory(
-            JdkClientHttpRequestFactory().apply { setReadTimeout(Duration.ofSeconds(10)) }
-        )
+    fun pagBankProxy() = PagBankRestClientCustomizer { builder ->
+        builder.defaultHeader("X-Trace-Id", traceId())
     }
 }
 ```
@@ -331,6 +371,7 @@ try {
 | `NotFound` | 404 | |
 | `ValidationError` | 400 / 409 / 422 with a PagBank error body | `errors` carries the parsed `error_messages` |
 | `RateLimited` | 429 | `retryAfter` holds `Retry-After` (seconds or HTTP-date) when present — back off, do not treat as an outage |
+| `Timeout` | no response within the configured timeout | `phase` is `CONNECT` (never sent — safe to retry) or `READ` (**outcome unknown**, see [Timeouts](#timeouts)) |
 | `ServerError` | 5xx or any unmapped status | PagBank itself is failing |
 | `InvalidSignature` | webhook header check failed | Only with `pagbank.webhook.verify-signature=true` |
 
@@ -386,12 +427,12 @@ pushing a tag named `v<version>`. The [Release workflow](.github/workflows/relea
 tests, signs the artifacts, uploads the bundle to the Maven Central Portal (auto-published once validated)
 and creates a GitHub Release with generated notes.
 
-### Release candidate (e.g. `1.0.0-RC7`)
+### Release candidate (e.g. `1.0.0-RC8`)
 
 1. On `main`, open a branch and set the version:
    ```bash
-   git checkout -b chore/bump-1.0.0-rc7
-   sed -i '' 's/^version=.*/version=1.0.0-RC7/' gradle.properties
+   git checkout -b chore/bump-1.0.0-rc8
+   sed -i '' 's/^version=.*/version=1.0.0-RC8/' gradle.properties
    ```
 2. Update the three install snippets under [Installation](#installation) to the same version, and turn
    the `unreleased` heading in [CHANGELOG.md](CHANGELOG.md) into the version and date.
@@ -399,8 +440,8 @@ and creates a GitHub Release with generated notes.
 4. Tag the merge commit and push the tag — this is what publishes:
    ```bash
    git checkout main && git pull
-   git tag v1.0.0-RC7
-   git push origin v1.0.0-RC7
+   git tag v1.0.0-RC8
+   git push origin v1.0.0-RC8
    ```
 5. Watch the *Release* workflow on GitHub Actions. It refuses to run if the tag does not match
    `gradle.properties`, so a typo fails fast instead of publishing the wrong version.
@@ -421,7 +462,7 @@ The GitHub Release is created as a normal (non pre-release) release because the 
 ### If something goes wrong
 
 - **Workflow failed before "Upload bundle"** — nothing was published. Fix, delete the tag
-  (`git push --delete origin v1.0.0-RC7 && git tag -d v1.0.0-RC7`), re-tag and push again.
+  (`git push --delete origin v1.0.0-RC8 && git tag -d v1.0.0-RC8`), re-tag and push again.
 - **Upload succeeded but validation failed** — the deployment is dropped by Central; same recovery as above.
 - **Published by mistake** — Maven Central is immutable. Ship a new version; never reuse a tag.
 
