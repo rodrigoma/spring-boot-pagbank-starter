@@ -3,6 +3,31 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.0.0-RC7] — unreleased
+
+### Added
+- `pagbank.connect-timeout` (default `5s`) and `pagbank.read-timeout` (default `20s`), both
+  `java.time.Duration`; `0` waits forever. The client had no timeouts at all, so a slow PagBank meant the
+  caller's proxy gave up first — on Heroku, a 30s router cut that returned an opaque 503 while the
+  subscription was in fact created.
+- `PagBankException.Timeout(phase, method, path, cause)` with `TimeoutPhase.CONNECT` / `READ`. `CONNECT`
+  never reached PagBank and is safe to retry; `READ` was sent and its **outcome is unknown** — re-read the
+  resource instead of reporting failure. Previously a timeout surfaced as Spring's `ResourceAccessException`,
+  indistinguishable from any other transport error. **Breaking:** exhaustive `when` over `PagBankException`
+  needs the new branch.
+- `META-INF/spring-configuration-metadata.json` now describes every `pagbank.*` property (type, default,
+  description) for IDE completion. The file shipped with `"properties": []` up to RC6: the Spring
+  configuration processor ran through kapt, which does not expose `src/main/resources` to it, so neither
+  the generated nor an `additional-*` file ever described a property. It is now versioned and kept in sync
+  by a test.
+
+### Changed
+- New runtime dependency `org.springframework.boot:spring-boot-http-client` (version from the Boot BOM):
+  `spring-boot-starter-web` does not bring it, and it is what lets the starter apply timeouts to whichever
+  HTTP client is on the classpath.
+- A call that previously hung forever now fails once the read timeout elapses. Applications relying on a
+  deliberately slow endpoint should raise `pagbank.read-timeout` or set it to `0`.
+
 ## [1.0.0-RC6] — 2026-09-17
 
 ### Changed

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL
 import com.fasterxml.jackson.annotation.JsonInclude.Value.construct
 import io.github.rodrigoma.pagbank.http.PagBankErrorHandler
 import io.github.rodrigoma.pagbank.http.PagBankLoggingInterceptor
+import io.github.rodrigoma.pagbank.http.PagBankTimeoutInterceptor
 import io.github.rodrigoma.pagbank.service.PagBankCouponService
 import io.github.rodrigoma.pagbank.service.PagBankCustomerService
 import io.github.rodrigoma.pagbank.service.PagBankInvoiceService
@@ -19,8 +20,11 @@ import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder
+import org.springframework.boot.http.client.HttpClientSettings
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpHeaders.AUTHORIZATION
+import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.RestClient
 import tools.jackson.databind.PropertyNamingStrategies.SNAKE_CASE
@@ -53,7 +57,9 @@ class PagBankAutoConfiguration(
             RestClient
                 .builder()
                 .baseUrl(properties.resolvedBaseUrl())
+                .requestFactory(requestFactory())
                 .defaultHeader(AUTHORIZATION, "Bearer ${properties.token}")
+                .requestInterceptor(PagBankTimeoutInterceptor())
                 .configureMessageConverters {
                     it.registerDefaults().withJsonConverter(JacksonJsonHttpMessageConverter(objectMapper))
                 }.also { if (properties.logRequests) it.requestInterceptor(PagBankLoggingInterceptor()) }
@@ -62,6 +68,18 @@ class PagBankAutoConfiguration(
         customizers.orderedStream().forEach { it.customize(builder) }
 
         return builder.build()
+    }
+
+    /**
+     * Request factory for the PagBank client, using whichever HTTP client the consumer has on the
+     * classpath (Apache HttpClient 5, Jetty, Reactor, JDK…) via [ClientHttpRequestFactoryBuilder.detect].
+     * A zero duration leaves that client's own default in place, which generally means "wait forever".
+     */
+    private fun requestFactory(): ClientHttpRequestFactory {
+        var settings = HttpClientSettings.defaults()
+        properties.connectTimeout.takeIf { !it.isZero }?.let { settings = settings.withConnectTimeout(it) }
+        properties.readTimeout.takeIf { !it.isZero }?.let { settings = settings.withReadTimeout(it) }
+        return ClientHttpRequestFactoryBuilder.detect().build(settings)
     }
 
     @Bean

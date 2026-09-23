@@ -1,17 +1,16 @@
 plugins {
     id("pagbank.kotlin-library")
     id("pagbank.publish")
-    kotlin("kapt")
 }
 
 group = "io.github.rodrigoma"
 
 dependencies {
+    // Needed at runtime: spring-boot-starter-web does not bring it, and it is what lets the starter
+    // build a request factory with timeouts using whichever HTTP client the consumer has on the classpath.
+    api("org.springframework.boot:spring-boot-http-client")
     compileOnly("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.springframework.boot:spring-boot-starter-actuator")
-    kapt(platform("org.springframework.boot:spring-boot-dependencies:4.1.1"))
-    kapt("org.springframework.boot:spring-boot-configuration-processor")
-    kapt("org.springframework.boot:spring-boot-health")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-web")
     testImplementation("org.springframework.boot:spring-boot-starter-actuator")

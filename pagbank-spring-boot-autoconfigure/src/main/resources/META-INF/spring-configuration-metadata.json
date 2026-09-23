@@ -1,0 +1,86 @@
+{
+  "groups": [
+    {
+      "name": "pagbank",
+      "type": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties",
+      "sourceType": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties"
+    },
+    {
+      "name": "pagbank.webhook",
+      "type": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties$Webhook",
+      "sourceType": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties",
+      "sourceMethod": "getWebhook()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "pagbank.token",
+      "type": "java.lang.String",
+      "sourceType": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties",
+      "description": "API token from your PagBank dashboard. Required; the application fails to start without it."
+    },
+    {
+      "name": "pagbank.environment",
+      "type": "io.github.rodrigoma.pagbank.autoconfigure.PagBankEnvironment",
+      "sourceType": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties",
+      "defaultValue": "sandbox",
+      "description": "Target PagBank environment. Production is only reached when spelled out explicitly."
+    },
+    {
+      "name": "pagbank.base-url",
+      "type": "java.lang.String",
+      "sourceType": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties",
+      "description": "Absolute URL that overrides the environment's base URL - for example a local stub when testing."
+    },
+    {
+      "name": "pagbank.health-indicator-enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties",
+      "defaultValue": false,
+      "description": "Exposes /actuator/health/pagBank when Spring Boot Actuator is on the classpath."
+    },
+    {
+      "name": "pagbank.log-requests",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties",
+      "defaultValue": false,
+      "description": "Logs outgoing requests and responses at DEBUG, with card data, CPF/CNPJ, e-mail and phone numbers masked."
+    },
+    {
+      "name": "pagbank.connect-timeout",
+      "type": "java.time.Duration",
+      "sourceType": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties",
+      "defaultValue": "5s",
+      "description": "How long to wait for the TCP connection to PagBank. 0 disables the timeout (waits forever). A request that times out while connecting never reached PagBank."
+    },
+    {
+      "name": "pagbank.read-timeout",
+      "type": "java.time.Duration",
+      "sourceType": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties",
+      "defaultValue": "20s",
+      "description": "How long to wait for PagBank's response once connected. 0 disables the timeout (waits forever). Keep it below the timeout of any proxy in front of the application so the starter fails first, with a typed exception."
+    },
+    {
+      "name": "pagbank.webhook.verify-signature",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.github.rodrigoma.pagbank.autoconfigure.PagBankProperties$Webhook",
+      "defaultValue": false,
+      "description": "Requires a valid x-authenticity-token header on webhooks. Off by default because the Subscriptions API is not documented to send it."
+    }
+  ],
+  "hints": [
+    {
+      "name": "pagbank.environment",
+      "values": [
+        {
+          "value": "sandbox",
+          "description": "https://sandbox.api.assinaturas.pagseguro.com"
+        },
+        {
+          "value": "production",
+          "description": "https://api.assinaturas.pagseguro.com"
+        }
+      ]
+    }
+  ]
+}
